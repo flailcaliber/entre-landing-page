@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entre — Meet in the middle.</title>
+  <meta name="description" content="The easiest way to find where to eat with a friend. Entre finds restaurants halfway between you both. Coming to NYC." />
+  <meta property="og:title" content="Entre — Meet in the middle." />
+  <meta property="og:description" content="Find restaurants halfway between you and a friend. No more 'idk, you pick.'" />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:        #131220;
+      --surface:   #1c1b2e;
+      --cream:     #FFF8F0;
+      --cream-dim: rgba(255, 248, 240, 0.55);
+      --cream-faint: rgba(255, 248, 240, 0.18);
+      --sage:      #9ED29E;
+      --sage-dim:  rgba(158, 210, 158, 0.15);
+      --purple:    #7C3AED;
+      --purple-soft: rgba(124, 58, 237, 0.18);
+      --coral:     #E8A87C;
+      --muted:     rgba(255, 248, 240, 0.38);
+      --border:    rgba(255, 248, 240, 0.09);
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Canvas background ─────────────────────────────── */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      will-change: transform;
+    }
+
+    .blob-a {
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(158,210,158,0.22) 0%, rgba(158,210,158,0.04) 70%);
+      top: 15%;
+      left: -8%;
+      animation: drift-a 18s ease-in-out infinite;
+    }
+
+    .blob-b {
+      width: 580px;
+      height: 580px;
+      background: radial-gradient(circle, rgba(124,58,237,0.20) 0%, rgba(124,58,237,0.04) 70%);
+      top: 10%;
+      right: -10%;
+      animation: drift-b 20s ease-in-out infinite;
+    }
+
+    .blob-c {
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, rgba(232,168,124,0.12) 0%, rgba(232,168,124,0.02) 70%);
+      bottom: 12%;
+      left: 38%;
+      animation: drift-c 25s ease-in-out infinite;
+    }
+
+    @keyframes drift-a {
+      0%   { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(40px, -30px) scale(1.05); }
+      66%  { transform: translate(80px, 20px) scale(0.97); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes drift-b {
+      0%   { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(-50px, 30px) scale(1.04); }
+      66%  { transform: translate(-90px, -20px) scale(0.96); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes drift-c {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(20px, -40px) scale(1.08); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* Grain overlay */
+    .bg-canvas::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 180px;
+      opacity: 0.45;
+      mix-blend-mode: overlay;
+    }
+
+    /* ─── Layout ─────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* ─── Nav ────────────────────────────────────────────── */
+    nav {
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      opacity: 0;
+      animation: fade-up 0.7s ease 0.1s forwards;
+    }
+
+    .wordmark-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.85rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--cream);
+      line-height: 1;
+    }
+
+    .wordmark-text em {
+      font-style: italic;
+      color: var(--sage);
+    }
+
+    .nav-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      animation: fade-up 0.7s ease 0.2s forwards;
+    }
+
+    .nav-badge::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--sage);
+      box-shadow: 0 0 8px var(--sage);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* ─── Hero ───────────────────────────────────────────── */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem 4rem;
+      gap: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 2.2rem;
+      opacity: 0;
+      animation: fade-up 0.7s ease 0.3s forwards;
+    }
+
+    .pill-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--sage);
+      display: inline-block;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.2rem, 8.5vw, 7.2rem);
+      font-weight: 300;
+      line-height: 1.0;
+      letter-spacing: -0.01em;
+      color: var(--cream);
+      max-width: 13ch;
+      margin-bottom: 1.6rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--sage);
+    }
+
+    .h1-line {
+      display: block;
+      overflow: hidden;
+    }
+
+    .h1-inner {
+      display: block;
+      transform: translateY(110%);
+      animation: slide-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .h1-line:nth-child(1) .h1-inner { animation-delay: 0.35s; }
+    .h1-line:nth-child(2) .h1-inner { animation-delay: 0.5s;  }
+    .h1-line:nth-child(3) .h1-inner { animation-delay: 0.62s; }
+
+    @keyframes slide-up {
+      to { transform: translateY(0); }
+    }
+
+    .subhead {
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 300;
+      color: var(--cream-dim);
+      line-height: 1.65;
+      max-width: 36ch;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fade-up 0.8s ease 0.9s forwards;
+    }
+
+    /* ─── Form ───────────────────────────────────────────── */
+    .form-wrap {
+      width: 100%;
+      max-width: 440px;
+      opacity: 0;
+      animation: fade-up 0.8s ease 1.05s forwards;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      transition: border-color 0.25s, box-shadow 0.25s;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .input-row:focus-within {
+      border-color: rgba(158, 210, 158, 0.45);
+      box-shadow: 0 0 0 3px rgba(158, 210, 158, 0.08), 0 0 30px rgba(158,210,158,0.06);
+    }
+
+    .email-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0.9rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      color: var(--cream);
+      min-width: 0;
+    }
+
+    .email-input::placeholder {
+      color: var(--muted);
+    }
+
+    .submit-btn {
+      flex-shrink: 0;
+      padding: 0.75rem 1.4rem;
+      margin: 0.25rem 0.25rem 0.25rem 0;
+      border: none;
+      border-radius: 100px;
+      background: var(--sage);
+      color: #131220;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .submit-btn:hover {
+      background: #b5ddb5;
+      box-shadow: 0 4px 20px rgba(158, 210, 158, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .form-note {
+      margin-top: 0.85rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* ─── PMF optional question ─────────────────────────────── */
+    .pmf-wrap {
+      margin-top: 0.7rem;
+    }
+
+    .pmf-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      outline: none;
+      padding: 0.55rem 0.1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--cream-dim);
+      transition: border-color 0.2s;
+    }
+
+    .pmf-input::placeholder {
+      color: var(--muted);
+    }
+
+    .pmf-input:focus {
+      border-bottom-color: rgba(158, 210, 158, 0.45);
+    }
+
+    /* ─── Error state ───────────────────────────────────────── */
+    .form-error {
+      display: none;
+      margin-top: 0.6rem;
+      font-size: 0.76rem;
+      color: #e8856e;
+      text-align: center;
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    /* ─── Success state ──────────────────────────────────── */
+    .success-msg {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .success-msg.visible {
+      display: flex;
+      animation: fade-up 0.5s ease forwards;
+    }
+
+    .success-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--sage-dim);
+      border: 1px solid rgba(158,210,158,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .success-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--cream);
+    }
+
+    .success-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* ─── Divider visual ─────────────────────────────────── */
+    .between-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 5rem;
+      opacity: 0;
+      animation: fade-up 0.8s ease 1.3s forwards;
+    }
+
+    .line-seg {
+      height: 1px;
+      width: 60px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    .between-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ─── Features row ──────────────────────────────────── */
+    .features {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 3.5rem;
+      padding: 2rem 2rem 0;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fade-up 0.8s ease 1.45s forwards;
+    }
+
+    .feat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 140px;
+      text-align: center;
+    }
+
+    .feat-icon {
+      font-size: 1.3rem;
+      line-height: 1;
+      opacity: 0.7;
+    }
+
+    .feat-label {
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    footer {
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      animation: fade-up 0.6s ease 1.6s forwards;
+    }
+
+    .footer-left {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-link {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 300;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover {
+      color: var(--cream-dim);
+    }
+
+    /* ─── Animations ─────────────────────────────────────── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Mobile ─────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      nav { padding: 1.5rem 1.25rem; }
+
+      .input-row {
+        flex-direction: column;
+        border-radius: 16px;
+        gap: 0;
+      }
+
+      .email-input {
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .submit-btn {
+        margin: 0.3rem 0.3rem;
+        padding: 0.85rem 1.2rem;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .features {
+        gap: 2rem;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    /* ─── Cursor glow ────────────────────────────────────── */
+    .cursor-glow {
+      position: fixed;
+      pointer-events: none;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(158,210,158,0.06) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      transition: opacity 0.3s;
+      will-change: left, top;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background -->
+  <div class="bg-canvas">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+  </div>
+
+  <!-- Cursor glow -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- Page layout -->
+  <div class="wrapper">
+
+    <!-- Nav -->
+    <nav>
+      <a class="wordmark" href="/">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 70" fill="none"
+             height="32" aria-hidden="true">
+          <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="4"  y1="21" x2="35" y2="21"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="22" y1="39" x2="22" y2="57"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+        </svg>
+        <span class="wordmark-text">entr<em>e</em></span>
+      </a>
+      <span class="nav-badge">Coming to NYC</span>
+    </nav>
+
+    <!-- Hero -->
+    <main class="hero">
+
+      <span class="pill">
+        <span class="pill-dot"></span>
+        Now accepting early members
+      </span>
+
+      <h1>
+        <span class="h1-line"><span class="h1-inner">The restaurant</span></span>
+        <span class="h1-line"><span class="h1-inner"><em>between</em></span></span>
+        <span class="h1-line"><span class="h1-inner">the two of you.</span></span>
+      </h1>
+
+      <p class="subhead">
+        No more "idk, you pick." Entre finds restaurants halfway between you and a friend — matched to both your tastes, ready to book.
+      </p>
+
+      <!-- Waitlist form -->
+      <div class="form-wrap">
+        <form id="waitlistForm">
+          <div class="input-row">
+            <input
+              class="email-input"
+              id="emailInput"
+              type="email"
+              placeholder="your@email.com"
+              autocomplete="email"
+              required
+            />
+            <button class="submit-btn" type="submit" id="submitBtn">
+              Join the waitlist
+            </button>
+          </div>
+          <div class="pmf-wrap">
+            <input
+              class="pmf-input"
+              id="phoneInput"
+              type="tel"
+              placeholder="Phone number (optional — for SMS updates)"
+              maxlength="20"
+              autocomplete="tel"
+            />
+          </div>
+          <div class="pmf-wrap">
+            <input
+              class="pmf-input"
+              id="pmfInput"
+              type="text"
+              placeholder="Biggest challenge with NYC lunch meetups? (optional)"
+              maxlength="280"
+              autocomplete="off"
+            />
+          </div>
+        </form>
+
+        <!-- Error state -->
+        <p class="form-error" id="formError"></p>
+
+        <!-- Success state (replaces form) -->
+        <div class="success-msg" id="successMsg">
+          <div class="success-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 9.5L7 13.5L15 5" stroke="#9ED29E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <p class="success-title">You're on the list.</p>
+          <p class="success-sub">We'll reach out before we launch. Sit tight.</p>
+        </div>
+
+        <p class="form-note" id="formNote">No spam, ever. Unsubscribe anytime.</p>
+      </div>
+
+      <!-- Visual divider -->
+      <div class="between-line">
+        <div class="line-seg"></div>
+        <span class="between-label">How it works</span>
+        <div class="line-seg"></div>
+      </div>
+
+      <!-- Feature callouts -->
+      <div class="features">
+        <div class="feat">
+          <span class="feat-icon">📍</span>
+          <span class="feat-label">Enter two addresses, get restaurants in the middle</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">✦</span>
+          <span class="feat-label">Match on cuisine, budget &amp; diet — both of you</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">↗</span>
+          <span class="feat-label">One tap to recommend, one tap to accept</span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <span class="footer-left">© 2026 Entre</span>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:hello@entre.app">Contact</a>
+        <a class="footer-link" href="#">Privacy</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // ── Supabase config ──────────────────────────────────────
+    // Fill in your values from Supabase dashboard → Settings → API
+    // The anon key is safe to include here — it's designed to be public.
+    const SUPABASE_URL  = 'https://vsclkqcuzclenfhbdzvc.supabase.co';       // e.g. https://abcdef.supabase.co
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzY2xrcWN1emNsZW5maGJkenZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwODY3NDIsImV4cCI6MjA5MTY2Mjc0Mn0.T-u_NVA_zq5vkukWaybhdBFvqBgMbBBfSq2UL2MIa_I';  // "anon public" key
+
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ── UTM + referral capture ───────────────────────────────
+    const _params = new URLSearchParams(window.location.search);
+    const _utm = {
+      source:   _params.get('utm_source')   || null,
+      medium:   _params.get('utm_medium')   || null,
+      campaign: _params.get('utm_campaign') || null,
+      content:  _params.get('utm_content')  || null,
+      term:     _params.get('utm_term')     || null,
+    };
+    const _refCode = _params.get('ref') || sessionStorage.getItem('entre_ref') || null;
+    if (_refCode) sessionStorage.setItem('entre_ref', _refCode);
+
+    // ── Page view tracking (once per session) ────────────────
+    if (!sessionStorage.getItem('entre_pv')) {
+      sessionStorage.setItem('entre_pv', '1');
+      const _sid = sessionStorage.getItem('entre_sid') || crypto.randomUUID();
+      sessionStorage.setItem('entre_sid', _sid);
+      _supabase.from('page_views').insert({
+        session_id:   _sid,
+        utm_source:   _utm.source,
+        utm_medium:   _utm.medium,
+        utm_campaign: _utm.campaign,
+        utm_term:     _utm.term,
+        utm_content:  _utm.content,
+        ref_code:     _refCode,
+      }).then(() => {});  // fire-and-forget
+    }
+
+    // ── Referral code generator ──────────────────────────────
+    function generateCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    // ── Cursor glow ──────────────────────────────────────────
+    const glow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+
+    function animateGlow() {
+      glowX += (mouseX - glowX) * 0.08;
+      glowY += (mouseY - glowY) * 0.08;
+      glow.style.left = glowX + 'px';
+      glow.style.top  = glowY + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+
+    // ── Waitlist form ────────────────────────────────────────
+    const form       = document.getElementById('waitlistForm');
+    const btn        = document.getElementById('submitBtn');
+    const input      = document.getElementById('emailInput');
+    const phoneInput = document.getElementById('phoneInput');
+    const pmfInput   = document.getElementById('pmfInput');
+    const successMsg = document.getElementById('successMsg');
+    const formNote   = document.getElementById('formNote');
+    const formError  = document.getElementById('formError');
+
+    function showError(msg) {
+      formError.textContent = msg;
+      formError.classList.add('visible');
+      btn.textContent = 'Try again';
+      btn.classList.remove('loading');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = input.value.trim().toLowerCase();
+      if (!email) return;
+
+      btn.textContent = 'Saving…';
+      btn.classList.add('loading');
+      formError.classList.remove('visible');
+
+      let res, data;
+      try {
+        res = await fetch('/.netlify/functions/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            phone:            phoneInput.value.trim() || null,
+            referred_by_code: _refCode || null,
+            source:           _refCode ? 'referral' : 'organic',
+            utm_source:       _utm.source,
+            utm_medium:       _utm.medium,
+            utm_campaign:     _utm.campaign,
+            utm_content:      _utm.content,
+            utm_term:         _utm.term,
+            pmf_response:     pmfInput.value.trim() || null,
+          }),
+        });
+        data = await res.json();
+      } catch (err) {
+        showError('Something went wrong. Please try again.');
+        console.error('[entre] signup error:', err);
+        return;
+      }
+
+      if (res.status === 409) {
+        // Already on the list
+        form.style.display = 'none';
+        formNote.style.display = 'none';
+        successMsg.classList.add('visible');
+        document.querySelector('.success-sub').textContent = 'You\'re already on the list — we\'ll be in touch.';
+        return;
+      }
+
+      if (!res.ok) {
+        showError('Something went wrong. Please try again.');
+        console.error('[entre] signup error:', data);
+        return;
+      }
+
+      // Success
+      form.style.display = 'none';
+      formNote.style.display = 'none';
+      successMsg.classList.add('visible');
+    });
+  </script>
+</body>
+</html>

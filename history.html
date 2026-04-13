@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entre — Growth History</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500@display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #131220;
+      --surface:     #1c1b2e;
+      --surface2:    #211f35;
+      --cream:       #FFF8F0;
+      --cream-dim:   rgba(255,248,240,0.55);
+      --sage:        #9ED29E;
+      --sage-dim:    rgba(158,210,158,0.15);
+      --coral:       #E8A87C;
+      --coral-dim:   rgba(232,168,124,0.15);
+      --purple:      #7C3AED;
+      --purple-dim:  rgba(124,58,237,0.2);
+      --muted:       rgba(255,248,240,0.35);
+      --border:      rgba(255,248,240,0.08);
+    }
+
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100dvh;
+    }
+
+    /* ── Auth gate ─────────────────────────────────────────── */
+    #authGate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .auth-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; text-align: center; }
+    .auth-logo em { font-style: italic; color: var(--sage); }
+    .auth-label { font-size: 0.8rem; color: var(--muted); text-align: center; }
+    .auth-input {
+      width: 100%; padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--cream);
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      outline: none;
+    }
+    .auth-input:focus { border-color: rgba(158,210,158,0.45); }
+    .auth-btn {
+      padding: 0.75rem; background: var(--sage); color: #131220;
+      border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 500; cursor: pointer;
+    }
+    .auth-btn:hover { background: #b5ddb5; }
+    .auth-error { font-size: 0.78rem; color: #e8856e; text-align: center; display: none; }
+
+    /* ── Main layout ───────────────────────────────────────── */
+    #dashboard { display: none; }
+
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-left { display: flex; align-items: center; gap: 0.75rem; }
+    .header-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; }
+    .header-logo em { font-style: italic; color: var(--sage); }
+    .header-badge {
+      font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 100px;
+      padding: 0.2rem 0.6rem;
+    }
+    .header-right { display: flex; align-items: center; gap: 0.5rem; }
+    .btn-sm {
+      padding: 0.4rem 0.9rem; background: transparent;
+      border: 1px solid var(--border); border-radius: 6px;
+      color: var(--cream-dim); font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem; cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-sm:hover { border-color: rgba(255,248,240,0.25); color: var(--cream); }
+
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .section-title {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 1rem; margin-top: 2rem;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ── Toggle ────────────────────────────────────────────── */
+    .toggle-row {
+      display: flex; gap: 0.4rem; margin-bottom: 1.5rem;
+    }
+    .toggle-btn {
+      padding: 0.4rem 1rem; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: var(--sage-dim); border-color: rgba(158,210,158,0.4);
+      color: var(--sage);
+    }
+
+    /* ── Stat cards ────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.2rem 1.4rem;
+    }
+    .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+    .stat-value { font-size: 2rem; font-weight: 400; line-height: 1; }
+    .stat-sub   { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+    .sage  { color: var(--sage); }
+    .coral { color: var(--coral); }
+
+    /* ── Chart cards ───────────────────────────────────────── */
+    .chart-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .chart-title {
+      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem;
+    }
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap-tall { position: relative; height: 320px; }
+
+    /* ── Table ─────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; overflow: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th {
+      padding: 0.75rem 1rem; text-align: left;
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); white-space: nowrap;
+    }
+    td { padding: 0.65rem 1rem; border-bottom: 1px solid rgba(255,248,240,0.04); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .pill {
+      display: inline-block; padding: 0.15rem 0.55rem;
+      border-radius: 100px; font-size: 0.72rem;
+    }
+    .pill-sage   { background: var(--sage-dim); color: var(--sage); }
+    .pill-coral  { background: var(--coral-dim); color: var(--coral); }
+    .pill-purple { background: var(--purple-dim); color: #b28ef5; }
+    .pill-muted  { background: rgba(255,248,240,0.06); color: var(--muted); }
+
+    .loading-msg { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">entr<em>e</em></div>
+    <div class="auth-label">Growth History — Admin only</div>
+    <input class="auth-input" id="passwordInput" type="password" placeholder="Admin password" />
+    <button class="auth-btn" id="authBtn">Sign in</button>
+    <div class="auth-error" id="authError">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <header class="page-header">
+    <div class="header-left">
+      <span class="header-logo">entr<em>e</em></span>
+      <span class="header-badge">Growth History</span>
+    </div>
+    <div class="header-right">
+      <a class="btn-sm" href="admin.html">← Dashboard</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div id="loadingMsg" class="loading-msg">Loading…</div>
+    <div id="content" style="display:none">
+
+      <!-- View toggle -->
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="toggleWeek" onclick="setView('week')">Weekly</button>
+        <button class="toggle-btn" id="toggleMonth" onclick="setView('month')">Monthly</button>
+      </div>
+
+      <!-- Summary stats -->
+      <p class="section-title">All-time summary</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total signups</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">incl. imports</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Organic + Referral</div>
+          <div class="stat-value sage" id="statOrganic">—</div>
+          <div class="stat-sub">excl. imports</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Imported</div>
+          <div class="stat-value coral" id="statImported">—</div>
+          <div class="stat-sub">from bulk upload</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best week</div>
+          <div class="stat-value" id="statBestWeek">—</div>
+          <div class="stat-sub" id="statBestWeekDate"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Best month</div>
+          <div class="stat-value" id="statBestMonth">—</div>
+          <div class="stat-sub" id="statBestMonthDate"></div>
+        </div>
+      </div>
+
+      <!-- Cumulative growth chart -->
+      <p class="section-title">Cumulative growth</p>
+      <div class="chart-card">
+        <div class="chart-title" id="cumTitle">Cumulative signups by week</div>
+        <div class="chart-wrap-tall">
+          <canvas id="cumChart"></canvas>
+        </div>
+      </div>
+
+      <!-- New signups per period -->
+      <p class="section-title">New signups per period</p>
+      <div class="chart-card">
+        <div class="chart-title" id="newTitle">New signups by week (organic vs imported)</div>
+        <div class="chart-wrap">
+          <canvas id="newChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Data table -->
+      <p class="section-title" id="tableTitle">Weekly breakdown</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th id="thPeriod">Week of</th>
+              <th>Organic</th>
+              <th>Referral</th>
+              <th>Imported</th>
+              <th>Total new</th>
+              <th>Cumulative (organic)</th>
+              <th>Cumulative (all)</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- #content -->
+  </div><!-- .main-content -->
+</div><!-- #dashboard -->
+
+<script>
+  const API = '/.netlify/functions/admin';
+  let _password = '';
+  let _data     = null;
+  let _view     = 'week'; // 'week' | 'month'
+  let _cumChart = null;
+  let _newChart = null;
+
+  const authGate  = document.getElementById('authGate');
+  const dashboard = document.getElementById('dashboard');
+
+  // ── Auth ──────────────────────────────────────────────────────
+  async function tryAuth(pw) {
+    const res = await fetch(`${API}?action=analytics`, {
+      headers: { 'Authorization': `Bearer ${pw}` }
+    });
+    return res.ok;
+  }
+
+  document.getElementById('authBtn').addEventListener('click', async () => {
+    const pw = document.getElementById('passwordInput').value.trim();
+    if (!pw) return;
+    document.getElementById('authBtn').textContent = 'Checking…';
+    try {
+      const ok = await tryAuth(pw);
+      if (ok) {
+        _password = pw;
+        sessionStorage.setItem('entre_admin_pw', pw);
+        authGate.style.display = 'none';
+        dashboard.style.display = 'block';
+        loadData();
+      } else {
+        document.getElementById('authError').style.display = 'block';
+      }
+    } catch (e) {
+      document.getElementById('authError').textContent = 'Connection error.';
+      document.getElementById('authError').style.display = 'block';
+    }
+    document.getElementById('authBtn').textContent = 'Sign in';
+  });
+
+  document.getElementById('passwordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('authBtn').click();
+  });
+
+  const saved = sessionStorage.getItem('entre_admin_pw');
+  if (saved) {
+    tryAuth(saved).then(ok => {
+      if (ok) {
+        _password = saved;
+        authGate.style.display  = 'none';
+        dashboard.style.display = 'block';
+        loadData();
+      }
+    }).catch(() => {});
+  }
+
+  // ── Data load ─────────────────────────────────────────────────
+  async function loadData() {
+    const res  = await fetch(`${API}?action=history`, {
+      headers: { 'Authorization': `Bearer ${_password}` }
+    });
+    _data = await res.json();
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('content').style.display    = 'block';
+    renderSummary();
+    renderView();
+  }
+
+  // ── Summary stats ─────────────────────────────────────────────
+  function renderSummary() {
+    const weeks  = _data.byWeek  || [];
+    const months = _data.byMonth || [];
+
+    const lastWeek  = weeks[weeks.length - 1]  || {};
+    const lastMonth = months[months.length - 1] || {};
+
+    document.getElementById('statTotal').textContent    = fmt(lastWeek.cumTotal  || lastMonth.cumTotal  || 0);
+    document.getElementById('statOrganic').textContent  = fmt(lastWeek.cumOrganic || lastMonth.cumOrganic || 0);
+    const imported = (lastWeek.cumTotal || 0) - (lastWeek.cumOrganic || 0);
+    document.getElementById('statImported').textContent = fmt(imported);
+
+    // Best week (organic + referral)
+    const bestWeek = weeks.reduce((best, w) => (w.organic + w.referral) > (best.organic + best.referral) ? w : best, weeks[0] || {});
+    if (bestWeek.week) {
+      document.getElementById('statBestWeek').textContent     = fmt(bestWeek.organic + bestWeek.referral);
+      document.getElementById('statBestWeekDate').textContent = fmtWeek(bestWeek.week);
+    }
+
+    // Best month
+    const bestMonth = months.reduce((best, m) => (m.organic + m.referral) > (best.organic + best.referral) ? m : best, months[0] || {});
+    if (bestMonth.month) {
+      document.getElementById('statBestMonth').textContent     = fmt(bestMonth.organic + bestMonth.referral);
+      document.getElementById('statBestMonthDate').textContent = fmtMonth(bestMonth.month);
+    }
+  }
+
+  // ── View toggle ───────────────────────────────────────────────
+  function setView(v) {
+    _view = v;
+    document.getElementById('toggleWeek').classList.toggle('active',  v === 'week');
+    document.getElementById('toggleMonth').classList.toggle('active', v === 'month');
+    renderView();
+  }
+
+  function renderView() {
+    const rows = _view === 'week' ? (_data.byWeek || []) : (_data.byMonth || []);
+
+    document.getElementById('cumTitle').textContent  = _view === 'week'
+      ? 'Cumulative signups by week' : 'Cumulative signups by month';
+    document.getElementById('newTitle').textContent  = _view === 'week'
+      ? 'New signups by week (organic vs imported)' : 'New signups by month (organic vs imported)';
+    document.getElementById('tableTitle').textContent = _view === 'week' ? 'Weekly breakdown' : 'Monthly breakdown';
+    document.getElementById('thPeriod').textContent   = _view === 'week' ? 'Week of' : 'Month';
+
+    renderCumChart(rows);
+    renderNewChart(rows);
+    renderTable(rows);
+  }
+
+  // ── Charts ────────────────────────────────────────────────────
+  const chartDefaults = {
+    plugins: {
+      legend: { labels: { color: 'rgba(255,248,240,0.55)', font: { family: 'DM Sans', size: 11 }, boxWidth: 12 } },
+      tooltip: {
+        backgroundColor: '#1c1b2e',
+        borderColor: 'rgba(255,248,240,0.12)',
+        borderWidth: 1,
+        titleColor: '#FFF8F0',
+        bodyColor: 'rgba(255,248,240,0.7)',
+        padding: 10,
+      }
+    },
+    scales: {
+      x: {
+        ticks: { color: 'rgba(255,248,240,0.35)', font: { family: 'DM Sans', size: 10 }, maxRotation: 45 },
+        grid:  { color: 'rgba(255,248,240,0.04)' }
+      },
+      y: {
+        ticks: { color: 'rgba(255,248,240,0.35)', font: { family: 'DM Sans', size: 10 } },
+        grid:  { color: 'rgba(255,248,240,0.06)' },
+        beginAtZero: true
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+  };
+
+  function renderCumChart(rows) {
+    const labels  = rows.map(r => _view === 'week' ? fmtWeek(r.week) : fmtMonth(r.month));
+    const organic = rows.map(r => r.cumOrganic);
+    const total   = rows.map(r => r.cumTotal);
+
+    if (_cumChart) _cumChart.destroy();
+    const ctx = document.getElementById('cumChart').getContext('2d');
+    _cumChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Organic + Referral',
+            data: organic,
+            borderColor: '#9ED29E',
+            backgroundColor: 'rgba(158,210,158,0.08)',
+            borderWidth: 2,
+            pointRadius: rows.length > 30 ? 0 : 3,
+            pointHoverRadius: 5,
+            fill: true,
+            tension: 0.3,
+          },
+          {
+            label: 'All (incl. imports)',
+            data: total,
+            borderColor: 'rgba(232,168,124,0.6)',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            fill: false,
+            tension: 0.3,
+          }
+        ]
+      },
+      options: { ...chartDefaults }
+    });
+  }
+
+  function renderNewChart(rows) {
+    const labels   = rows.map(r => _view === 'week' ? fmtWeek(r.week) : fmtMonth(r.month));
+    const organic  = rows.map(r => r.organic);
+    const referral = rows.map(r => r.referral);
+    const imported = rows.map(r => r.imported);
+
+    if (_newChart) _newChart.destroy();
+    const ctx = document.getElementById('newChart').getContext('2d');
+    _newChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Organic',
+            data: organic,
+            backgroundColor: 'rgba(158,210,158,0.7)',
+            borderRadius: 3,
+            stack: 'new',
+          },
+          {
+            label: 'Referral',
+            data: referral,
+            backgroundColor: 'rgba(124,58,237,0.55)',
+            borderRadius: 3,
+            stack: 'new',
+          },
+          {
+            label: 'Imported',
+            data: imported,
+            backgroundColor: 'rgba(232,168,124,0.45)',
+            borderRadius: 3,
+            stack: 'new',
+          }
+        ]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          x: { ...chartDefaults.scales.x, stacked: true },
+          y: { ...chartDefaults.scales.y, stacked: true },
+        }
+      }
+    });
+  }
+
+  // ── Table ─────────────────────────────────────────────────────
+  function renderTable(rows) {
+    const tbody = document.getElementById('tableBody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No data yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = [...rows].reverse().map(r => {
+      const label = _view === 'week' ? fmtWeek(r.week) : fmtMonth(r.month);
+      return `
+        <tr>
+          <td style="white-space:nowrap;color:var(--cream-dim)">${label}</td>
+          <td><span class="pill pill-sage">${r.organic}</span></td>
+          <td><span class="pill pill-purple">${r.referral}</span></td>
+          <td><span class="pill pill-coral">${r.imported}</span></td>
+          <td style="font-weight:400">${r.total}</td>
+          <td>${fmt(r.cumOrganic)}</td>
+          <td style="color:var(--muted)">${fmt(r.cumTotal)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function fmt(n) { return (n || 0).toLocaleString(); }
+
+  function fmtWeek(iso) {
+    const d = new Date(iso + 'T00:00:00Z');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+
+  function fmtMonth(ym) {
+    const [y, m] = ym.split('-');
+    return new Date(Date.UTC(+y, +m - 1, 1))
+      .toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  }
+</script>
+</body>
+</html>

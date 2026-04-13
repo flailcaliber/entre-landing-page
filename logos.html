@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entre — Logo Concepts</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:     #131220;
+      --cream:  #FFF8F0;
+      --sage:   #9ED29E;
+      --sage-dk:#5FA85F;
+      --navy:   #1A1A2E;
+      --muted:  rgba(255,248,240,0.38);
+      --border: rgba(255,248,240,0.08);
+      --cell:   rgba(255,255,255,0.025);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 100px;
+    }
+
+    /* ── Page header ─────────────────────────────── */
+    .pg-header {
+      padding: 44px 64px 40px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 72px;
+    }
+    .pg-wm {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+    .pg-wm i { font-style: italic; color: var(--sage); }
+    .pg-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Concept section ─────────────────────────── */
+    .concept {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 52px;
+      padding: 0 64px 80px;
+      align-items: start;
+    }
+    .concept + .concept {
+      border-top: 1px solid var(--border);
+      padding-top: 72px;
+    }
+
+    .c-num {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 10px;
+    }
+    .c-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .c-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 260px;
+    }
+    .c-note {
+      margin-top: 20px;
+      font-size: 0.68rem;
+      color: rgba(158,210,158,0.55);
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+
+    /* ── Demo grid ───────────────────────────────── */
+    .demos {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .demo {
+      background: var(--cell);
+      padding: 40px 28px 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 210px;
+      position: relative;
+    }
+    .demo + .demo { border-left: 1px solid var(--border); }
+    .demo.light { background: var(--cream); }
+
+    .demo-lbl {
+      position: absolute;
+      bottom: 14px;
+      left: 18px;
+      font-size: 0.57rem;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .demo.light .demo-lbl { color: rgba(26,26,46,0.28); }
+
+    /* ── Wordmark ────────────────────────────────── */
+    .wm {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      letter-spacing: 0.035em;
+      color: var(--cream);
+      line-height: 1;
+    }
+    .wm i { font-style: italic; color: var(--sage); }
+    .wm.lg { font-size: 30px; }
+    .wm.sm { font-size: 20px; }
+    .wm.dk { color: var(--navy); }
+    .wm.dk i { color: var(--sage-dk); }
+
+    .lockup { display: flex; align-items: center; gap: 12px; }
+    .lockup.tight { gap: 7px; }
+
+    /* ── Footer note ─────────────────────────────── */
+    .footnote {
+      padding: 64px 64px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 16px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    @media (max-width: 1000px) {
+      .concept { grid-template-columns: 1fr; gap: 36px; padding: 0 28px 64px; }
+      .pg-header { padding: 32px 28px 28px; }
+      .demos { grid-template-columns: repeat(2, 1fr); }
+      .demo:nth-child(3) { border-left: none; border-top: 1px solid var(--border); }
+      .demo:nth-child(4) { border-top: 1px solid var(--border); }
+      .footnote { padding: 48px 28px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="pg-header">
+  <span class="pg-wm">entr<i>e</i></span>
+  <span class="pg-label">Logo Concepts · 2026</span>
+</header>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- CONCEPT 01 · FILLED MARK                    -->
+<!-- Pin silhouette, "e" carved as negative space -->
+<!-- ════════════════════════════════════════════ -->
+<section class="concept">
+  <div class="c-meta">
+    <p class="c-num">Concept 01</p>
+    <h2 class="c-name">The<br>Filled Mark</h2>
+    <p class="c-desc">Solid sage pin. The Cormorant italic "e" is carved out as negative space, letting the background breathe through the letterform. Punchy and immediately legible.</p>
+    <p class="c-note">Best for: app icon, dark contexts,<br>high-contrast moments.</p>
+  </div>
+
+  <div class="demos">
+    <!-- Mark alone (large) -->
+    <div class="demo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="78" height="100" viewBox="0 0 44 56">
+        <defs>
+          <mask id="ma1" maskUnits="userSpaceOnUse">
+            <rect width="44" height="56" fill="white"/>
+            <text x="7" y="29"
+                  font-family="'Cormorant Garamond', Georgia, serif"
+                  font-size="28" font-style="italic" font-weight="400"
+                  fill="black">e</text>
+          </mask>
+        </defs>
+        <path d="M 22 54 C 11 43 3 34 3 21 A 19 19 0 1 1 41 21 C 41 34 33 43 22 54 Z"
+              fill="#9ED29E" mask="url(#ma1)"/>
+      </svg>
+      <span class="demo-lbl">Mark</span>
+    </div>
+
+    <!-- Horizontal lockup -->
+    <div class="demo">
+      <div class="lockup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 44 56">
+          <defs>
+            <mask id="ma2" maskUnits="userSpaceOnUse">
+              <rect width="44" height="56" fill="white"/>
+              <text x="7" y="29"
+                    font-family="'Cormorant Garamond', Georgia, serif"
+                    font-size="28" font-style="italic" font-weight="400"
+                    fill="black">e</text>
+            </mask>
+          </defs>
+          <path d="M 22 54 C 11 43 3 34 3 21 A 19 19 0 1 1 41 21 C 41 34 33 43 22 54 Z"
+                fill="#9ED29E" mask="url(#ma2)"/>
+        </svg>
+        <span class="wm lg">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Horizontal lockup</span>
+    </div>
+
+    <!-- Nav size -->
+    <div class="demo">
+      <div class="lockup tight">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="28" viewBox="0 0 44 56">
+          <defs>
+            <mask id="ma3" maskUnits="userSpaceOnUse">
+              <rect width="44" height="56" fill="white"/>
+              <text x="7" y="29"
+                    font-family="'Cormorant Garamond', Georgia, serif"
+                    font-size="28" font-style="italic" font-weight="400"
+                    fill="black">e</text>
+            </mask>
+          </defs>
+          <path d="M 22 54 C 11 43 3 34 3 21 A 19 19 0 1 1 41 21 C 41 34 33 43 22 54 Z"
+                fill="#9ED29E" mask="url(#ma3)"/>
+        </svg>
+        <span class="wm sm">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Nav size</span>
+    </div>
+
+    <!-- Light background -->
+    <div class="demo light">
+      <div class="lockup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 44 56">
+          <defs>
+            <mask id="ma4" maskUnits="userSpaceOnUse">
+              <rect width="44" height="56" fill="white"/>
+              <text x="7" y="29"
+                    font-family="'Cormorant Garamond', Georgia, serif"
+                    font-size="28" font-style="italic" font-weight="400"
+                    fill="black">e</text>
+            </mask>
+          </defs>
+          <path d="M 22 54 C 11 43 3 34 3 21 A 19 19 0 1 1 41 21 C 41 34 33 43 22 54 Z"
+                fill="#5FA85F" mask="url(#ma4)"/>
+        </svg>
+        <span class="wm lg dk">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Light background</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════ -->
+<!-- CONCEPT 02 · DRAWN MARK                     -->
+<!-- Geometric open arc + crossbar = "e" as pin  -->
+<!-- ════════════════════════════════════════════ -->
+<section class="concept">
+  <div class="c-meta">
+    <p class="c-num">Concept 02</p>
+    <h2 class="c-name">The<br>Drawn Mark</h2>
+    <p class="c-desc">An open arc and crossbar — the geometry of a lowercase "e" — become a pin. The arc opens on the right (the aperture). A teardrop dot anchors the bottom. Refined and architectural.</p>
+    <p class="c-note">Best for: wordmark pairings, editorial<br>contexts, embossing, light backgrounds.</p>
+  </div>
+
+  <div class="demos">
+    <!-- Mark alone (large) -->
+    <div class="demo">
+      <!--
+        Circle: center (22, 21), r=18
+        Opening: ±30° from right (3 o'clock)
+        Top of gap:    (22 + 18·cos30°, 21 - 18·sin30°) = (37.6, 12.0)
+        Bottom of gap: (22 + 18·cos30°, 21 + 18·sin30°) = (37.6, 30.0)
+        Arc: from top-gap to bottom-gap, counterclockwise (large arc, sweep=0)
+        Crossbar: leftmost (4, 21) to x=34 (stops before gap)
+        Pin stem: bottom of circle (22, 39) → (22, 56)
+        Pin dot: (22, 61) r=4.5
+      -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="72" height="110" viewBox="0 0 46 70" fill="none">
+        <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+              stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="4" y1="21" x2="35" y2="21"
+              stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="22" y1="39" x2="22" y2="57"
+              stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+      </svg>
+      <span class="demo-lbl">Mark</span>
+    </div>
+
+    <!-- Horizontal lockup -->
+    <div class="demo">
+      <div class="lockup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="52" viewBox="0 0 46 70" fill="none">
+          <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="4" y1="21" x2="35" y2="21"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="22" y1="39" x2="22" y2="57"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+        </svg>
+        <span class="wm lg">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Horizontal lockup</span>
+    </div>
+
+    <!-- Nav size -->
+    <div class="demo">
+      <div class="lockup tight">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="26" viewBox="0 0 46 70" fill="none">
+          <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="4" y1="21" x2="35" y2="21"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="22" y1="39" x2="22" y2="57"
+                stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+        </svg>
+        <span class="wm sm">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Nav size</span>
+    </div>
+
+    <!-- Light background -->
+    <div class="demo light">
+      <div class="lockup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="34" height="52" viewBox="0 0 46 70" fill="none">
+          <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+                stroke="#5FA85F" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="4" y1="21" x2="35" y2="21"
+                stroke="#5FA85F" stroke-width="2.4" stroke-linecap="round"/>
+          <line x1="22" y1="39" x2="22" y2="57"
+                stroke="#5FA85F" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="22" cy="62" r="4.5" fill="#5FA85F"/>
+        </svg>
+        <span class="wm lg dk">entr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Light background</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════ -->
+<!-- CONCEPT 03 · LETTERMARK                     -->
+<!-- The Cormorant italic "e" IS the pin          -->
+<!-- ════════════════════════════════════════════ -->
+<section class="concept">
+  <div class="c-meta">
+    <p class="c-num">Concept 03</p>
+    <h2 class="c-name">The<br>Lettermark</h2>
+    <p class="c-desc">The Cormorant italic "e" is the entire mark. A pin-drop emerges from the base of the bowl. No icon separated from the letter — the letter IS the icon. Literary and singular.</p>
+    <p class="c-note">Best for: brand moments where type<br>and identity are one and the same.</p>
+  </div>
+
+  <div class="demos">
+    <!-- Mark alone (large) -->
+    <div class="demo">
+      <!--
+        Font: Cormorant Garamond italic 300 at 52px
+        Approx metrics: x-height ≈ 27.6px, advance-width ≈ 31px
+        Baseline at y=46. Text anchor x=4.
+        Bowl optical center x ≈ 4 + 1 (sidebearing) + 12 (half bowl width ~24px) = 17
+        Bowl bottom at y≈47. Pin drop center-x=17, from y=47 to y=68.
+      -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="68" height="92" viewBox="0 0 48 66">
+        <text x="4" y="44"
+              font-family="'Cormorant Garamond', Georgia, serif"
+              font-size="52" font-style="italic" font-weight="300"
+              fill="#9ED29E">e</text>
+        <!-- Pin drop: teardrop from base of bowl -->
+        <path d="M 13 45 C 11 52 17 64 17 66 C 17 64 23 52 21 45 Z" fill="#9ED29E"/>
+      </svg>
+      <span class="demo-lbl">Mark</span>
+    </div>
+
+    <!-- Horizontal lockup -->
+    <div class="demo">
+      <div class="lockup" style="gap:8px; align-items:flex-end; padding-bottom:4px">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="54" viewBox="0 0 48 66">
+          <text x="4" y="44"
+                font-family="'Cormorant Garamond', Georgia, serif"
+                font-size="52" font-style="italic" font-weight="300"
+                fill="#9ED29E">e</text>
+          <path d="M 13 45 C 11 52 17 64 17 66 C 17 64 23 52 21 45 Z" fill="#9ED29E"/>
+        </svg>
+        <span class="wm lg" style="padding-bottom:3px">ntr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Horizontal lockup</span>
+    </div>
+
+    <!-- Nav size -->
+    <div class="demo">
+      <div class="lockup tight" style="align-items:flex-end; padding-bottom:2px">
+        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="31" viewBox="0 0 48 66">
+          <text x="4" y="44"
+                font-family="'Cormorant Garamond', Georgia, serif"
+                font-size="52" font-style="italic" font-weight="300"
+                fill="#9ED29E">e</text>
+          <path d="M 13 45 C 11 52 17 64 17 66 C 17 64 23 52 21 45 Z" fill="#9ED29E"/>
+        </svg>
+        <span class="wm sm" style="padding-bottom:1px">ntr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Nav size</span>
+    </div>
+
+    <!-- Light background -->
+    <div class="demo light">
+      <div class="lockup" style="gap:8px; align-items:flex-end; padding-bottom:4px">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="54" viewBox="0 0 48 66">
+          <text x="4" y="44"
+                font-family="'Cormorant Garamond', Georgia, serif"
+                font-size="52" font-style="italic" font-weight="300"
+                fill="#5FA85F">e</text>
+          <path d="M 13 45 C 11 52 17 64 17 66 C 17 64 23 52 21 45 Z" fill="#5FA85F"/>
+        </svg>
+        <span class="wm lg dk" style="padding-bottom:3px">ntr<i>e</i></span>
+      </div>
+      <span class="demo-lbl">Light background</span>
+    </div>
+  </div>
+</section>
+
+<p class="footnote">
+  All marks use Cormorant Garamond and the landing page color palette (sage #9ED29E · navy #1A1A2E · cream #FFF8F0).
+  Concepts 01 and 02 use the full "entre" wordmark alongside the icon.
+  Concept 03 splits the "e" into the icon — the wordmark beside it reads "ntre" — spelling "entre" together.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "entre-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Entre landing page + waitlist backend",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "xlsx": "^0.18.5"
+  }
+}

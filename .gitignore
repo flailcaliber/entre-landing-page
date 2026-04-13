@@ -1,0 +1,21 @@
+# Netlify CLI state — not needed in repo
+.netlify/
+
+# Dependencies
+node_modules/
+
+# Environment variables — never commit secrets
+.env
+.env.local
+.env.*
+
+# Build artifacts
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
