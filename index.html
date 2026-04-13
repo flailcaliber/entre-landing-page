@@ -8,6 +8,7 @@
   <meta property="og:title" content="Entre — Meet in the middle." />
   <meta property="og:description" content="Find restaurants halfway between you and a friend. No more 'idk, you pick.'" />
   <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -286,14 +287,18 @@
       animation: fade-up 0.8s ease 1.05s forwards;
     }
 
+    #waitlistForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
     .input-row {
       display: flex;
-      gap: 0;
       border: 1px solid var(--border);
       border-radius: 100px;
       background: rgba(255,255,255,0.04);
       transition: border-color 0.25s, box-shadow 0.25s;
-      overflow: hidden;
       backdrop-filter: blur(8px);
     }
 
@@ -313,6 +318,7 @@
       font-weight: 300;
       color: var(--cream);
       min-width: 0;
+      border-radius: 100px;
     }
 
     .email-input::placeholder {
@@ -320,20 +326,20 @@
     }
 
     .submit-btn {
-      flex-shrink: 0;
-      padding: 0.75rem 1.4rem;
-      margin: 0.25rem 0.25rem 0.25rem 0;
+      display: block;
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.9rem 1.4rem;
       border: none;
       border-radius: 100px;
       background: var(--sage);
       color: #131220;
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 500;
       letter-spacing: 0.01em;
       cursor: pointer;
       transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      white-space: nowrap;
     }
 
     .submit-btn:hover {
@@ -356,33 +362,6 @@
       font-size: 0.72rem;
       color: var(--muted);
       letter-spacing: 0.02em;
-    }
-
-    /* ─── PMF optional question ─────────────────────────────── */
-    .pmf-wrap {
-      margin-top: 0.7rem;
-    }
-
-    .pmf-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border);
-      outline: none;
-      padding: 0.55rem 0.1rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 300;
-      color: var(--cream-dim);
-      transition: border-color 0.2s;
-    }
-
-    .pmf-input::placeholder {
-      color: var(--muted);
-    }
-
-    .pmf-input:focus {
-      border-bottom-color: rgba(158, 210, 158, 0.45);
     }
 
     /* ─── Error state ───────────────────────────────────────── */
@@ -543,26 +522,73 @@
     @media (max-width: 600px) {
       nav { padding: 1.5rem 1.25rem; }
 
-      .input-row {
-        flex-direction: column;
-        border-radius: 16px;
-        gap: 0;
-      }
-
       .email-input {
-        padding: 1rem 1.2rem;
-        border-bottom: 1px solid var(--border);
+        padding: 0.9rem 1.2rem;
       }
 
-      .submit-btn {
-        margin: 0.3rem 0.3rem;
-        padding: 0.85rem 1.2rem;
-        border-radius: 12px;
-        text-align: center;
-      }
-
+      /* ── Feature steps: vertical timeline ── */
       .features {
-        gap: 2rem;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 0;
+        padding: 2rem 2rem 0;
+      }
+
+      .feat {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1.1rem;
+        max-width: none;
+        text-align: left;
+        position: relative;
+      }
+
+      .feat:not(:last-child) {
+        margin-bottom: 2rem;
+      }
+
+      .feat-icon {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.035);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        opacity: 1;
+        position: relative;
+      }
+
+      .feat-label {
+        padding-top: 11px;
+        font-size: 0.82rem;
+        line-height: 1.55;
+      }
+
+      /* Animated connector line between steps */
+      .feat:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 20px;           /* center of 42px icon */
+        top: 46px;            /* just below icon bottom */
+        width: 1px;
+        height: calc(2rem - 4px);
+        background: linear-gradient(
+          to bottom,
+          rgba(158, 210, 158, 0.5),
+          rgba(158, 210, 158, 0.0)
+        );
+        transform: scaleY(0);
+        transform-origin: top center;
+      }
+
+      .feat:not(:last-child).step-revealed::after {
+        transform: scaleY(1);
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       footer {
@@ -650,30 +676,30 @@
               autocomplete="email"
               required
             />
-            <button class="submit-btn" type="submit" id="submitBtn">
-              Join the waitlist
-            </button>
           </div>
-          <div class="pmf-wrap">
+          <div class="input-row">
             <input
-              class="pmf-input"
+              class="email-input"
               id="phoneInput"
               type="tel"
-              placeholder="Phone number (optional — for SMS updates)"
+              placeholder="Phone number (optional)"
               maxlength="20"
               autocomplete="tel"
             />
           </div>
-          <div class="pmf-wrap">
+          <div class="input-row">
             <input
-              class="pmf-input"
+              class="email-input"
               id="pmfInput"
               type="text"
-              placeholder="Biggest challenge with NYC lunch meetups? (optional)"
+              placeholder="Biggest NYC lunch challenge? (optional)"
               maxlength="280"
               autocomplete="off"
             />
           </div>
+          <button class="submit-btn" type="submit" id="submitBtn">
+            Join the waitlist
+          </button>
         </form>
 
         <!-- Error state -->
@@ -858,6 +884,20 @@
       formNote.style.display = 'none';
       successMsg.classList.add('visible');
     });
+
+    // ── Mobile step connector animations ─────────────────────
+    if ('IntersectionObserver' in window) {
+      const stepObs = new IntersectionObserver(
+        (entries) => entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('step-revealed');
+            stepObs.unobserve(e.target);
+          }
+        }),
+        { threshold: 0.45 }
+      );
+      document.querySelectorAll('.feat').forEach(el => stepObs.observe(el));
+    }
   </script>
 </body>
 </html>

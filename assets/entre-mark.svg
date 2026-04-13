@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 70" fill="none" role="img" aria-label="Entre mark">
+  <!--
+    Entre — The Drawn Mark (Concept 02)
+    Geometric "e" as map pin: open arc + crossbar + stem + dot.
+
+    Circle: center (22, 21), radius 18
+    Opening: ±30° from right (aperture of the "e")
+      Gap top:    (37.6, 12.0)
+      Gap bottom: (37.6, 30.0)
+    Arc: counterclockwise from gap-top to gap-bottom (large arc, sweep=0)
+    Crossbar: leftmost (4, 21) → x=35, stops before the gap
+    Stem: (22, 39) → (22, 57)
+    Dot: (22, 62) r=4.5
+
+    Colors:
+      Sage green:  #9ED29E  (dark backgrounds)
+      Sage dark:   #5FA85F  (light backgrounds)
+  -->
+  <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
+        stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="4"  y1="21" x2="35" y2="21"
+        stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+  <line x1="22" y1="39" x2="22" y2="57"
+        stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+</svg>
