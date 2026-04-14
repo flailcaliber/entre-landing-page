@@ -91,10 +91,10 @@ function buildEmailHtml(email) {
                 You're on the list.
               </p>
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 300; color: #3d3a4e; line-height: 1.7; margin: 0 0 16px;">
-                Thank you for signing up — genuinely. Between the friends who can never agree on a spot and the endless back-and-forth of "idk, you pick," Entre is the thing we all needed. We're so glad you're along for the ride.
+                Thank you for signing up. Genuinely. Finding that perfect lunch spot during a busy work day is too complicated. We're on a mission to fix that. We're so glad you're along for the ride.
               </p>
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 300; color: #3d3a4e; line-height: 1.7; margin: 0;">
-                We're building something that actually solves this — restaurants halfway between two people, filtered to both your tastes, ready to book in one tap. NYC first. More cities soon.
+                We're building an app that handles every ounce of logistics when it comes to lunch planning. We find restaurants in between you and your friends, curated to both your tastes, and handle timing/navigation so you can get back to where you need to be without making your boss mad. Ready to book in one tap. NYC first. More cities soon.
               </p>
             </td>
           </tr>
@@ -163,9 +163,9 @@ function buildEmailHtml(email) {
 
           <!-- Sign-off -->
           <tr>
-            <td style="background-color:#faf7f4; border-top: 1px solid #ede8e2; padding: 28px 40px;">
+            <td style="padding: 0 40px 36px;">
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0 0 4px;">
-                Sit tight — good things take a moment to get right.
+                Thanks again for joining. Sit tight :)
               </p>
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; margin: 0;">
                 — Sam, Entre
@@ -175,10 +175,9 @@ function buildEmailHtml(email) {
 
           <!-- Footer -->
           <tr>
-            <td style="padding: 20px 40px 28px; background-color:#faf7f4;">
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; color: #b5b0a8; line-height: 1.6; margin: 0;">
-                You're receiving this because you signed up at <a href="https://www.entre.nyc" style="color:#9ED29E; text-decoration:none;">entre.nyc</a>.
-                Questions? Reply to this email or reach us at <a href="mailto:hello@entre.nyc" style="color:#9ED29E; text-decoration:none;">hello@entre.nyc</a>.
+            <td style="background-color:#faf7f4; border-top: 1px solid #ede8e2; padding: 12px 40px;">
+              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; color: #b5b0a8; line-height: 1.5; margin: 0;">
+                You're receiving this because you signed up at <a href="https://www.entre.nyc" style="color:#9ED29E; text-decoration:none;">entre.nyc</a>. Questions? Reply to this email or reach us at <a href="mailto:hello@entre.nyc" style="color:#9ED29E; text-decoration:none;">hello@entre.nyc</a>.
               </p>
             </td>
           </tr>
