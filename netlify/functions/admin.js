@@ -3,11 +3,13 @@
  *
  * All routes require: Authorization: Bearer <ADMIN_PASSWORD>
  *
- * GET  /.netlify/functions/admin?action=analytics   — dashboard stats
- * GET  /.netlify/functions/admin?action=list         — paginated subscriber list
+ * GET  /.netlify/functions/admin?action=analytics        — dashboard stats
+ * GET  /.netlify/functions/admin?action=list             — paginated subscriber list
  * GET  /.netlify/functions/admin?action=list&page=2&search=gmail
- * GET  /.netlify/functions/admin?action=export       — download CSV
- * POST /.netlify/functions/admin?action=import       — body: { emails: string[] }
+ * GET  /.netlify/functions/admin?action=export           — download CSV
+ * POST /.netlify/functions/admin?action=import           — body: { emails: string[] }
+ * GET  /.netlify/functions/admin?action=referral-stats   — full referral analytics
+ * GET  /.netlify/functions/admin?action=waitlist-queue   — queue ranked by position
  *
  * Required Netlify env vars:
  *   SUPABASE_URL             (same as EXPO_PUBLIC_SUPABASE_URL)
@@ -269,6 +271,86 @@ async function handleImport(event) {
   });
 }
 
+async function handleReferralStats() {
+  const [allRes, topRes] = await Promise.all([
+    sb().from('waitlist')
+      .select('email, referral_code, referral_count, source, created_at')
+      .eq('is_bot_flagged', false),
+    sb().from('waitlist')
+      .select('email, referral_code, referral_count, created_at')
+      .gt('referral_count', 0)
+      .order('referral_count', { ascending: false })
+      .limit(25),
+  ]);
+
+  if (allRes.error) throw allRes.error;
+  if (topRes.error) throw topRes.error;
+
+  const all   = allRes.data || [];
+  const total = all.length;
+
+  const totalReferrals   = all.reduce((s, r) => s + (r.referral_count || 0), 0);
+  const usersWithRefs    = all.filter(r => (r.referral_count || 0) >= 1).length;
+  const avgReferrals     = total > 0 ? (totalReferrals / total).toFixed(2) : '0.00';
+  const topReferrerCount = topRes.data?.[0]?.referral_count || 0;
+
+  // Distribution buckets
+  const dist = { '0': 0, '1-2': 0, '3-5': 0, '6-10': 0, '10+': 0 };
+  all.forEach(r => {
+    const n = r.referral_count || 0;
+    if      (n === 0)       dist['0']++;
+    else if (n <= 2)        dist['1-2']++;
+    else if (n <= 5)        dist['3-5']++;
+    else if (n <= 10)       dist['6-10']++;
+    else                    dist['10+']++;
+  });
+
+  return json(200, {
+    total,
+    totalReferrals,
+    usersWithRefs,
+    avgReferrals,
+    topReferrerCount,
+    distribution: dist,
+    topReferrers: topRes.data || [],
+  });
+}
+
+async function handleWaitlistQueue(event) {
+  const params = event.queryStringParameters || {};
+  const page   = Math.max(1, parseInt(params.page || '1', 10));
+  const limit  = 50;
+  const offset = (page - 1) * limit;
+  const search = (params.search || '').trim();
+
+  // Fetch all non-flagged rows to compute rank client-side
+  // (Supabase JS client doesn't support window functions directly)
+  let q = sb()
+    .from('waitlist')
+    .select('email, referral_code, referral_count, source, created_at', { count: 'exact' })
+    .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
+    .order('referral_count', { ascending: false })
+    .order('created_at',     { ascending: true });
+
+  if (search) q = q.ilike('email', `%${search}%`);
+
+  // For ranked pagination we need all rows when searching, otherwise use range
+  let data, count, error;
+  if (search) {
+    ({ data, count, error } = await q);
+    if (error) throw error;
+    // Assign positions 1..n for filtered view (relative rank within results)
+    const ranked = (data || []).map((r, i) => ({ ...r, position: offset + i + 1 }));
+    const slice  = ranked.slice(offset, offset + limit);
+    return json(200, { queue: slice, total: count || 0, page, limit, pages: Math.ceil((count || 0) / limit) });
+  } else {
+    ({ data, count, error } = await q.range(offset, offset + limit - 1));
+    if (error) throw error;
+    const ranked = (data || []).map((r, i) => ({ ...r, position: offset + i + 1 }));
+    return json(200, { queue: ranked, total: count || 0, page, limit, pages: Math.ceil((count || 0) / limit) });
+  }
+}
+
 async function handleExport() {
   const { data, error } = await sb()
     .from('waitlist')
@@ -306,11 +388,13 @@ exports.handler = async (event) => {
   const action = (event.queryStringParameters || {}).action;
 
   try {
-    if (event.httpMethod === 'GET'  && action === 'list')      return await handleList(event);
-    if (event.httpMethod === 'GET'  && action === 'analytics') return await handleAnalytics();
-    if (event.httpMethod === 'GET'  && action === 'history')   return await handleHistory();
-    if (event.httpMethod === 'POST' && action === 'import')    return await handleImport(event);
-    if (event.httpMethod === 'GET'  && action === 'export')    return await handleExport();
+    if (event.httpMethod === 'GET'  && action === 'list')            return await handleList(event);
+    if (event.httpMethod === 'GET'  && action === 'analytics')       return await handleAnalytics();
+    if (event.httpMethod === 'GET'  && action === 'history')         return await handleHistory();
+    if (event.httpMethod === 'POST' && action === 'import')          return await handleImport(event);
+    if (event.httpMethod === 'GET'  && action === 'export')          return await handleExport();
+    if (event.httpMethod === 'GET'  && action === 'referral-stats')  return await handleReferralStats();
+    if (event.httpMethod === 'GET'  && action === 'waitlist-queue')  return await handleWaitlistQueue(event);
     return json(400, { error: `Unknown action: ${action}` });
   } catch (err) {
     console.error('[entre-admin]', err);

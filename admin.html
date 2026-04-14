@@ -126,48 +126,139 @@
     /* ── Dashboard layout ──────────────────────────────────── */
     #dashboard { display: none; }
 
-    .page-header {
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 210px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 2rem;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .sidebar-logo {
+      padding: 1.5rem 1.5rem 1rem;
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-    }
-
-    .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .header-logo {
+    .sidebar-logo-text {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       font-weight: 400;
       letter-spacing: 0.04em;
     }
 
-    .header-logo em { font-style: italic; color: var(--sage); }
+    .sidebar-logo-text em { font-style: italic; color: var(--sage); }
 
-    .header-badge {
-      font-size: 0.65rem;
+    .sidebar-badge {
+      font-size: 0.58rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border);
-      padding: 0.25rem 0.6rem;
+      padding: 0.2rem 0.5rem;
       border-radius: 100px;
     }
 
-    .header-right {
+    .sidebar-nav {
+      flex: 1;
+      padding: 0.75rem 0;
+      overflow-y: auto;
+    }
+
+    .nav-item {
       display: flex;
       align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      padding: 0.6rem 1.25rem;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 300;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      border-radius: 0;
+    }
+
+    .nav-item:hover { color: var(--cream-dim); background: rgba(255,255,255,0.02); }
+
+    .nav-item.active {
+      color: var(--cream);
+      background: rgba(255,255,255,0.05);
+      font-weight: 400;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 2px;
+      height: 1.2rem;
+      background: var(--sage);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .nav-section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,248,240,0.2);
+      padding: 1rem 1.25rem 0.4rem;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    /* Content area (offset by sidebar width) */
+    .content-area {
+      margin-left: 210px;
+      min-height: 100dvh;
+    }
+
+    .content-pane { display: none; }
+    .content-pane.active { display: block; }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.75rem 2rem 0;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
       gap: 0.75rem;
+    }
+
+    .pane-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .pane-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pane-body {
+      padding: 0 2rem 2.5rem;
     }
 
     .btn-sm {
@@ -181,6 +272,10 @@
       border: 1px solid var(--border);
       background: transparent;
       color: var(--cream-dim);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
     }
 
     .btn-sm:hover { border-color: var(--cream-faint); color: var(--cream); }
@@ -194,10 +289,262 @@
 
     .btn-sm.primary:hover { background: #b5ddb5; }
 
-    .main-content {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
+    .btn-sm.danger {
+      background: rgba(232,133,110,0.12);
+      color: var(--red);
+      border-color: rgba(232,133,110,0.25);
+    }
+
+    .btn-sm.danger:hover { background: rgba(232,133,110,0.22); }
+
+    /* ── Email template cards ──────────────────────────────── */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .template-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .template-card-name {
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .template-card-subject {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .template-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border2);
+    }
+
+    .template-card-date {
+      font-size: 0.7rem;
+      color: rgba(255,248,240,0.25);
+    }
+
+    .template-card-actions {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    /* ── Send history table ────────────────────────────────── */
+    .send-history-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .send-status-done    { color: var(--sage); }
+    .send-status-sending { color: var(--coral); }
+    .send-status-failed  { color: var(--red); }
+    .send-status-pending { color: var(--muted); }
+
+    /* ── Referral queue ────────────────────────────────────── */
+    .ref-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Modal overlay ─────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,9,20,0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .modal-header h3 {
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 0.25rem;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: var(--cream); }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .field-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .field-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus { border-color: var(--sage-border); }
+
+    .field-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 0.9rem;
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: var(--cream-dim);
+      outline: none;
+      resize: vertical;
+      min-height: 220px;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    .field-textarea:focus { border-color: var(--sage-border); }
+
+    /* Send modal segments */
+    .segment-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .segment-option {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .segment-option input[type="radio"] { accent-color: var(--sage); }
+
+    .segment-option:has(input:checked) {
+      border-color: var(--sage-border);
+      background: var(--sage-dim);
+    }
+
+    .segment-label { font-size: 0.82rem; color: var(--cream-dim); }
+    .segment-count { font-size: 0.72rem; color: var(--muted); }
+
+    .send-preview-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .send-preview-box strong { color: var(--cream); }
+
+    /* status bar during send */
+    .send-progress {
+      display: none;
+      background: var(--sage-dim);
+      border: 1px solid var(--sage-border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      color: var(--sage);
+    }
+
+    @media (max-width: 800px) {
+      .sidebar { display: none; }
+      .content-area { margin-left: 0; }
+      .pane-header { padding: 1rem 1rem 0; }
+      .pane-body { padding: 0 1rem 2rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .search-input { width: 160px; }
+      .segment-options { grid-template-columns: 1fr; }
     }
 
     /* ── Section titles ────────────────────────────────────── */
@@ -669,13 +1016,6 @@
     /* ── Utility ───────────────────────────────────────────── */
     .divider { height: 1px; background: var(--border); margin: 2rem 0; }
     .text-muted { color: var(--muted); }
-
-    @media (max-width: 800px) {
-      .main-content { padding: 1rem; }
-      .page-header { padding: 1rem; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .search-input { width: 160px; }
-    }
   </style>
 </head>
 <body>
@@ -701,133 +1041,348 @@
 
 <!-- ── Dashboard ──────────────────────────────────────────── -->
 <div id="dashboard">
-  <header class="page-header">
-    <div class="header-left">
-      <span class="header-logo">entr<em>e</em></span>
-      <span class="header-badge">Admin</span>
-    </div>
-    <div class="header-right">
-      <button class="btn-sm" id="refreshBtn">↻ Refresh</button>
-      <a class="btn-sm" href="history.html">📈 Growth History</a>
-      <button class="btn-sm primary" id="exportBtn">↓ Export CSV</button>
-      <button class="btn-sm" id="logoutBtn">Sign out</button>
-    </div>
-  </header>
 
-  <div class="main-content">
-
-    <!-- Stats -->
-    <p class="section-title">Overview</p>
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-label">Total Signups</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub" id="statTotalSub"></div></div>
-      <div class="stat-card"><div class="stat-label">This Week <span style="font-size:0.65rem;color:var(--muted);font-weight:400">(organic)</span></div><div class="stat-value sage" id="statWeek">—</div><div class="stat-sub" id="statWoW"></div></div>
-      <div class="stat-card"><div class="stat-label">Viral K-factor</div><div class="stat-value" id="statK">—</div><div class="stat-sub">target 0.8 – 1.2</div></div>
-      <div class="stat-card"><div class="stat-label">Conversion Rate</div><div class="stat-value coral" id="statConv">—</div><div class="stat-sub" id="statPV"></div></div>
-      <div class="stat-card"><div class="stat-label">Page Views</div><div class="stat-value" id="statPVCount">—</div><div class="stat-sub">unique sessions tracked</div></div>
-      <div class="stat-card"><div class="stat-label">Referral Signups</div><div class="stat-value" id="statReferral">—</div><div class="stat-sub" id="statOrganic"></div></div>
+  <!-- Sidebar navigation -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 70" fill="none" height="22" aria-hidden="true">
+        <path d="M 37.6 12 A 18 18 0 1 0 37.6 30" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="4" y1="21" x2="35" y2="21" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="22" y1="39" x2="22" y2="57" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+      </svg>
+      <span class="sidebar-logo-text">entr<em>e</em></span>
+      <span class="sidebar-badge">Admin</span>
     </div>
 
-    <!-- Charts row -->
-    <p class="section-title">Growth</p>
-    <div class="charts-row">
-      <!-- Signups by week -->
-      <div class="chart-card">
-        <div class="chart-title">Signups by week</div>
-        <div class="bar-chart" id="weeklyChart"></div>
-      </div>
+    <div class="sidebar-nav">
+      <p class="nav-section-label">Analytics</p>
+      <button class="nav-item active" data-tab="overview" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="8" width="4" height="7" rx="1"/><rect x="6" y="5" width="4" height="10" rx="1"/><rect x="11" y="2" width="4" height="13" rx="1"/></svg>
+        Overview
+      </button>
+      <button class="nav-item" data-tab="subscribers" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5"/><circle cx="12" cy="6" r="2"/><path d="M12 10c1.5 0 3 .8 3 3"/></svg>
+        Subscribers
+      </button>
 
-      <!-- Source breakdown -->
-      <div class="chart-card">
-        <div class="chart-title">Signup source</div>
-        <div class="breakdown-list" id="sourceBreakdown"></div>
-      </div>
-
-      <!-- UTM breakdown -->
-      <div class="chart-card">
-        <div class="chart-title">Top UTM sources</div>
-        <div class="breakdown-list" id="utmBreakdown"></div>
-      </div>
+      <p class="nav-section-label">Marketing</p>
+      <button class="nav-item" data-tab="email" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="m1 4 7 5 7-5"/></svg>
+        Email Marketing
+      </button>
+      <button class="nav-item" data-tab="referrals" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7.2 10 5M6 8.8l4 2.4"/></svg>
+        Referral Program
+      </button>
     </div>
 
-    <!-- Top referrers + City breakdown side by side -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
-      <div class="chart-card">
-        <div class="chart-title">Top referrers</div>
-        <div class="referrers-list" id="topReferrers"><p class="text-muted" style="font-size:0.8rem;">No referrals yet.</p></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">City distribution</div>
-        <div class="breakdown-list" id="cityBreakdown"></div>
-      </div>
+    <div class="sidebar-footer">
+      <a class="btn-sm" href="history.html" style="justify-content:center;">📈 Growth History</a>
+      <button class="btn-sm" id="logoutBtn" style="justify-content:center;">Sign out</button>
     </div>
+  </nav>
 
-    <!-- Import -->
-    <p class="section-title">Import</p>
-    <div class="import-card">
-      <div class="import-header">
-        <div>
-          <h3>Import emails from Excel / CSV</h3>
-          <p>Drag and drop your file or click to browse. Existing emails are silently skipped.</p>
+  <!-- Main content area -->
+  <div class="content-area">
+
+    <!-- ── Overview pane ──────────────────────────────────── -->
+    <div class="content-pane active" id="tabOverview">
+      <div class="pane-header">
+        <h2 class="pane-title">Overview</h2>
+        <div class="pane-actions">
+          <button class="btn-sm" id="refreshBtn">↻ Refresh</button>
         </div>
       </div>
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
-        <div class="drop-icon">📄</div>
-        <div class="drop-text"><strong>Choose file</strong> or drag it here<br>.xlsx · .xls · .csv</div>
+      <div class="pane-body">
+        <p class="section-title">Signups</p>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="stat-label">Total Signups</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub" id="statTotalSub"></div></div>
+          <div class="stat-card"><div class="stat-label">This Week <span style="font-size:0.65rem;color:var(--muted);font-weight:400">(organic)</span></div><div class="stat-value sage" id="statWeek">—</div><div class="stat-sub" id="statWoW"></div></div>
+          <div class="stat-card"><div class="stat-label">Viral K-factor</div><div class="stat-value" id="statK">—</div><div class="stat-sub">target 0.8 – 1.2</div></div>
+          <div class="stat-card"><div class="stat-label">Conversion Rate</div><div class="stat-value coral" id="statConv">—</div><div class="stat-sub" id="statPV"></div></div>
+          <div class="stat-card"><div class="stat-label">Page Views</div><div class="stat-value" id="statPVCount">—</div><div class="stat-sub">unique sessions tracked</div></div>
+          <div class="stat-card"><div class="stat-label">Referral Signups</div><div class="stat-value" id="statReferral">—</div><div class="stat-sub" id="statOrganic"></div></div>
+        </div>
+
+        <p class="section-title">Growth</p>
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Signups by week</div>
+            <div class="bar-chart" id="weeklyChart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Signup source</div>
+            <div class="breakdown-list" id="sourceBreakdown"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Top UTM sources</div>
+            <div class="breakdown-list" id="utmBreakdown"></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
+          <div class="chart-card">
+            <div class="chart-title">Top referrers</div>
+            <div class="referrers-list" id="topReferrers"><p class="text-muted" style="font-size:0.8rem;">No referrals yet.</p></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">City distribution</div>
+            <div class="breakdown-list" id="cityBreakdown"></div>
+          </div>
+        </div>
       </div>
-      <div class="import-result" id="importResult"></div>
     </div>
 
-    <!-- Subscriber table -->
-    <div class="tabs-row">
-      <p class="section-title" style="margin-bottom:0">Subscribers</p>
-      <div class="table-actions">
-        <input class="search-input" id="searchInput" type="search" placeholder="Search emails…" />
+    <!-- ── Subscribers pane ───────────────────────────────── -->
+    <div class="content-pane" id="tabSubscribers">
+      <div class="pane-header">
+        <h2 class="pane-title">Subscribers</h2>
+        <div class="pane-actions">
+          <input class="search-input" id="searchInput" type="search" placeholder="Search emails…" />
+          <button class="btn-sm primary" id="exportBtn">↓ Export CSV</button>
+        </div>
+      </div>
+      <div class="pane-body">
+        <p class="section-title">Import</p>
+        <div class="import-card">
+          <div class="import-header">
+            <div>
+              <h3>Import emails from Excel / CSV</h3>
+              <p>Drag and drop your file or click to browse. Existing emails are silently skipped.</p>
+            </div>
+          </div>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+            <div class="drop-icon">📄</div>
+            <div class="drop-text"><strong>Choose file</strong> or drag it here<br>.xlsx · .xls · .csv</div>
+          </div>
+          <div class="import-result" id="importResult"></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Source</th>
+                <th>Ref Code</th>
+                <th>Referred by</th>
+                <th>Referrals</th>
+                <th>City</th>
+                <th>PMF Response</th>
+                <th>UTM Source</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr class="loading-row"><td colspan="10">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="pagination">
+          <span id="paginationInfo"></span>
+          <div class="pagination-btns" id="paginationBtns"></div>
+        </div>
       </div>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Source</th>
-            <th>Ref Code</th>
-            <th>Referred by</th>
-            <th>Referrals</th>
-            <th>City</th>
-            <th>PMF Response</th>
-            <th>UTM Source</th>
-            <th>Joined</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <tr class="loading-row"><td colspan="10">Loading…</td></tr>
-        </tbody>
-      </table>
+    <!-- ── Email Marketing pane ───────────────────────────── -->
+    <div class="content-pane" id="tabEmail">
+      <div class="pane-header">
+        <h2 class="pane-title">Email Marketing</h2>
+        <div class="pane-actions">
+          <button class="btn-sm primary" id="newTemplateBtn">+ New Template</button>
+        </div>
+      </div>
+      <div class="pane-body">
+        <p class="section-title">Templates</p>
+        <div class="template-grid" id="templateGrid">
+          <div class="empty-state" style="grid-column:1/-1;">Loading templates…</div>
+        </div>
+
+        <p class="section-title">Send History</p>
+        <div class="send-history-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Template</th>
+                <th>Subject</th>
+                <th>Segment</th>
+                <th>Recipients</th>
+                <th>Sent</th>
+                <th>Failed</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="sendHistoryBody">
+              <tr class="loading-row"><td colspan="8">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <div class="pagination" id="pagination">
-      <span id="paginationInfo"></span>
-      <div class="pagination-btns" id="paginationBtns"></div>
+    <!-- ── Referral Program pane ──────────────────────────── -->
+    <div class="content-pane" id="tabReferrals">
+      <div class="pane-header">
+        <h2 class="pane-title">Referral Program</h2>
+        <div class="pane-actions">
+          <button class="btn-sm" id="sendReminderBtn">Send Referral Reminder</button>
+        </div>
+      </div>
+      <div class="pane-body">
+        <p class="section-title">Stats</p>
+        <div class="ref-stats-grid" id="refStatsGrid">
+          <div class="stat-card"><div class="stat-label">Total Referrals</div><div class="stat-value sage" id="refStatTotal">—</div><div class="stat-sub">across all users</div></div>
+          <div class="stat-card"><div class="stat-label">Users with ≥1 Referral</div><div class="stat-value" id="refStatUsers">—</div><div class="stat-sub" id="refStatUsersSub"></div></div>
+          <div class="stat-card"><div class="stat-label">Avg Referrals / User</div><div class="stat-value" id="refStatAvg">—</div><div class="stat-sub">across all signups</div></div>
+          <div class="stat-card"><div class="stat-label">Top Referrer</div><div class="stat-value coral" id="refStatTop">—</div><div class="stat-sub">referrals</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;">
+          <div class="chart-card">
+            <div class="chart-title">Referral distribution</div>
+            <div class="breakdown-list" id="refDistList"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Top 25 referrers</div>
+            <div class="referrers-list" id="topReferrers25"><p class="text-muted" style="font-size:0.8rem;">Loading…</p></div>
+          </div>
+        </div>
+
+        <div class="tabs-row">
+          <p class="section-title" style="margin-bottom:0">Waitlist Queue <span style="font-size:0.65rem;color:var(--muted);font-weight:300">(ranked by referrals, then join date)</span></p>
+          <div class="table-actions">
+            <input class="search-input" id="queueSearchInput" type="search" placeholder="Search emails…" />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Email</th>
+                <th>Ref Code</th>
+                <th>Referrals</th>
+                <th>Source</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody id="queueBody">
+              <tr class="loading-row"><td colspan="6">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="queuePagination">
+          <span id="queuePaginationInfo"></span>
+          <div class="pagination-btns" id="queuePaginationBtns"></div>
+        </div>
+      </div>
     </div>
 
-  </div><!-- /main-content -->
+  </div><!-- /content-area -->
+
+  <!-- ── Template editor modal ─────────────────────────────── -->
+  <div class="modal-overlay" id="templateModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="templateModalTitle">New Template</h3>
+        <button class="modal-close" id="templateModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <p class="field-label">Template name</p>
+          <input class="field-input" id="tmplName" type="text" placeholder="e.g. Launch Announcement" />
+        </div>
+        <div>
+          <p class="field-label">Email subject</p>
+          <input class="field-input" id="tmplSubject" type="text" placeholder="e.g. Entre is here — here's what's next" />
+        </div>
+        <div>
+          <p class="field-label">HTML content</p>
+          <textarea class="field-textarea" id="tmplHtml" placeholder="Paste your HTML email here…"></textarea>
+        </div>
+        <p style="font-size:0.72rem;color:var(--muted)">Tip: design your email in Resend, export the HTML, and paste it here. Or write it from scratch — Resend will send it as-is.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" id="templateModalCancel">Cancel</button>
+        <button class="btn-sm primary" id="templateModalSave">Save Template</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Send campaign modal ────────────────────────────────── -->
+  <div class="modal-overlay" id="sendModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Send Campaign — <span id="sendModalTemplateName" style="color:var(--muted);font-weight:300"></span></h3>
+        <button class="modal-close" id="sendModalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <p class="field-label">Subject <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0">(leave blank to use template subject)</span></p>
+          <input class="field-input" id="sendSubjectOverride" type="text" placeholder="Override subject line (optional)" />
+        </div>
+        <div>
+          <p class="field-label">Send to</p>
+          <div class="segment-options">
+            <label class="segment-option">
+              <input type="radio" name="sendSegment" value="all" checked />
+              <div><div class="segment-label">Everyone</div><div class="segment-count" id="segCountAll">—</div></div>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="sendSegment" value="organic" />
+              <div><div class="segment-label">Organic only</div><div class="segment-count" id="segCountOrganic">—</div></div>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="sendSegment" value="referral" />
+              <div><div class="segment-label">Referred users</div><div class="segment-count" id="segCountReferral">—</div></div>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="sendSegment" value="no_referrals" />
+              <div><div class="segment-label">No referrals yet</div><div class="segment-count" id="segCountNoRef">—</div></div>
+            </label>
+          </div>
+        </div>
+        <div class="send-preview-box" id="sendPreviewBox">
+          Select a segment to see recipient count.
+        </div>
+        <div class="send-progress" id="sendProgress">Sending… please wait.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm" id="sendModalCancel">Cancel</button>
+        <button class="btn-sm primary" id="sendModalConfirm">Send Campaign</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /dashboard -->
 
 <script>
 // ── Config ────────────────────────────────────────────────────
-// The admin API runs at this path (Netlify Function)
-const API = '/.netlify/functions/admin';
+const API       = '/.netlify/functions/admin';
+const EMAIL_API = '/.netlify/functions/email';
 
 // ── State ──────────────────────────────────────────────────────
-let _password  = '';
-let _analytics = null;
-let _page      = 1;
-let _totalPages = 1;
-let _search    = '';
+let _password    = '';
+let _analytics   = null;
+let _page        = 1;
+let _totalPages  = 1;
+let _search      = '';
 let _searchTimer = null;
+
+// Email tab state
+let _editingTemplateId = null;
+let _sendTemplateId    = null;
+
+// Referral queue state
+let _queuePage        = 1;
+let _queueTotalPages  = 1;
+let _queueSearch      = '';
+let _queueSearchTimer = null;
 
 // ── Auth ───────────────────────────────────────────────────────
 const authGate  = document.getElementById('authGate');
@@ -889,17 +1444,47 @@ if (saved) {
 function api(path, opts = {}) {
   return fetch(`${API}${path}`, {
     ...opts,
-    headers: {
-      'Authorization': `Bearer ${_password}`,
-      'Content-Type': 'application/json',
-      ...(opts.headers || {}),
-    }
+    headers: { 'Authorization': `Bearer ${_password}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
   });
 }
 
+function emailApi(path, opts = {}) {
+  return fetch(`${EMAIL_API}${path}`, {
+    ...opts,
+    headers: { 'Authorization': `Bearer ${_password}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  });
+}
+
+// ── Navigation ─────────────────────────────────────────────────
+const _tabLoaded = {};
+
+function switchTab(tabName) {
+  // Update nav items
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === tabName);
+  });
+  // Show/hide panes
+  document.querySelectorAll('.content-pane').forEach(el => {
+    el.classList.toggle('active', el.id === `tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+  });
+  // Lazy-load tab data the first time it's opened
+  if (!_tabLoaded[tabName]) {
+    _tabLoaded[tabName] = true;
+    if (tabName === 'overview')     { loadAnalytics(); }
+    if (tabName === 'subscribers')  { loadSubscribers(); }
+    if (tabName === 'email')        { loadEmailTemplates(); loadSendHistory(); }
+    if (tabName === 'referrals')    { loadReferralStats(); loadWaitlistQueue(); }
+  }
+}
+
+document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
 // ── Dashboard init ─────────────────────────────────────────────
 async function initDashboard() {
-  await Promise.all([loadAnalytics(), loadSubscribers()]);
+  // Overview loads by default (first tab)
+  switchTab('overview');
 }
 
 // ── Analytics ──────────────────────────────────────────────────
@@ -1107,8 +1692,8 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 
 // ── Header buttons ─────────────────────────────────────────────
 document.getElementById('refreshBtn').addEventListener('click', () => {
-  loadAnalytics();
-  loadSubscribers();
+  Object.keys(_tabLoaded).forEach(k => delete _tabLoaded[k]);
+  switchTab('overview');
 });
 
 document.getElementById('exportBtn').addEventListener('click', async () => {
@@ -1230,6 +1815,344 @@ function showImportResult(type, msg) {
   importResult.textContent = msg;
   importResult.style.display = 'block';
 }
+
+// ── Email Marketing ────────────────────────────────────────────
+
+async function loadEmailTemplates() {
+  const grid = document.getElementById('templateGrid');
+  grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Loading…</div>';
+  try {
+    const res  = await emailApi('?action=templates');
+    const data = await res.json();
+    renderTemplateGrid(data.templates || []);
+  } catch (e) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:var(--red)">Error loading templates: ${escHtml(e.message)}</div>`;
+  }
+}
+
+function renderTemplateGrid(templates) {
+  const grid = document.getElementById('templateGrid');
+  if (templates.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No templates yet. Create one to get started.</div>`;
+    return;
+  }
+  grid.innerHTML = templates.map(t => `
+    <div class="template-card">
+      <div class="template-card-name">${escHtml(t.name)}</div>
+      <div class="template-card-subject">Subject: ${escHtml(t.subject)}</div>
+      <div class="template-card-footer">
+        <span class="template-card-date">${formatDate(t.updated_at)}</span>
+        <div class="template-card-actions">
+          <button class="btn-sm" onclick="openTemplateEdit('${escHtml(t.id)}','${escHtml(t.name).replace(/'/g,"\\'")}','${escHtml(t.subject).replace(/'/g,"\\'")}')">Edit</button>
+          <button class="btn-sm primary" onclick="openSendModal('${escHtml(t.id)}','${escHtml(t.name).replace(/'/g,"\\'")}')">Send</button>
+          <button class="btn-sm danger" onclick="deleteTemplate('${escHtml(t.id)}')">Del</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function loadSendHistory() {
+  const tbody = document.getElementById('sendHistoryBody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading…</td></tr>';
+  try {
+    const res  = await emailApi('?action=send-history');
+    const data = await res.json();
+    const sends = data.sends || [];
+    if (sends.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">No campaigns sent yet.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = sends.map(s => `
+      <tr>
+        <td>${escHtml(s.template_name)}</td>
+        <td title="${escHtml(s.subject)}">${escHtml(truncate(s.subject, 40))}</td>
+        <td><span class="badge badge-${s.segment === 'all' ? 'organic' : s.segment === 'referral' ? 'referral' : 'imported'}">${escHtml(s.segment)}</span></td>
+        <td>${fmt(s.recipient_count)}</td>
+        <td style="color:var(--sage)">${fmt(s.sent_count)}</td>
+        <td style="color:${s.failed_count > 0 ? 'var(--red)' : 'var(--muted)'}">${s.failed_count || 0}</td>
+        <td class="send-status-${escHtml(s.status)}">${escHtml(s.status)}</td>
+        <td style="white-space:nowrap">${formatDate(s.sent_at)}</td>
+      </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="8" style="color:var(--red);text-align:center;padding:2rem;">Error: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+// Template modal
+function openTemplateModal() {
+  _editingTemplateId = null;
+  document.getElementById('templateModalTitle').textContent = 'New Template';
+  document.getElementById('tmplName').value    = '';
+  document.getElementById('tmplSubject').value = '';
+  document.getElementById('tmplHtml').value    = '';
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function openTemplateEdit(id, name, subject) {
+  _editingTemplateId = id;
+  document.getElementById('templateModalTitle').textContent = 'Edit Template';
+  document.getElementById('tmplName').value    = name;
+  document.getElementById('tmplSubject').value = subject;
+  // Fetch full template to get html_content
+  emailApi(`?action=templates`).then(r => r.json()).then(data => {
+    const t = (data.templates || []).find(x => x.id === id);
+    // We only have name/subject/date in the list — need to re-fetch individually via save (workaround: store in dataset)
+    // Since we don't have a single-template endpoint, leave textarea empty for user to paste
+  });
+  document.getElementById('tmplHtml').value = '';
+  document.getElementById('templateModal').classList.add('open');
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('open');
+}
+
+document.getElementById('newTemplateBtn').addEventListener('click', openTemplateModal);
+document.getElementById('templateModalClose').addEventListener('click', closeTemplateModal);
+document.getElementById('templateModalCancel').addEventListener('click', closeTemplateModal);
+
+document.getElementById('templateModalSave').addEventListener('click', async () => {
+  const name        = document.getElementById('tmplName').value.trim();
+  const subject     = document.getElementById('tmplSubject').value.trim();
+  const html_content = document.getElementById('tmplHtml').value.trim();
+  if (!name || !subject || !html_content) {
+    alert('Name, subject, and HTML content are all required.');
+    return;
+  }
+  const btn = document.getElementById('templateModalSave');
+  btn.textContent = 'Saving…';
+  try {
+    const body = { name, subject, html_content };
+    if (_editingTemplateId) body.id = _editingTemplateId;
+    const res  = await emailApi('?action=template-save', { method: 'POST', body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    closeTemplateModal();
+    loadEmailTemplates();
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  } finally {
+    btn.textContent = 'Save Template';
+  }
+});
+
+async function deleteTemplate(id) {
+  if (!confirm('Delete this template? This cannot be undone.')) return;
+  try {
+    const res = await emailApi('?action=template-delete', { method: 'POST', body: JSON.stringify({ id }) });
+    if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
+    loadEmailTemplates();
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  }
+}
+
+// Send modal
+async function openSendModal(templateId, templateName) {
+  _sendTemplateId = templateId;
+  document.getElementById('sendModalTemplateName').textContent = templateName;
+  document.getElementById('sendSubjectOverride').value = '';
+  document.getElementById('sendProgress').style.display = 'none';
+  document.getElementById('sendModalConfirm').disabled = false;
+  document.getElementById('sendModalConfirm').textContent = 'Send Campaign';
+  document.getElementById('sendModal').classList.add('open');
+  // Load segment counts
+  await loadSegmentCounts();
+}
+
+async function loadSegmentCounts() {
+  const segments = ['all', 'organic', 'referral', 'no_referrals'];
+  const ids = { all: 'segCountAll', organic: 'segCountOrganic', referral: 'segCountReferral', no_referrals: 'segCountNoRef' };
+  // Fetch counts in parallel
+  await Promise.all(segments.map(async seg => {
+    try {
+      const res  = await emailApi(`?action=segment-count&segment=${seg}`);
+      const data = await res.json();
+      document.getElementById(ids[seg]).textContent = `${fmt(data.count)} subscribers`;
+    } catch {
+      document.getElementById(ids[seg]).textContent = 'error';
+    }
+  }));
+  updateSendPreview();
+}
+
+function updateSendPreview() {
+  const seg = document.querySelector('input[name="sendSegment"]:checked')?.value || 'all';
+  const countEl = document.getElementById({ all:'segCountAll', organic:'segCountOrganic', referral:'segCountReferral', no_referrals:'segCountNoRef' }[seg]);
+  const count = countEl?.textContent || '—';
+  document.getElementById('sendPreviewBox').innerHTML =
+    `Will send to <strong>${count}</strong> in the <strong>${escHtml(seg)}</strong> segment via Resend.`;
+}
+
+document.querySelectorAll('input[name="sendSegment"]').forEach(r => r.addEventListener('change', updateSendPreview));
+
+function closeSendModal() {
+  document.getElementById('sendModal').classList.remove('open');
+}
+
+document.getElementById('sendModalClose').addEventListener('click', closeSendModal);
+document.getElementById('sendModalCancel').addEventListener('click', closeSendModal);
+
+document.getElementById('sendModalConfirm').addEventListener('click', async () => {
+  const segment         = document.querySelector('input[name="sendSegment"]:checked')?.value || 'all';
+  const subject_override = document.getElementById('sendSubjectOverride').value.trim() || undefined;
+  const confirmMsg = `Send this campaign to the "${segment}" segment? This will send live emails.`;
+  if (!confirm(confirmMsg)) return;
+
+  const btn = document.getElementById('sendModalConfirm');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  document.getElementById('sendProgress').style.display = 'block';
+
+  try {
+    const body = { template_id: _sendTemplateId, segment };
+    if (subject_override) body.subject_override = subject_override;
+    const res  = await emailApi('?action=send-campaign', { method: 'POST', body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Send failed');
+    document.getElementById('sendProgress').style.display = 'none';
+    alert(`✓ Campaign sent!\n\nSent: ${data.sent}\nFailed: ${data.failed}\nTotal: ${data.total}`);
+    closeSendModal();
+    loadSendHistory();
+  } catch (e) {
+    document.getElementById('sendProgress').style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'Send Campaign';
+    alert(`Error: ${e.message}`);
+  }
+});
+
+// Referral reminder quick action
+document.getElementById('sendReminderBtn').addEventListener('click', async () => {
+  // Look for a template with "reminder" in the name, else prompt to create one
+  const res  = await emailApi('?action=templates');
+  const data = await res.json();
+  const templates = data.templates || [];
+  if (templates.length === 0) {
+    alert('No templates yet. Create one in the Email Marketing tab first.');
+    return;
+  }
+  // Pick best candidate
+  const reminder = templates.find(t => t.name.toLowerCase().includes('reminder')) || templates[0];
+  document.querySelector('input[name="sendSegment"][value="no_referrals"]').checked = true;
+  await openSendModal(reminder.id, reminder.name);
+  document.querySelector('input[name="sendSegment"][value="no_referrals"]').checked = true;
+  updateSendPreview();
+});
+
+// ── Referral Program ───────────────────────────────────────────
+
+async function loadReferralStats() {
+  try {
+    const res  = await api('?action=referral-stats');
+    const data = await res.json();
+    renderReferralStats(data);
+  } catch (e) {
+    console.error('[entre-admin] referral stats error:', e);
+  }
+}
+
+function renderReferralStats(d) {
+  document.getElementById('refStatTotal').textContent = fmt(d.totalReferrals);
+  document.getElementById('refStatUsers').textContent  = fmt(d.usersWithRefs);
+  const pct = d.total > 0 ? ((d.usersWithRefs / d.total) * 100).toFixed(1) : '0';
+  document.getElementById('refStatUsersSub').textContent = `${pct}% of all signups`;
+  document.getElementById('refStatAvg').textContent  = d.avgReferrals;
+  document.getElementById('refStatTop').textContent  = fmt(d.topReferrerCount);
+
+  // Distribution breakdown
+  const dist = d.distribution || {};
+  const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
+  const labels = { '0': 'No referrals', '1-2': '1–2 referrals', '3-5': '3–5 referrals', '6-10': '6–10 referrals', '10+': '10+ referrals' };
+  document.getElementById('refDistList').innerHTML = Object.entries(dist).map(([k, v]) => `
+    <div class="breakdown-item">
+      <div class="breakdown-row">
+        <span class="breakdown-key">${labels[k] || k}</span>
+        <span class="breakdown-val">${v}</span>
+      </div>
+      <div class="breakdown-bar">
+        <div class="breakdown-bar-fill" style="width:${Math.round((v/total)*100)}%"></div>
+      </div>
+    </div>`).join('');
+
+  // Top 25 referrers
+  const refs = d.topReferrers || [];
+  const el = document.getElementById('topReferrers25');
+  if (refs.length === 0) {
+    el.innerHTML = '<p style="font-size:0.78rem;color:var(--muted)">No referrals yet.</p>';
+  } else {
+    el.innerHTML = refs.map((r, i) => `
+      <div class="referrer-row">
+        <span style="font-size:0.7rem;color:var(--muted);width:1.5rem;flex-shrink:0">#${i+1}</span>
+        <span class="referrer-email">${escHtml(r.email)}</span>
+        <span class="referrer-count">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#9ED29E" stroke-width="1.2"/></svg>
+          ${r.referral_count}
+        </span>
+      </div>`).join('');
+  }
+}
+
+async function loadWaitlistQueue() {
+  const params = new URLSearchParams({ action: 'waitlist-queue', page: _queuePage });
+  if (_queueSearch) params.set('search', _queueSearch);
+  document.getElementById('queueBody').innerHTML = '<tr class="loading-row"><td colspan="6">Loading…</td></tr>';
+  try {
+    const res  = await api(`?${params}`);
+    const data = await res.json();
+    _queueTotalPages = data.pages || 1;
+    renderQueueTable(data.queue || []);
+    renderQueuePagination(data.total || 0, data.page || 1, _queueTotalPages);
+  } catch (e) {
+    document.getElementById('queueBody').innerHTML = `<tr><td colspan="6" style="color:var(--red);text-align:center;padding:2rem;">Error: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderQueueTable(rows) {
+  const tbody = document.getElementById('queueBody');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No results.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="color:var(--muted);font-size:0.75rem;">#${fmt(r.position)}</td>
+      <td class="email">${escHtml(r.email)}</td>
+      <td><code style="font-size:0.75rem;letter-spacing:0.08em;color:var(--sage)">${escHtml(r.referral_code || '—')}</code></td>
+      <td style="color:${(r.referral_count||0) > 0 ? 'var(--sage)' : 'var(--muted)'}">${r.referral_count || 0}</td>
+      <td><span class="badge badge-${escHtml(r.source || 'organic')}">${escHtml(r.source || 'organic')}</span></td>
+      <td style="white-space:nowrap">${formatDate(r.created_at)}</td>
+    </tr>`).join('');
+}
+
+function renderQueuePagination(total, page, pages) {
+  document.getElementById('queuePaginationInfo').textContent =
+    total === 0 ? 'No results' : `#${(page-1)*50+1}–#${Math.min(page*50, total)} of ${fmt(total)}`;
+  const btns = document.getElementById('queuePaginationBtns');
+  const range = pageRange(page, pages);
+  btns.innerHTML = [
+    `<button class="page-btn" onclick="goQueuePage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>`,
+    ...range.map(p => p === '…'
+      ? `<span style="padding:0.35rem 0.4rem;color:var(--muted);font-size:0.78rem">…</span>`
+      : `<button class="page-btn ${p===page?'active':''}" onclick="goQueuePage(${p})">${p}</button>`),
+    `<button class="page-btn" onclick="goQueuePage(${page+1})" ${page>=pages?'disabled':''}>Next →</button>`,
+  ].join('');
+}
+
+function goQueuePage(p) {
+  if (p < 1 || p > _queueTotalPages) return;
+  _queuePage = p;
+  loadWaitlistQueue();
+}
+
+document.getElementById('queueSearchInput').addEventListener('input', (e) => {
+  clearTimeout(_queueSearchTimer);
+  _queueSearchTimer = setTimeout(() => {
+    _queueSearch = e.target.value.trim();
+    _queuePage = 1;
+    loadWaitlistQueue();
+  }, 350);
+});
 
 // ── Utilities ──────────────────────────────────────────────────
 function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }

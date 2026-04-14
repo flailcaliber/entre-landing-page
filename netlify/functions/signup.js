@@ -47,7 +47,12 @@ function json(status, body) {
 
 // ─── Email template ───────────────────────────────────────────
 
-function buildEmailHtml(email) {
+function buildEmailHtml(referralCode, position) {
+  const referralLink = `https://entre.nyc/?ref=${referralCode}`;
+  const positionLine = position
+    ? `You're currently <strong style="color:#131220;">#${position}</strong> on the waitlist.`
+    : `You're on the waitlist.`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,9 +108,65 @@ function buildEmailHtml(email) {
           <tr>
             <td style="padding: 28px 40px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td style="border-top: 1px solid #ede8e2;"></td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Referral / move up the line block -->
+          <tr>
+            <td style="padding: 0 40px 36px;">
+              <!-- Position callout -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border-radius:12px; margin-bottom:20px;">
                 <tr>
-                  <td style="border-top: 1px solid #ede8e2;"></td>
+                  <td style="padding: 18px 20px;">
+                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #3d3a4e; margin: 0 0 4px;">
+                      ${positionLine}
+                    </p>
+                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #7a7585; margin: 0;">
+                      Early access opens from the top of the list first. The more friends you bring along, the sooner you get in.
+                    </p>
+                  </td>
                 </tr>
+              </table>
+
+              <!-- Move up CTA -->
+              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #9ED29E; margin: 0 0 10px;">
+                Move up the waitlist
+              </p>
+              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0 0 16px;">
+                Share your personal link. Every person who joins through your link bumps you up one spot — no cap.
+              </p>
+
+              <!-- Referral link box -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border: 1px solid #ede8e2; border-radius:10px; margin-bottom:16px;">
+                <tr>
+                  <td style="padding: 14px 18px;">
+                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; color: #9b9490; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px;">Your invite link</p>
+                    <a href="${referralLink}" style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; text-decoration: none;">${referralLink}</a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Share button -->
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-radius: 8px; background-color: #131220;">
+                    <a href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20Entre%20waitlist%20%E2%80%94%20a%20new%20app%20that%20figures%20out%20where%20you%20and%20your%20friends%20should%20grab%20lunch%20in%20NYC.%20Join%20me%3A%20${encodeURIComponent(referralLink)}"
+                       style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; padding:10px 20px;">
+                      Share on X (Twitter)
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding: 0 40px 28px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td style="border-top: 1px solid #ede8e2;"></td></tr>
               </table>
             </td>
           </tr>
@@ -139,7 +200,7 @@ function buildEmailHtml(email) {
                   </td>
                   <td>
                     <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
-                      <strong style="font-weight:500; color:#131220;">Early access</strong> — you'll be among the first to try Entre when we open the doors. No waiting in line.
+                      <strong style="font-weight:500; color:#131220;">Early access</strong> — doors open from the top of the waitlist first. Get your friends in and climb.
                     </p>
                   </td>
                 </tr>
@@ -195,7 +256,7 @@ function buildEmailHtml(email) {
 
 // ─── Send via Resend ──────────────────────────────────────────
 
-async function sendConfirmation(email) {
+async function sendConfirmation(email, referralCode, position) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[entre-signup] RESEND_API_KEY not set — skipping confirmation email');
@@ -212,7 +273,7 @@ async function sendConfirmation(email) {
       from:     'Sam at Entre <howdy@mail.entre.nyc>',
       to:       email,
       subject:  "You're on the list — Entre",
-      html:     buildEmailHtml(email),
+      html:     buildEmailHtml(referralCode, position),
       reply_to: 'sam@entre.nyc',
     }),
   });
@@ -274,8 +335,21 @@ exports.handler = async (event) => {
     return json(500, { error: error.message });
   }
 
-  // Fire confirmation email — non-blocking on failure
-  await sendConfirmation(email.trim().toLowerCase());
+  // Compute approximate waitlist position — new signups start at the back
+  // (referrals will move them up over time). Position = total non-flagged rows.
+  let position = null;
+  try {
+    const { count: total } = await sb()
+      .from('waitlist')
+      .select('id', { count: 'exact', head: true })
+      .or('is_bot_flagged.is.null,is_bot_flagged.eq.false');
+    position = total;
+  } catch (e) {
+    console.warn('[entre-signup] position lookup failed:', e.message);
+  }
 
-  return json(200, { success: true });
+  // Fire confirmation email — non-blocking on failure
+  await sendConfirmation(email.trim().toLowerCase(), referral_code, position);
+
+  return json(200, { success: true, referral_code, position });
 };

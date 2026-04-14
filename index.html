@@ -417,6 +417,111 @@
       font-weight: 300;
     }
 
+    /* ─── Referral block (shown after signup) ───────────── */
+    .referral-block {
+      width: 100%;
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      text-align: left;
+    }
+
+    .referral-position {
+      background: rgba(158,210,158,0.08);
+      border: 1px solid rgba(158,210,158,0.2);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--cream-dim);
+      text-align: center;
+    }
+
+    .referral-position strong {
+      color: var(--sage);
+      font-weight: 500;
+    }
+
+    .referral-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .referral-link-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .referral-link-text {
+      flex: 1;
+      font-size: 0.8rem;
+      color: var(--cream);
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 0.3rem 0.75rem;
+      background: var(--sage);
+      color: #131220;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover { background: #b5ddb5; }
+    .copy-btn.copied { background: rgba(158,210,158,0.35); color: var(--sage); }
+
+    .share-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .share-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.5rem;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--cream-dim);
+    }
+
+    .share-btn:hover { border-color: var(--cream-faint); color: var(--cream); }
+
+    .referral-nudge {
+      font-size: 0.76rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
     /* ─── Divider visual ─────────────────────────────────── */
     .between-line {
       display: flex;
@@ -713,7 +818,36 @@
             </svg>
           </div>
           <p class="success-title">You're on the list.</p>
-          <p class="success-sub">We'll reach out before we launch. Sit tight.</p>
+          <p class="success-sub" id="successSub">We'll reach out before we launch. Sit tight.</p>
+
+          <!-- Referral block — populated by JS after signup -->
+          <div class="referral-block" id="referralBlock" style="display:none;">
+            <div class="referral-position" id="positionBadge">
+              You're <strong>#<span id="positionNum">—</span></strong> on the waitlist.
+              Early access opens from the top first.
+            </div>
+
+            <div>
+              <p class="referral-label">Move up — share your invite link</p>
+              <div class="referral-link-row">
+                <span class="referral-link-text" id="refLinkText">entre.nyc/?ref=…</span>
+                <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+              </div>
+            </div>
+
+            <div class="share-row">
+              <a class="share-btn" id="twitterShareBtn" href="#" target="_blank" rel="noopener">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                Share on X
+              </a>
+              <button class="share-btn" id="nativeShareBtn" type="button" style="display:none;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                Share
+              </button>
+            </div>
+
+            <p class="referral-nudge">Each friend who joins with your link moves you up one spot — no limit.</p>
+          </div>
         </div>
 
         <p class="form-note" id="formNote">No spam, ever. Unsubscribe anytime.</p>
@@ -865,11 +999,11 @@
       }
 
       if (res.status === 409) {
-        // Already on the list
+        // Already on the list — no referral data available
         form.style.display = 'none';
         formNote.style.display = 'none';
+        document.getElementById('successSub').textContent = 'You\'re already on the list — we\'ll be in touch.';
         successMsg.classList.add('visible');
-        document.querySelector('.success-sub').textContent = 'You\'re already on the list — we\'ll be in touch.';
         return;
       }
 
@@ -879,9 +1013,68 @@
         return;
       }
 
-      // Success
+      // Success — show referral block
       form.style.display = 'none';
       formNote.style.display = 'none';
+      document.getElementById('successSub').textContent = 'Check your email for your invite link. Sit tight.';
+
+      const referralCode = data.referral_code;
+      const position     = data.position;
+
+      if (referralCode) {
+        const referralLink = `https://entre.nyc/?ref=${referralCode}`;
+
+        // Populate position badge
+        if (position) {
+          document.getElementById('positionNum').textContent = position.toLocaleString();
+        } else {
+          document.getElementById('positionBadge').style.display = 'none';
+        }
+
+        // Populate link
+        document.getElementById('refLinkText').textContent = `entre.nyc/?ref=${referralCode}`;
+
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', () => {
+          navigator.clipboard.writeText(referralLink).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+          }).catch(() => {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = referralLink;
+            ta.style.position = 'absolute';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+          });
+        });
+
+        // Twitter share
+        const tweetText = `I just joined the Entre waitlist — a new app that figures out where you and your friends should grab lunch in NYC. Join me:`;
+        document.getElementById('twitterShareBtn').href =
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(referralLink)}`;
+
+        // Native share (mobile)
+        if (navigator.share) {
+          const nativeBtn = document.getElementById('nativeShareBtn');
+          nativeBtn.style.display = '';
+          nativeBtn.addEventListener('click', () => {
+            navigator.share({ title: 'Join me on Entre', text: tweetText, url: referralLink }).catch(() => {});
+          });
+        }
+
+        document.getElementById('referralBlock').style.display = '';
+      }
+
       successMsg.classList.add('visible');
     });
 
