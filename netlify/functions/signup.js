@@ -48,7 +48,7 @@ function json(status, body) {
 // ─── Email template ───────────────────────────────────────────
 
 function buildEmailHtml(referralCode, position) {
-  const referralLink = `https://entre.nyc/?ref=${referralCode}`;
+  const referralLink = `https://www.entre.nyc/?ref=${referralCode}`;
   const positionLine = position
     ? `You're currently <strong style="color:#131220;">#${position}</strong> on the waitlist.`
     : `You're on the waitlist.`;
@@ -142,7 +142,7 @@ function buildEmailHtml(referralCode, position) {
               <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
                 <tr>
                   <td style="border-radius:8px; background-color:#131220; border:1px solid #2d2b42;">
-                    <a href="https://entre.nyc/waitlist?token=${referralCode}"
+                    <a href="https://www.entre.nyc/waitlist?token=${referralCode}"
                        style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#FFF8F0; text-decoration:none; padding:12px 24px;">View your waitlist position</a>
                   </td>
                 </tr>
