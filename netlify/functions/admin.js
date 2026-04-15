@@ -374,6 +374,22 @@ async function handleExport() {
   };
 }
 
+async function handleDelete(event) {
+  let body;
+  try { body = JSON.parse(event.body || '{}'); }
+  catch { return json(400, { error: 'Invalid JSON' }); }
+
+  const ids = body.ids;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return json(400, { error: 'Provide { ids: string[] }' });
+  }
+
+  const { error } = await sb().from('waitlist').delete().in('id', ids);
+  if (error) throw error;
+
+  return json(200, { deleted: ids.length });
+}
+
 // ─── Main handler ─────────────────────────────────────────────
 
 exports.handler = async (event) => {
@@ -395,6 +411,7 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'GET'  && action === 'export')          return await handleExport();
     if (event.httpMethod === 'GET'  && action === 'referral-stats')  return await handleReferralStats();
     if (event.httpMethod === 'GET'  && action === 'waitlist-queue')  return await handleWaitlistQueue(event);
+    if (event.httpMethod === 'POST' && action === 'delete')          return await handleDelete(event);
     return json(400, { error: `Unknown action: ${action}` });
   } catch (err) {
     console.error('[entre-admin]', err);
