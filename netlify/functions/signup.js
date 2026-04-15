@@ -139,9 +139,9 @@ function buildEmailHtml(referralCode, position) {
               </p>
 
               <!-- Magic link CTA -->
-              <table cellpadding="0" cellspacing="0" border="0" width="300" style="margin-bottom:20px;">
+              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
                 <tr>
-                  <td width="300" style="width:300px; border-radius:8px; background-color:#131220; border:1px solid #2d2b42; padding:12px 24px; white-space:nowrap;">
+                  <td style="border-radius:8px; background-color:#131220; border:1px solid #2d2b42; padding:12px 24px; white-space:nowrap;">
                     <a href="https://entre.nyc/waitlist?token=${referralCode}"
                        style="font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; white-space:nowrap;">View your waitlist position&nbsp;✨</a>
                   </td>
