@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Waitlist Status — Entre</title>
+  <meta name="description" content="Check your Entre waitlist position and share your invite link." />
+  <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #131220;
+      --surface:     #1c1b2e;
+      --cream:       #FFF8F0;
+      --cream-dim:   rgba(255,248,240,0.55);
+      --cream-faint: rgba(255,248,240,0.18);
+      --sage:        #9ED29E;
+      --sage-dim:    rgba(158,210,158,0.12);
+      --sage-border: rgba(158,210,158,0.28);
+      --muted:       rgba(255,248,240,0.35);
+      --border:      rgba(255,248,240,0.08);
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .logo em { font-style: italic; color: var(--sage); }
+
+    .back-link {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--cream); }
+
+    /* ── Card ──────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.25rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.2;
+      color: var(--cream);
+    }
+
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: -0.5rem;
+    }
+
+    /* ── Lookup form ───────────────────────────────────────── */
+    #lookupForm { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .field-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.85rem 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus { border-color: var(--sage-border); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .lookup-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--sage);
+      color: #131220;
+      border: none;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .lookup-btn:hover { background: #b5ddb5; transform: translateY(-1px); }
+    .lookup-btn:active { transform: translateY(0); }
+    .lookup-btn:disabled { opacity: 0.6; pointer-events: none; }
+
+    .form-error {
+      font-size: 0.76rem;
+      color: #e8856e;
+      text-align: center;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+
+    /* ── Status panel ──────────────────────────────────────── */
+    #statusPanel { display: none; flex-direction: column; gap: 1.25rem; }
+    #statusPanel.visible { display: flex; }
+
+    .position-card {
+      background: var(--sage-dim);
+      border: 1px solid var(--sage-border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+
+    .position-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 400;
+      color: var(--sage);
+      line-height: 1;
+    }
+
+    .position-label {
+      font-size: 0.76rem;
+      color: var(--cream-dim);
+      margin-top: 0.4rem;
+      letter-spacing: 0.04em;
+    }
+
+    .position-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .link-text {
+      flex: 1;
+      font-size: 0.8rem;
+      color: var(--cream);
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 0.3rem 0.8rem;
+      background: var(--sage);
+      color: #131220;
+      border: none;
+      border-radius: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { background: #b5ddb5; }
+    .copy-btn.copied { background: rgba(158,210,158,0.25); color: var(--sage); }
+
+    .share-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .share-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.5rem;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--cream-dim);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .share-btn:hover { border-color: var(--cream-faint); color: var(--cream); }
+
+    .referral-count-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+
+    .referral-count-label {
+      font-size: 0.8rem;
+      color: var(--cream-dim);
+    }
+
+    .referral-count-num {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--sage);
+    }
+
+    .nudge {
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    .lookup-again-btn {
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.74rem;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 0;
+    }
+
+    .lookup-again-btn:hover { color: var(--cream-dim); }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card { animation: fade-up 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="logo" href="/">entr<em>e</em></a>
+    <a class="back-link" href="/">← Back to home</a>
+  </nav>
+
+  <div class="card">
+
+    <!-- Lookup form (default state) -->
+    <div id="lookupSection">
+      <p class="card-title">Your waitlist status.</p>
+      <p class="card-sub">Enter your email to see your position, referral count, and invite link.</p>
+
+      <form id="lookupForm">
+        <input
+          class="field-input"
+          id="emailInput"
+          type="email"
+          placeholder="your@email.com"
+          autocomplete="email"
+          required
+        />
+        <button class="lookup-btn" type="submit" id="lookupBtn">Look me up</button>
+        <p class="form-error" id="formError"></p>
+      </form>
+    </div>
+
+    <!-- Status panel (shown after lookup or magic link) -->
+    <div id="statusPanel">
+      <p class="card-title">You're on the list.</p>
+
+      <!-- Position -->
+      <div class="position-card">
+        <div class="position-num" id="positionNum">—</div>
+        <div class="position-label">Your current position</div>
+        <div class="position-sub">Each referral moves you up one spot</div>
+      </div>
+
+      <!-- Referral count -->
+      <div class="referral-count-row">
+        <span class="referral-count-label">Friends referred so far</span>
+        <span class="referral-count-num" id="referralCountNum">0</span>
+      </div>
+
+      <!-- Invite link -->
+      <div>
+        <p class="section-label">Your invite link</p>
+        <div class="link-row">
+          <span class="link-text" id="linkText">entre.nyc/?ref=…</span>
+          <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+        </div>
+      </div>
+
+      <!-- Share buttons -->
+      <div class="share-row">
+        <a class="share-btn" id="twitterBtn" href="#" target="_blank" rel="noopener">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+          Share on X
+        </a>
+        <button class="share-btn" id="nativeShareBtn" type="button" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+          Share
+        </button>
+      </div>
+
+      <p class="nudge">Early access opens from the top of the list first.<br>No limit on how many people you can refer.</p>
+
+      <button class="lookup-again-btn" id="lookupAgainBtn">Not you? Look up a different email</button>
+    </div>
+
+  </div>
+
+  <script>
+    const LOOKUP_API = '/.netlify/functions/lookup';
+
+    // ── Check for magic link token ──────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const token  = (params.get('token') || '').trim().toUpperCase();
+
+    if (token) {
+      // Hide the form immediately, show loading state in card title
+      document.getElementById('lookupSection').style.display = 'none';
+      doLookup(null, token);
+    }
+
+    // ── Form submit ─────────────────────────────────────────────
+    document.getElementById('lookupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value.trim().toLowerCase();
+      if (!email) return;
+      document.getElementById('lookupBtn').textContent = 'Looking up…';
+      document.getElementById('lookupBtn').disabled = true;
+      await doLookup(email, null);
+      document.getElementById('lookupBtn').textContent = 'Look me up';
+      document.getElementById('lookupBtn').disabled = false;
+    });
+
+    // ── Core lookup ─────────────────────────────────────────────
+    async function doLookup(email, tok) {
+      hideError();
+      try {
+        const qs  = tok ? `token=${encodeURIComponent(tok)}` : `email=${encodeURIComponent(email)}`;
+        const res = await fetch(`${LOOKUP_API}?${qs}`);
+        const d   = await res.json();
+
+        if (res.status === 404) {
+          showError("We couldn't find that email. Did you sign up with a different address?");
+          return;
+        }
+        if (!res.ok) {
+          showError('Something went wrong. Please try again.');
+          return;
+        }
+
+        showStatus(d);
+      } catch (err) {
+        showError('Connection error. Please try again.');
+        console.error('[entre-waitlist]', err);
+      }
+    }
+
+    // ── Render status ───────────────────────────────────────────
+    function showStatus(d) {
+      const referralLink = `https://entre.nyc/?ref=${d.referral_code}`;
+
+      document.getElementById('positionNum').textContent       = '#' + d.position.toLocaleString();
+      document.getElementById('referralCountNum').textContent  = d.referral_count;
+      document.getElementById('linkText').textContent          = `entre.nyc/?ref=${d.referral_code}`;
+
+      // Copy button
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(referralLink).then(() => {
+          const btn = document.getElementById('copyBtn');
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        }).catch(() => {
+          const ta = document.createElement('textarea');
+          ta.value = referralLink;
+          ta.style.cssText = 'position:absolute;opacity:0;';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const btn = document.getElementById('copyBtn');
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+      });
+
+      // Twitter / X share
+      const tweetText = `I just joined the Entre waitlist — a new app that figures out where you and your friends should grab lunch in NYC. Join me:`;
+      document.getElementById('twitterBtn').href =
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(referralLink)}`;
+
+      // Native share (mobile)
+      if (navigator.share) {
+        const nb = document.getElementById('nativeShareBtn');
+        nb.style.display = '';
+        nb.addEventListener('click', () => {
+          navigator.share({
+            title: 'Join me on Entre',
+            text: tweetText,
+            url: referralLink,
+          }).catch(() => {});
+        });
+      }
+
+      // Show panel
+      document.getElementById('lookupSection').style.display = 'none';
+      document.getElementById('statusPanel').classList.add('visible');
+    }
+
+    // ── "Not you?" reset ────────────────────────────────────────
+    document.getElementById('lookupAgainBtn').addEventListener('click', () => {
+      document.getElementById('statusPanel').classList.remove('visible');
+      document.getElementById('lookupSection').style.display = '';
+      document.getElementById('emailInput').value = '';
+      // Remove old copy listener by replacing the button
+      const old = document.getElementById('copyBtn');
+      old.replaceWith(old.cloneNode(true));
+    });
+
+    function showError(msg) {
+      const el = document.getElementById('formError');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideError() {
+      document.getElementById('formError').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>
