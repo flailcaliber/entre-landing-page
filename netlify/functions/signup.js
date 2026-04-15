@@ -135,8 +135,20 @@ function buildEmailHtml(referralCode, position) {
                 Move up the waitlist
               </p>
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0 0 16px;">
-                Share your personal link. Every person who joins through your link bumps you up one spot — no cap.
+                Share your personal link. Every person who joins through your link bumps you up one spot — No limit!
               </p>
+
+              <!-- Magic link CTA -->
+              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+                <tr>
+                  <td style="border-radius: 8px; background-color: #131220; border: 1px solid #2d2b42;">
+                    <a href="https://entre.nyc/waitlist?token=${referralCode}"
+                       style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; padding:12px 24px;">
+                      ✨ View your waitlist position
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
               <!-- Referral link box -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border: 1px solid #ede8e2; border-radius:10px; margin-bottom:16px;">
@@ -219,19 +231,6 @@ function buildEmailHtml(referralCode, position) {
                   </td>
                 </tr>
               </table>
-            </td>
-          </tr>
-
-          <!-- Magic link CTA -->
-          <tr>
-            <td style="padding: 0 40px 28px; text-align: center;">
-              <a href="https://entre.nyc/waitlist?token=${referralCode}"
-                 style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; background-color:#131220; border:1px solid #2d2b42; border-radius:8px; padding:12px 24px;">
-                View your waitlist position →
-              </a>
-              <p style="font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:11px; color:#b5b0a8; margin:8px 0 0;">
-                Bookmark this link — it always shows your current spot.
-              </p>
             </td>
           </tr>
 
