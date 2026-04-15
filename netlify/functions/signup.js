@@ -143,7 +143,7 @@ function buildEmailHtml(referralCode, position) {
                 <tr>
                   <td width="300" style="width:300px; border-radius:8px; background-color:#131220; border:1px solid #2d2b42; padding:12px 24px; white-space:nowrap;">
                     <a href="https://entre.nyc/waitlist?token=${referralCode}"
-                       style="font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; white-space:nowrap;">View your waitlist position ✨</a>
+                       style="font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; white-space:nowrap;">View your waitlist position&nbsp;✨</a>
                   </td>
                 </tr>
               </table>
