@@ -634,7 +634,7 @@
 
     /* ─── Mobile ─────────────────────────────────────────── */
     @media (max-width: 600px) {
-      nav { padding: 1.5rem 1.25rem; padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+      nav { padding: 1.25rem 1.25rem; padding-top: max(1.25rem, env(safe-area-inset-top)); }
 
       .blob { filter: blur(48px); }
 
