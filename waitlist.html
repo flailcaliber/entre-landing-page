@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#131220" />
   <title>Your Waitlist Status — Entre</title>
   <meta name="description" content="Check your Entre waitlist position and share your invite link." />
@@ -41,6 +41,8 @@
       align-items: center;
       justify-content: center;
       padding: 2rem 1.25rem;
+      padding-top: calc(2rem + env(safe-area-inset-top));
+      padding-bottom: calc(2rem + env(safe-area-inset-bottom));
     }
 
     /* ── Nav ───────────────────────────────────────────────── */
@@ -51,6 +53,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 1.25rem 2rem;
+      padding-top: calc(1.25rem + env(safe-area-inset-top));
       z-index: 10;
     }
 
