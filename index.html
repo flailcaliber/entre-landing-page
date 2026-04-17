@@ -96,6 +96,11 @@
       animation: drift-c 25s ease-in-out infinite;
     }
 
+    /* Mobile-only edge blobs — hidden on desktop.
+       Provide colored pixels at the viewport's top/bottom edges so iOS 26
+       Liquid Glass has something other than flat body-bg to tint with. */
+    .blob-top, .blob-bottom { display: none; }
+
     @keyframes drift-a {
       0%   { transform: translate(0, 0) scale(1); }
       33%  { transform: translate(40px, -30px) scale(1.05); }
@@ -632,6 +637,26 @@
 
       .blob { filter: blur(48px); }
 
+      .blob-top {
+        display: block;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(158,210,158,0.32) 0%, rgba(158,210,158,0.04) 70%);
+        top: -190px;
+        left: -60px;
+        animation: drift-a 18s ease-in-out infinite;
+      }
+
+      .blob-bottom {
+        display: block;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(124,58,237,0.28) 0%, rgba(124,58,237,0.04) 70%);
+        bottom: -190px;
+        right: -60px;
+        animation: drift-b 20s ease-in-out infinite;
+      }
+
       .email-input {
         padding: 0.9rem 1.2rem;
       }
@@ -730,6 +755,8 @@
     <div class="blob blob-a"></div>
     <div class="blob blob-b"></div>
     <div class="blob blob-c"></div>
+    <div class="blob blob-top"></div>
+    <div class="blob blob-bottom"></div>
   </div>
 
   <!-- Cursor glow -->
