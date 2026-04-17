@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="transparent" />
   <title>Entre — Meet in the middle.</title>
   <meta name="description" content="The easiest way to find where to eat with a friend. Entre finds restaurants halfway between you both. Coming to NYC." />
   <meta property="og:title" content="Entre — Meet in the middle." />
@@ -43,16 +42,6 @@
       font-size: 16px;
       scroll-behavior: smooth;
       background: #131220;
-      /* Extend a visible gradient into the status bar zone.
-         iOS uses the html background to paint the area behind/above the
-         safe viewport, so this gradient shows through the status bar glass
-         regardless of whether viewport-fit=cover is honoured. */
-      background-image: linear-gradient(
-        to bottom,
-        rgba(158, 210, 158, 0.55) 0px,
-        rgba(158, 210, 158, 0.0) 90px
-      );
-      background-attachment: fixed;
     }
 
     body {
@@ -107,7 +96,9 @@
       animation: drift-c 25s ease-in-out infinite;
     }
 
-    /* Mobile-only edge blobs — hidden on desktop */
+    /* Mobile-only edge blobs — hidden on desktop.
+       Provide colored pixels at the viewport's top/bottom edges so iOS 26
+       Liquid Glass has something other than flat body-bg to tint with. */
     .blob-top, .blob-bottom { display: none; }
 
     @keyframes drift-a {
