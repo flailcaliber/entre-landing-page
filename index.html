@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="transparent" />
   <title>Entre — Meet in the middle.</title>
   <meta name="description" content="The easiest way to find where to eat with a friend. Entre finds restaurants halfway between you both. Coming to NYC." />
   <meta property="og:title" content="Entre — Meet in the middle." />
@@ -43,16 +42,6 @@
       font-size: 16px;
       scroll-behavior: smooth;
       background: #131220;
-      /* Extend a visible gradient into the status bar zone.
-         iOS uses the html background to paint the area behind/above the
-         safe viewport, so this gradient shows through the status bar glass
-         regardless of whether viewport-fit=cover is honoured. */
-      background-image: linear-gradient(
-        to bottom,
-        rgba(158, 210, 158, 0.55) 0px,
-        rgba(158, 210, 158, 0.0) 90px
-      );
-      background-attachment: fixed;
     }
 
     body {
@@ -106,9 +95,6 @@
       left: 38%;
       animation: drift-c 25s ease-in-out infinite;
     }
-
-    /* Mobile-only edge blobs — hidden on desktop */
-    .blob-top, .blob-bottom { display: none; }
 
     @keyframes drift-a {
       0%   { transform: translate(0, 0) scale(1); }
@@ -646,26 +632,6 @@
 
       .blob { filter: blur(48px); }
 
-      .blob-top {
-        display: block;
-        width: 380px;
-        height: 380px;
-        background: radial-gradient(circle, rgba(158,210,158,0.32) 0%, rgba(158,210,158,0.04) 70%);
-        top: -190px;
-        left: -60px;
-        animation: drift-a 18s ease-in-out infinite;
-      }
-
-      .blob-bottom {
-        display: block;
-        width: 380px;
-        height: 380px;
-        background: radial-gradient(circle, rgba(124,58,237,0.28) 0%, rgba(124,58,237,0.04) 70%);
-        bottom: -190px;
-        right: -60px;
-        animation: drift-b 20s ease-in-out infinite;
-      }
-
       .email-input {
         padding: 0.9rem 1.2rem;
       }
@@ -764,8 +730,6 @@
     <div class="blob blob-a"></div>
     <div class="blob blob-b"></div>
     <div class="blob blob-c"></div>
-    <div class="blob blob-top"></div>
-    <div class="blob blob-bottom"></div>
   </div>
 
   <!-- Cursor glow -->
