@@ -1067,10 +1067,6 @@
       </button>
 
       <p class="nav-section-label">Marketing</p>
-      <button class="nav-item" data-tab="email" style="position:relative;">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="m1 4 7 5 7-5"/></svg>
-        Email Marketing
-      </button>
       <button class="nav-item" data-tab="referrals" style="position:relative;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7.2 10 5M6 8.8l4 2.4"/></svg>
         Referral Program
@@ -1190,50 +1186,10 @@
       </div>
     </div>
 
-    <!-- ── Email Marketing pane ───────────────────────────── -->
-    <div class="content-pane" id="tabEmail">
-      <div class="pane-header">
-        <h2 class="pane-title">Email Marketing</h2>
-        <div class="pane-actions">
-          <button class="btn-sm primary" id="newTemplateBtn">+ New Template</button>
-        </div>
-      </div>
-      <div class="pane-body">
-        <p class="section-title">Templates</p>
-        <div class="template-grid" id="templateGrid">
-          <div class="empty-state" style="grid-column:1/-1;">Loading templates…</div>
-        </div>
-
-        <p class="section-title">Send History</p>
-        <div class="send-history-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Template</th>
-                <th>Subject</th>
-                <th>Segment</th>
-                <th>Recipients</th>
-                <th>Sent</th>
-                <th>Failed</th>
-                <th>Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody id="sendHistoryBody">
-              <tr class="loading-row"><td colspan="8">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
     <!-- ── Referral Program pane ──────────────────────────── -->
     <div class="content-pane" id="tabReferrals">
       <div class="pane-header">
         <h2 class="pane-title">Referral Program</h2>
-        <div class="pane-actions">
-          <button class="btn-sm" id="sendReminderBtn">Send Referral Reminder</button>
-        </div>
       </div>
       <div class="pane-body">
         <p class="section-title">Stats</p>
@@ -1287,86 +1243,11 @@
 
   </div><!-- /content-area -->
 
-  <!-- ── Template editor modal ─────────────────────────────── -->
-  <div class="modal-overlay" id="templateModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="templateModalTitle">New Template</h3>
-        <button class="modal-close" id="templateModalClose">×</button>
-      </div>
-      <div class="modal-body">
-        <div>
-          <p class="field-label">Template name</p>
-          <input class="field-input" id="tmplName" type="text" placeholder="e.g. Launch Announcement" />
-        </div>
-        <div>
-          <p class="field-label">Email subject</p>
-          <input class="field-input" id="tmplSubject" type="text" placeholder="e.g. Entre is here — here's what's next" />
-        </div>
-        <div>
-          <p class="field-label">HTML content</p>
-          <textarea class="field-textarea" id="tmplHtml" placeholder="Paste your HTML email here…"></textarea>
-        </div>
-        <p style="font-size:0.72rem;color:var(--muted)">Tip: design your email in Resend, export the HTML, and paste it here. Or write it from scratch — Resend will send it as-is.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-sm" id="templateModalCancel">Cancel</button>
-        <button class="btn-sm primary" id="templateModalSave">Save Template</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Send campaign modal ────────────────────────────────── -->
-  <div class="modal-overlay" id="sendModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Send Campaign — <span id="sendModalTemplateName" style="color:var(--muted);font-weight:300"></span></h3>
-        <button class="modal-close" id="sendModalClose">×</button>
-      </div>
-      <div class="modal-body">
-        <div>
-          <p class="field-label">Subject <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0">(leave blank to use template subject)</span></p>
-          <input class="field-input" id="sendSubjectOverride" type="text" placeholder="Override subject line (optional)" />
-        </div>
-        <div>
-          <p class="field-label">Send to</p>
-          <div class="segment-options">
-            <label class="segment-option">
-              <input type="radio" name="sendSegment" value="all" checked />
-              <div><div class="segment-label">Everyone</div><div class="segment-count" id="segCountAll">—</div></div>
-            </label>
-            <label class="segment-option">
-              <input type="radio" name="sendSegment" value="organic" />
-              <div><div class="segment-label">Organic only</div><div class="segment-count" id="segCountOrganic">—</div></div>
-            </label>
-            <label class="segment-option">
-              <input type="radio" name="sendSegment" value="referral" />
-              <div><div class="segment-label">Referred users</div><div class="segment-count" id="segCountReferral">—</div></div>
-            </label>
-            <label class="segment-option">
-              <input type="radio" name="sendSegment" value="no_referrals" />
-              <div><div class="segment-label">No referrals yet</div><div class="segment-count" id="segCountNoRef">—</div></div>
-            </label>
-          </div>
-        </div>
-        <div class="send-preview-box" id="sendPreviewBox">
-          Select a segment to see recipient count.
-        </div>
-        <div class="send-progress" id="sendProgress">Sending… please wait.</div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-sm" id="sendModalCancel">Cancel</button>
-        <button class="btn-sm primary" id="sendModalConfirm">Send Campaign</button>
-      </div>
-    </div>
-  </div>
-
 </div><!-- /dashboard -->
 
 <script>
 // ── Config ────────────────────────────────────────────────────
-const API       = '/.netlify/functions/admin';
-const EMAIL_API = '/.netlify/functions/email';
+const API = '/.netlify/functions/admin';
 
 // ── State ──────────────────────────────────────────────────────
 let _password    = '';
@@ -1375,10 +1256,6 @@ let _page        = 1;
 let _totalPages  = 1;
 let _search      = '';
 let _searchTimer = null;
-
-// Email tab state
-let _editingTemplateId = null;
-let _sendTemplateId    = null;
 
 // Referral queue state
 let _queuePage        = 1;
@@ -1450,12 +1327,6 @@ function api(path, opts = {}) {
   });
 }
 
-function emailApi(path, opts = {}) {
-  return fetch(`${EMAIL_API}${path}`, {
-    ...opts,
-    headers: { 'Authorization': `Bearer ${_password}`, 'Content-Type': 'application/json', ...(opts.headers || {}) }
-  });
-}
 
 // ── Navigation ─────────────────────────────────────────────────
 const _tabLoaded = {};
@@ -1472,10 +1343,9 @@ function switchTab(tabName) {
   // Lazy-load tab data the first time it's opened
   if (!_tabLoaded[tabName]) {
     _tabLoaded[tabName] = true;
-    if (tabName === 'overview')     { loadAnalytics(); }
-    if (tabName === 'subscribers')  { loadSubscribers(); }
-    if (tabName === 'email')        { loadEmailTemplates(); loadSendHistory(); }
-    if (tabName === 'referrals')    { loadReferralStats(); loadWaitlistQueue(); }
+    if (tabName === 'overview')    { loadAnalytics(); }
+    if (tabName === 'subscribers') { loadSubscribers(); }
+    if (tabName === 'referrals')   { loadReferralStats(); loadWaitlistQueue(); }
   }
 }
 
@@ -1855,230 +1725,6 @@ function showImportResult(type, msg) {
   importResult.textContent = msg;
   importResult.style.display = 'block';
 }
-
-// ── Email Marketing ────────────────────────────────────────────
-
-async function loadEmailTemplates() {
-  const grid = document.getElementById('templateGrid');
-  grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Loading…</div>';
-  try {
-    const res  = await emailApi('?action=templates');
-    const data = await res.json();
-    renderTemplateGrid(data.templates || []);
-  } catch (e) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:var(--red)">Error loading templates: ${escHtml(e.message)}</div>`;
-  }
-}
-
-function renderTemplateGrid(templates) {
-  const grid = document.getElementById('templateGrid');
-  if (templates.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No templates yet. Create one to get started.</div>`;
-    return;
-  }
-  grid.innerHTML = templates.map(t => `
-    <div class="template-card">
-      <div class="template-card-name">${escHtml(t.name)}</div>
-      <div class="template-card-subject">Subject: ${escHtml(t.subject)}</div>
-      <div class="template-card-footer">
-        <span class="template-card-date">${formatDate(t.updated_at)}</span>
-        <div class="template-card-actions">
-          <button class="btn-sm" onclick="openTemplateEdit('${escHtml(t.id)}','${escHtml(t.name).replace(/'/g,"\\'")}','${escHtml(t.subject).replace(/'/g,"\\'")}')">Edit</button>
-          <button class="btn-sm primary" onclick="openSendModal('${escHtml(t.id)}','${escHtml(t.name).replace(/'/g,"\\'")}')">Send</button>
-          <button class="btn-sm danger" onclick="deleteTemplate('${escHtml(t.id)}')">Del</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-async function loadSendHistory() {
-  const tbody = document.getElementById('sendHistoryBody');
-  tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading…</td></tr>';
-  try {
-    const res  = await emailApi('?action=send-history');
-    const data = await res.json();
-    const sends = data.sends || [];
-    if (sends.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">No campaigns sent yet.</div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = sends.map(s => `
-      <tr>
-        <td>${escHtml(s.template_name)}</td>
-        <td title="${escHtml(s.subject)}">${escHtml(truncate(s.subject, 40))}</td>
-        <td><span class="badge badge-${s.segment === 'all' ? 'organic' : s.segment === 'referral' ? 'referral' : 'imported'}">${escHtml(s.segment)}</span></td>
-        <td>${fmt(s.recipient_count)}</td>
-        <td style="color:var(--sage)">${fmt(s.sent_count)}</td>
-        <td style="color:${s.failed_count > 0 ? 'var(--red)' : 'var(--muted)'}">${s.failed_count || 0}</td>
-        <td class="send-status-${escHtml(s.status)}">${escHtml(s.status)}</td>
-        <td style="white-space:nowrap">${formatDate(s.sent_at)}</td>
-      </tr>`).join('');
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="8" style="color:var(--red);text-align:center;padding:2rem;">Error: ${escHtml(e.message)}</td></tr>`;
-  }
-}
-
-// Template modal
-function openTemplateModal() {
-  _editingTemplateId = null;
-  document.getElementById('templateModalTitle').textContent = 'New Template';
-  document.getElementById('tmplName').value    = '';
-  document.getElementById('tmplSubject').value = '';
-  document.getElementById('tmplHtml').value    = '';
-  document.getElementById('templateModal').classList.add('open');
-}
-
-function openTemplateEdit(id, name, subject) {
-  _editingTemplateId = id;
-  document.getElementById('templateModalTitle').textContent = 'Edit Template';
-  document.getElementById('tmplName').value    = name;
-  document.getElementById('tmplSubject').value = subject;
-  // Fetch full template to get html_content
-  emailApi(`?action=templates`).then(r => r.json()).then(data => {
-    const t = (data.templates || []).find(x => x.id === id);
-    // We only have name/subject/date in the list — need to re-fetch individually via save (workaround: store in dataset)
-    // Since we don't have a single-template endpoint, leave textarea empty for user to paste
-  });
-  document.getElementById('tmplHtml').value = '';
-  document.getElementById('templateModal').classList.add('open');
-}
-
-function closeTemplateModal() {
-  document.getElementById('templateModal').classList.remove('open');
-}
-
-document.getElementById('newTemplateBtn').addEventListener('click', openTemplateModal);
-document.getElementById('templateModalClose').addEventListener('click', closeTemplateModal);
-document.getElementById('templateModalCancel').addEventListener('click', closeTemplateModal);
-
-document.getElementById('templateModalSave').addEventListener('click', async () => {
-  const name        = document.getElementById('tmplName').value.trim();
-  const subject     = document.getElementById('tmplSubject').value.trim();
-  const html_content = document.getElementById('tmplHtml').value.trim();
-  if (!name || !subject || !html_content) {
-    alert('Name, subject, and HTML content are all required.');
-    return;
-  }
-  const btn = document.getElementById('templateModalSave');
-  btn.textContent = 'Saving…';
-  try {
-    const body = { name, subject, html_content };
-    if (_editingTemplateId) body.id = _editingTemplateId;
-    const res  = await emailApi('?action=template-save', { method: 'POST', body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Save failed');
-    closeTemplateModal();
-    loadEmailTemplates();
-  } catch (e) {
-    alert(`Error: ${e.message}`);
-  } finally {
-    btn.textContent = 'Save Template';
-  }
-});
-
-async function deleteTemplate(id) {
-  if (!confirm('Delete this template? This cannot be undone.')) return;
-  try {
-    const res = await emailApi('?action=template-delete', { method: 'POST', body: JSON.stringify({ id }) });
-    if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
-    loadEmailTemplates();
-  } catch (e) {
-    alert(`Error: ${e.message}`);
-  }
-}
-
-// Send modal
-async function openSendModal(templateId, templateName) {
-  _sendTemplateId = templateId;
-  document.getElementById('sendModalTemplateName').textContent = templateName;
-  document.getElementById('sendSubjectOverride').value = '';
-  document.getElementById('sendProgress').style.display = 'none';
-  document.getElementById('sendModalConfirm').disabled = false;
-  document.getElementById('sendModalConfirm').textContent = 'Send Campaign';
-  document.getElementById('sendModal').classList.add('open');
-  // Load segment counts
-  await loadSegmentCounts();
-}
-
-async function loadSegmentCounts() {
-  const segments = ['all', 'organic', 'referral', 'no_referrals'];
-  const ids = { all: 'segCountAll', organic: 'segCountOrganic', referral: 'segCountReferral', no_referrals: 'segCountNoRef' };
-  // Fetch counts in parallel
-  await Promise.all(segments.map(async seg => {
-    try {
-      const res  = await emailApi(`?action=segment-count&segment=${seg}`);
-      const data = await res.json();
-      document.getElementById(ids[seg]).textContent = `${fmt(data.count)} subscribers`;
-    } catch {
-      document.getElementById(ids[seg]).textContent = 'error';
-    }
-  }));
-  updateSendPreview();
-}
-
-function updateSendPreview() {
-  const seg = document.querySelector('input[name="sendSegment"]:checked')?.value || 'all';
-  const countEl = document.getElementById({ all:'segCountAll', organic:'segCountOrganic', referral:'segCountReferral', no_referrals:'segCountNoRef' }[seg]);
-  const count = countEl?.textContent || '—';
-  document.getElementById('sendPreviewBox').innerHTML =
-    `Will send to <strong>${count}</strong> in the <strong>${escHtml(seg)}</strong> segment via Resend.`;
-}
-
-document.querySelectorAll('input[name="sendSegment"]').forEach(r => r.addEventListener('change', updateSendPreview));
-
-function closeSendModal() {
-  document.getElementById('sendModal').classList.remove('open');
-}
-
-document.getElementById('sendModalClose').addEventListener('click', closeSendModal);
-document.getElementById('sendModalCancel').addEventListener('click', closeSendModal);
-
-document.getElementById('sendModalConfirm').addEventListener('click', async () => {
-  const segment         = document.querySelector('input[name="sendSegment"]:checked')?.value || 'all';
-  const subject_override = document.getElementById('sendSubjectOverride').value.trim() || undefined;
-  const confirmMsg = `Send this campaign to the "${segment}" segment? This will send live emails.`;
-  if (!confirm(confirmMsg)) return;
-
-  const btn = document.getElementById('sendModalConfirm');
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  document.getElementById('sendProgress').style.display = 'block';
-
-  try {
-    const body = { template_id: _sendTemplateId, segment };
-    if (subject_override) body.subject_override = subject_override;
-    const res  = await emailApi('?action=send-campaign', { method: 'POST', body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Send failed');
-    document.getElementById('sendProgress').style.display = 'none';
-    alert(`✓ Campaign sent!\n\nSent: ${data.sent}\nFailed: ${data.failed}\nTotal: ${data.total}`);
-    closeSendModal();
-    loadSendHistory();
-  } catch (e) {
-    document.getElementById('sendProgress').style.display = 'none';
-    btn.disabled = false;
-    btn.textContent = 'Send Campaign';
-    alert(`Error: ${e.message}`);
-  }
-});
-
-// Referral reminder quick action
-document.getElementById('sendReminderBtn').addEventListener('click', async () => {
-  // Look for a template with "reminder" in the name, else prompt to create one
-  const res  = await emailApi('?action=templates');
-  const data = await res.json();
-  const templates = data.templates || [];
-  if (templates.length === 0) {
-    alert('No templates yet. Create one in the Email Marketing tab first.');
-    return;
-  }
-  // Pick best candidate
-  const reminder = templates.find(t => t.name.toLowerCase().includes('reminder')) || templates[0];
-  document.querySelector('input[name="sendSegment"][value="no_referrals"]').checked = true;
-  await openSendModal(reminder.id, reminder.name);
-  document.querySelector('input[name="sendSegment"][value="no_referrals"]').checked = true;
-  updateSendPreview();
-});
 
 // ── Referral Program ───────────────────────────────────────────
 
