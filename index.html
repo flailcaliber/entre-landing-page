@@ -50,7 +50,7 @@
     }
 
     body {
-      background: var(--bg);
+      background: transparent;
       color: var(--cream);
       font-family: 'DM Sans', sans-serif;
       font-weight: 300;
@@ -634,6 +634,8 @@
     /* ─── Mobile ─────────────────────────────────────────── */
     @media (max-width: 600px) {
       nav { padding: 1.5rem 1.25rem; padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+
+      .blob { filter: blur(48px); }
 
       .email-input {
         padding: 0.9rem 1.2rem;
