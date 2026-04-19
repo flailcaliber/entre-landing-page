@@ -267,14 +267,14 @@ function buildEmailHtml(referralCode, position) {
 
 // ─── Send via Resend ──────────────────────────────────────────
 
-async function sendConfirmation(email, referralCode, position) {
+// Returns { ok: bool, status: number, body: string } — never throws.
+async function sendEmail(to, subject, html) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn('[entre-signup] RESEND_API_KEY not set — skipping confirmation email');
-    return;
+    console.warn('[entre-signup] RESEND_API_KEY not set — skipping email');
+    return { ok: false, status: 0, body: 'no api key' };
   }
 
-  // Wrapped in try/catch — email failure must never crash the signup handler
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -284,24 +284,37 @@ async function sendConfirmation(email, referralCode, position) {
       },
       body: JSON.stringify({
         from:     'Sam at Entre <howdy@mail.entre.nyc>',
-        to:       email,
-        subject:  "You're on the list — Entre",
-        html:     buildEmailHtml(referralCode, position),
+        to,
+        subject,
+        html,
         reply_to: 'sam@entre.nyc',
+        // NOTE: List-Unsubscribe-Post intentionally omitted.
+        // Including it hands unsubscribe management to Resend, which adds
+        // addresses to their suppression list — blocking all future sends.
+        // We manage unsubscribes ourselves at entre.nyc/unsubscribe.html.
         headers: {
-          'List-Unsubscribe':      `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}>`,
-          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          'List-Unsubscribe': `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(to)}>`,
         },
       }),
     });
 
+    const body = await res.text();
     if (!res.ok) {
-      const err = await res.text();
-      console.error('[entre-signup] Resend error:', err);
+      console.error('[entre-signup] Resend error', res.status, body);
     }
+    return { ok: res.ok, status: res.status, body };
   } catch (e) {
-    console.error('[entre-signup] sendConfirmation threw:', e.message);
+    console.error('[entre-signup] sendEmail threw:', e.message);
+    return { ok: false, status: 0, body: e.message };
   }
+}
+
+function sendConfirmation(email, referralCode, position) {
+  return sendEmail(email, "You're on the list — Entre", buildEmailHtml(referralCode, position));
+}
+
+function sendWelcomeBack(email, referralCode, position) {
+  return sendEmail(email, "Welcome back — Entre", buildEmailHtml(referralCode, position));
 }
 
 // ─── Main handler ─────────────────────────────────────────────
@@ -392,8 +405,9 @@ exports.handler = async (event) => {
           console.warn('[entre-signup] position lookup failed:', e.message);
         }
 
-        await sendConfirmation(email.trim().toLowerCase(), existingCode, position);
-        return json(200, { success: true, referral_code: existingCode, position });
+        const emailResult = await sendWelcomeBack(email.trim().toLowerCase(), existingCode, position);
+        console.log('[entre-signup] re-subscribe email result:', emailResult.status, emailResult.ok);
+        return json(200, { success: true, referral_code: existingCode, position, _email_ok: emailResult.ok });
       }
 
       // Genuine duplicate — still subscribed
