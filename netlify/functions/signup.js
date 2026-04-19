@@ -249,6 +249,7 @@ function buildEmailHtml(referralCode, position) {
             <td style="background-color:#faf7f4; border-top: 1px solid #ede8e2; padding: 12px 40px;">
               <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; color: #b5b0a8; line-height: 1.5; margin: 0;">
                 You're receiving this because you signed up at <a href="https://www.entre.nyc" style="color:#9ED29E; text-decoration:none;">entre.nyc</a>. Questions? Reply to this email or reach us at <a href="mailto:hello@entre.nyc" style="color:#9ED29E; text-decoration:none;">hello@entre.nyc</a>.
+                &nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}" style="color:#b5b0a8; text-decoration:underline;">Unsubscribe</a>
               </p>
             </td>
           </tr>
@@ -285,6 +286,10 @@ async function sendConfirmation(email, referralCode, position) {
       subject:  "You're on the list — Entre",
       html:     buildEmailHtml(referralCode, position),
       reply_to: 'sam@entre.nyc',
+      headers: {
+        'List-Unsubscribe':      `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      },
     }),
   });
 
@@ -339,6 +344,53 @@ exports.handler = async (event) => {
 
   if (error) {
     if (error.code === '23505') {
+      // Duplicate email — check if they previously unsubscribed and want back in
+      const { data: existing } = await sb()
+        .from('waitlist')
+        .select('id, referral_code, unsubscribed_at')
+        .eq('email', email.trim().toLowerCase())
+        .limit(1);
+
+      if (existing && existing[0] && existing[0].unsubscribed_at) {
+        // Re-subscribe: clear the unsubscribe fields, reuse their existing referral_code
+        const existingCode = existing[0].referral_code;
+        const { error: resubErr } = await sb()
+          .from('waitlist')
+          .update({
+            unsubscribed_at: null,
+            unsub_reason:    null,
+            phone:           phone || null,
+            pmf_response:    pmf_response || null,
+            utm_source:      utm_source   || null,
+            utm_medium:      utm_medium   || null,
+            utm_campaign:    utm_campaign || null,
+            utm_content:     utm_content  || null,
+            utm_term:        utm_term     || null,
+          })
+          .eq('id', existing[0].id);
+
+        if (resubErr) {
+          console.error('[entre-signup] re-subscribe error:', resubErr);
+          return json(500, { error: resubErr.message });
+        }
+
+        let position = null;
+        try {
+          const { count: total } = await sb()
+            .from('waitlist')
+            .select('id', { count: 'exact', head: true })
+            .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
+            .is('unsubscribed_at', null);
+          position = total;
+        } catch (e) {
+          console.warn('[entre-signup] position lookup failed:', e.message);
+        }
+
+        await sendConfirmation(email.trim().toLowerCase(), existingCode, position);
+        return json(200, { success: true, referral_code: existingCode, position });
+      }
+
+      // Genuine duplicate — still subscribed
       return json(409, { error: 'duplicate' });
     }
     console.error('[entre-signup]', error);
