@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unsubscribe — Entre</title>
+  <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #131220;
+      --surface:     #1c1b2e;
+      --cream:       #FFF8F0;
+      --cream-dim:   rgba(255,248,240,0.55);
+      --cream-faint: rgba(255,248,240,0.18);
+      --sage:        #9ED29E;
+      --sage-dim:    rgba(158,210,158,0.12);
+      --sage-border: rgba(158,210,158,0.25);
+      --muted:       rgba(255,248,240,0.38);
+      --border:      rgba(255,248,240,0.09);
+      --red:         #e8856e;
+      --red-dim:     rgba(232,133,110,0.12);
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Ambient blobs ─────────────────────────────────────── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-sage   { width: 480px; height: 480px; background: rgba(158,210,158,0.07); top: -100px; left: -160px; }
+    .blob-purple { width: 520px; height: 520px; background: rgba(124,58,237,0.08);  bottom: -120px; right: -180px; }
+
+    /* ── Nav ───────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 1.1rem 1.75rem;
+      display: flex;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: var(--cream);
+    }
+
+    .wordmark svg { width: 18px; height: 27px; flex-shrink: 0; }
+
+    .wordmark-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Card ──────────────────────────────────────────────── */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+    }
+
+    .card-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-sub {
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+
+    /* ── Form elements ─────────────────────────────────────── */
+    .field-label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .field-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.85rem 1.1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 1.25rem;
+    }
+
+    .field-input:focus {
+      border-color: var(--sage-border);
+      box-shadow: 0 0 0 3px rgba(158,210,158,0.07);
+    }
+
+    /* ── Reason options ────────────────────────────────────── */
+    .reason-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .reason-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      margin-bottom: 0.5rem;
+    }
+
+    .reason-option:hover {
+      border-color: rgba(255,248,240,0.18);
+      background: rgba(255,255,255,0.025);
+    }
+
+    .reason-option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      position: relative;
+    }
+
+    .reason-option input[type="radio"]::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--sage);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .reason-option input[type="radio"]:checked {
+      border-color: var(--sage-border);
+    }
+
+    .reason-option input[type="radio"]:checked::after {
+      opacity: 1;
+    }
+
+    .reason-option.selected {
+      border-color: var(--sage-border);
+      background: var(--sage-dim);
+    }
+
+    .reason-label {
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      line-height: 1.4;
+    }
+
+    /* ── "Other" textarea ──────────────────────────────────── */
+    #otherTextWrap {
+      display: none;
+      margin-top: -0.25rem;
+      margin-bottom: 1rem;
+    }
+
+    #otherTextWrap.visible { display: block; }
+
+    .field-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.85rem 1.1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--cream);
+      outline: none;
+      resize: vertical;
+      min-height: 88px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field-textarea:focus {
+      border-color: var(--sage-border);
+      box-shadow: 0 0 0 3px rgba(158,210,158,0.07);
+    }
+
+    .field-textarea::placeholder { color: var(--muted); }
+
+    /* ── Submit button ─────────────────────────────────────── */
+    .unsub-btn {
+      display: block;
+      width: 100%;
+      padding: 0.9rem 1.4rem;
+      border: none;
+      border-radius: 100px;
+      background: var(--red);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .unsub-btn:hover:not(:disabled) { background: #e9957e; }
+    .unsub-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Inline error ──────────────────────────────────────── */
+    .inline-error {
+      display: none;
+      font-size: 0.8rem;
+      color: var(--red);
+      background: var(--red-dim);
+      border: 1px solid rgba(232,133,110,0.2);
+      border-radius: 10px;
+      padding: 0.65rem 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .inline-error.visible { display: block; }
+
+    /* ── Success state ─────────────────────────────────────── */
+    #successCard { display: none; }
+
+    #successCard .card-title { color: var(--cream); }
+
+    .success-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--sage-dim);
+      border: 1px solid var(--sage-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      margin-top: 1.5rem;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover { color: var(--cream-dim); }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-sage"></div>
+  <div class="blob blob-purple"></div>
+
+  <nav>
+    <a href="/" class="wordmark" aria-label="Entre home">
+      <svg viewBox="0 0 46 70" fill="none" aria-hidden="true">
+        <path d="M 37.6 12 A 18 18 0 1 0 37.6 30" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="4" y1="21" x2="35" y2="21" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="22" y1="39" x2="22" y2="57" stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
+      </svg>
+      <span class="wordmark-text">entr<em style="font-style:italic;color:var(--sage)">e</em></span>
+    </a>
+  </nav>
+
+  <!-- ── Unsubscribe form ──────────────────────────────────── -->
+  <div class="card" id="formCard">
+    <p class="card-eyebrow">Manage preferences</p>
+    <h1 class="card-title">Unsubscribe</h1>
+    <p class="card-sub">We're sorry to see you go. Before we remove you, could you tell us why? It genuinely helps us build something people want.</p>
+
+    <div class="inline-error" id="inlineError"></div>
+
+    <form id="unsubForm" novalidate>
+
+      <label class="field-label" for="emailInput">Your email</label>
+      <input
+        class="field-input"
+        id="emailInput"
+        type="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+        required
+      />
+
+      <label class="field-label">Reason for leaving <span style="color:var(--red);margin-left:0.2em">*</span></label>
+
+      <div class="reason-group" id="reasonGroup">
+        <label class="reason-option">
+          <input type="radio" name="reason" value="Moving out of NYC" />
+          <span class="reason-label">Moving out of NYC</span>
+        </label>
+        <label class="reason-option">
+          <input type="radio" name="reason" value="Found an alternative" />
+          <span class="reason-label">Found an alternative</span>
+        </label>
+        <label class="reason-option">
+          <input type="radio" name="reason" value="Not interested in the app" />
+          <span class="reason-label">Not interested in the app</span>
+        </label>
+        <label class="reason-option">
+          <input type="radio" name="reason" value="Too many emails" />
+          <span class="reason-label">Too many emails</span>
+        </label>
+        <label class="reason-option" id="otherOption">
+          <input type="radio" name="reason" value="Other" />
+          <span class="reason-label">Other (please explain below)</span>
+        </label>
+      </div>
+
+      <div id="otherTextWrap">
+        <textarea
+          class="field-textarea"
+          id="otherText"
+          placeholder="Tell us what's going on…"
+          maxlength="500"
+        ></textarea>
+      </div>
+
+      <button class="unsub-btn" type="submit" id="submitBtn">Unsubscribe me</button>
+
+    </form>
+  </div>
+
+  <!-- ── Success card ──────────────────────────────────────── -->
+  <div class="card" id="successCard">
+    <div class="success-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#9ED29E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 10 8 14 16 6"/>
+      </svg>
+    </div>
+    <p class="card-eyebrow">Done</p>
+    <h2 class="card-title">You've been removed.</h2>
+    <p class="card-sub" style="margin-bottom:0">We've taken you off the Entre waitlist. You won't hear from us again. If you ever change your mind, the door is always open at <a href="/" style="color:var(--sage);text-decoration:none;">entre.nyc</a>.</p>
+    <a href="/" class="back-link">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2L4 6l4 4"/></svg>
+      Back to Entre
+    </a>
+  </div>
+
+<script>
+  // ── Pre-fill email from query string ──────────────────────
+  const urlEmail = new URLSearchParams(location.search).get('email');
+  if (urlEmail) document.getElementById('emailInput').value = urlEmail;
+
+  // ── Radio styling ─────────────────────────────────────────
+  document.querySelectorAll('.reason-option input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      // Update selected styling
+      document.querySelectorAll('.reason-option').forEach(opt => opt.classList.remove('selected'));
+      radio.closest('.reason-option').classList.add('selected');
+
+      // Show/hide "other" textarea
+      const otherWrap = document.getElementById('otherTextWrap');
+      if (radio.value === 'Other') {
+        otherWrap.classList.add('visible');
+        document.getElementById('otherText').focus();
+      } else {
+        otherWrap.classList.remove('visible');
+      }
+    });
+  });
+
+  // ── Form submit ───────────────────────────────────────────
+  document.getElementById('unsubForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email     = document.getElementById('emailInput').value.trim();
+    const radioSel  = document.querySelector('input[name="reason"]:checked');
+    const otherText = document.getElementById('otherText').value.trim();
+    const errorEl   = document.getElementById('inlineError');
+    const btn       = document.getElementById('submitBtn');
+
+    // Clear previous error
+    errorEl.classList.remove('visible');
+    errorEl.textContent = '';
+
+    // Validate
+    if (!email || !email.includes('@')) {
+      showError('Please enter a valid email address.');
+      return;
+    }
+
+    if (!radioSel) {
+      showError('Please select a reason before unsubscribing.');
+      return;
+    }
+
+    if (radioSel.value === 'Other' && !otherText) {
+      showError('Please explain your reason in the text box above.');
+      return;
+    }
+
+    // Build the reason string
+    const reason = radioSel.value === 'Other'
+      ? `Other: ${otherText}`
+      : radioSel.value;
+
+    btn.disabled    = true;
+    btn.textContent = 'Unsubscribing…';
+
+    try {
+      const res  = await fetch('/.netlify/functions/unsubscribe', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, reason }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        document.getElementById('formCard').style.display    = 'none';
+        document.getElementById('successCard').style.display = 'block';
+        return;
+      }
+
+      if (res.status === 404) {
+        showError("We couldn't find that email on our waitlist. Double-check the address and try again.");
+      } else if (data.error === 'missing_fields') {
+        showError('Please fill in all required fields.');
+      } else {
+        showError('Something went wrong. Please try again in a moment.');
+      }
+    } catch (err) {
+      showError('Network error — please check your connection and try again.');
+    }
+
+    btn.disabled    = false;
+    btn.textContent = 'Unsubscribe me';
+  });
+
+  function showError(msg) {
+    const el = document.getElementById('inlineError');
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+</script>
+
+</body>
+</html>

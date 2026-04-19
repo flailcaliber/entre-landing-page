@@ -10,6 +10,7 @@
  * POST /.netlify/functions/admin?action=import           — body: { emails: string[] }
  * GET  /.netlify/functions/admin?action=referral-stats   — full referral analytics
  * GET  /.netlify/functions/admin?action=waitlist-queue   — queue ranked by position
+ * GET  /.netlify/functions/admin?action=unsubscribers    — paginated list of unsubscribed users
  *
  * Required Netlify env vars:
  *   SUPABASE_URL             (same as EXPO_PUBLIC_SUPABASE_URL)
@@ -101,6 +102,7 @@ async function handleList(event) {
       'id, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at',
       { count: 'exact' }
     )
+    .is('unsubscribed_at', null)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -117,20 +119,22 @@ async function handleAnalytics() {
   const t7   = new Date(now - 7  * 86400000).toISOString();
   const t14  = new Date(now - 14 * 86400000).toISOString();
 
-  const [allRes, thisWeekRes, lastWeekRes, pvRes, topRefRes] = await Promise.all([
-    sb().from('waitlist').select('source, utm_source, city, referral_count, created_at'),
+  const [allRes, thisWeekRes, lastWeekRes, pvRes, topRefRes, unsubRes] = await Promise.all([
+    sb().from('waitlist').select('source, utm_source, city, referral_count, created_at').is('unsubscribed_at', null),
     // Exclude imports from weekly growth — they skew the metric
-    sb().from('waitlist').select('id', { count: 'exact', head: true }).neq('source', 'imported').gte('created_at', t7),
-    sb().from('waitlist').select('id', { count: 'exact', head: true }).neq('source', 'imported').gte('created_at', t14).lt('created_at', t7),
+    sb().from('waitlist').select('id', { count: 'exact', head: true }).neq('source', 'imported').is('unsubscribed_at', null).gte('created_at', t7),
+    sb().from('waitlist').select('id', { count: 'exact', head: true }).neq('source', 'imported').is('unsubscribed_at', null).gte('created_at', t14).lt('created_at', t7),
     sb().from('page_views').select('id', { count: 'exact', head: true }),
     sb().from('waitlist')
       .select('email, referral_code, referral_count')
       .gt('referral_count', 0)
+      .is('unsubscribed_at', null)
       .order('referral_count', { ascending: false })
       .limit(10),
+    sb().from('waitlist').select('id', { count: 'exact', head: true }).not('unsubscribed_at', 'is', null),
   ]);
 
-  for (const r of [allRes, thisWeekRes, lastWeekRes, pvRes, topRefRes]) {
+  for (const r of [allRes, thisWeekRes, lastWeekRes, pvRes, topRefRes, unsubRes]) {
     if (r.error) throw r.error;
   }
 
@@ -164,6 +168,7 @@ async function handleAnalytics() {
     pageViews,
     convRate,
     viralK,
+    unsubCount:   unsubRes.count || 0,
     bySource:     groupByCount(all, 'source'),
     byUtm:        groupByCount(organic.filter(r => r.utm_source), 'utm_source'),
     byCity:       groupByCount(organic.filter(r => r.city), 'city'),
@@ -275,10 +280,12 @@ async function handleReferralStats() {
   const [allRes, topRes] = await Promise.all([
     sb().from('waitlist')
       .select('email, referral_code, referral_count, source, created_at')
-      .eq('is_bot_flagged', false),
+      .eq('is_bot_flagged', false)
+      .is('unsubscribed_at', null),
     sb().from('waitlist')
       .select('email, referral_code, referral_count, created_at')
       .gt('referral_count', 0)
+      .is('unsubscribed_at', null)
       .order('referral_count', { ascending: false })
       .limit(25),
   ]);
@@ -329,6 +336,7 @@ async function handleWaitlistQueue(event) {
     .from('waitlist')
     .select('email, referral_code, referral_count, source, created_at', { count: 'exact' })
     .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
+    .is('unsubscribed_at', null)
     .order('referral_count', { ascending: false })
     .order('created_at',     { ascending: true });
 
@@ -355,6 +363,7 @@ async function handleExport() {
   const { data, error } = await sb()
     .from('waitlist')
     .select('email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
+    .is('unsubscribed_at', null)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -372,6 +381,31 @@ async function handleExport() {
     },
     body: csv,
   };
+}
+
+async function handleUnsubscribers(event) {
+  const params = event.queryStringParameters || {};
+  const page   = Math.max(1, parseInt(params.page || '1', 10));
+  const limit  = 50;
+  const offset = (page - 1) * limit;
+  const search = (params.search || '').trim();
+
+  let q = sb()
+    .from('waitlist')
+    .select(
+      'email, unsub_reason, unsubscribed_at, source, referral_count',
+      { count: 'exact' }
+    )
+    .not('unsubscribed_at', 'is', null)
+    .order('unsubscribed_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (search) q = q.ilike('email', `%${search}%`);
+
+  const { data, error, count } = await q;
+  if (error) throw error;
+
+  return json(200, { unsubscribers: data, total: count, page, limit, pages: Math.ceil((count || 0) / limit) });
 }
 
 async function handleDelete(event) {
@@ -412,6 +446,7 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'GET'  && action === 'referral-stats')  return await handleReferralStats();
     if (event.httpMethod === 'GET'  && action === 'waitlist-queue')  return await handleWaitlistQueue(event);
     if (event.httpMethod === 'POST' && action === 'delete')          return await handleDelete(event);
+    if (event.httpMethod === 'GET'  && action === 'unsubscribers')   return await handleUnsubscribers(event);
     return json(400, { error: `Unknown action: ${action}` });
   } catch (err) {
     console.error('[entre-admin]', err);

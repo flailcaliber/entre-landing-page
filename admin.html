@@ -1061,9 +1061,15 @@
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="8" width="4" height="7" rx="1"/><rect x="6" y="5" width="4" height="10" rx="1"/><rect x="11" y="2" width="4" height="13" rx="1"/></svg>
         Overview
       </button>
+
+      <p class="nav-section-label">Audience</p>
       <button class="nav-item" data-tab="subscribers" style="position:relative;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5"/><circle cx="12" cy="6" r="2"/><path d="M12 10c1.5 0 3 .8 3 3"/></svg>
         Subscribers
+      </button>
+      <button class="nav-item" data-tab="unsubscribers" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5"/><line x1="10" y1="10" x2="15" y2="15"/><line x1="15" y1="10" x2="10" y2="15"/></svg>
+        Unsubscribers
       </button>
 
       <p class="nav-section-label">Marketing</p>
@@ -1099,6 +1105,7 @@
           <div class="stat-card"><div class="stat-label">Conversion Rate</div><div class="stat-value coral" id="statConv">—</div><div class="stat-sub" id="statPV"></div></div>
           <div class="stat-card"><div class="stat-label">Page Views</div><div class="stat-value" id="statPVCount">—</div><div class="stat-sub">unique sessions tracked</div></div>
           <div class="stat-card"><div class="stat-label">Referral Signups</div><div class="stat-value" id="statReferral">—</div><div class="stat-sub" id="statOrganic"></div></div>
+          <div class="stat-card"><div class="stat-label">Unsubscribers</div><div class="stat-value" id="statUnsub">—</div><div class="stat-sub">removed from list</div></div>
         </div>
 
         <p class="section-title">Growth</p>
@@ -1241,6 +1248,38 @@
       </div>
     </div>
 
+    <!-- ── Unsubscribers pane ────────────────────────────── -->
+    <div class="content-pane" id="tabUnsubscribers">
+      <div class="pane-header">
+        <h2 class="pane-title">Unsubscribers</h2>
+        <div class="pane-actions">
+          <input class="search-input" id="unsubSearchInput" type="search" placeholder="Search emails…" />
+        </div>
+      </div>
+      <div class="pane-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Reason</th>
+                <th>Source</th>
+                <th>Referrals</th>
+                <th>Unsubscribed</th>
+              </tr>
+            </thead>
+            <tbody id="unsubTableBody">
+              <tr class="loading-row"><td colspan="5">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="unsubPagination">
+          <span id="unsubPaginationInfo"></span>
+          <div class="pagination-btns" id="unsubPaginationBtns"></div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content-area -->
 
 </div><!-- /dashboard -->
@@ -1343,9 +1382,10 @@ function switchTab(tabName) {
   // Lazy-load tab data the first time it's opened
   if (!_tabLoaded[tabName]) {
     _tabLoaded[tabName] = true;
-    if (tabName === 'overview')    { loadAnalytics(); }
-    if (tabName === 'subscribers') { loadSubscribers(); }
-    if (tabName === 'referrals')   { loadReferralStats(); loadWaitlistQueue(); }
+    if (tabName === 'overview')       { loadAnalytics(); }
+    if (tabName === 'subscribers')   { loadSubscribers(); }
+    if (tabName === 'referrals')     { loadReferralStats(); loadWaitlistQueue(); }
+    if (tabName === 'unsubscribers') { loadUnsubscribers(); }
   }
 }
 
@@ -1396,6 +1436,8 @@ function renderStats(d) {
   const organicCount  = d.bySource?.organic  || 0;
   document.getElementById('statReferral').textContent = fmt(referralCount);
   document.getElementById('statOrganic').textContent  = `${fmt(organicCount)} organic`;
+
+  document.getElementById('statUnsub').textContent = fmt(d.unsubCount || 0);
 }
 
 function renderCharts(d) {
@@ -1837,6 +1879,77 @@ document.getElementById('queueSearchInput').addEventListener('input', (e) => {
     _queueSearch = e.target.value.trim();
     _queuePage = 1;
     loadWaitlistQueue();
+  }, 350);
+});
+
+// ── Unsubscribers tab ──────────────────────────────────────────
+let _unsubPage        = 1;
+let _unsubTotalPages  = 1;
+let _unsubSearch      = '';
+let _unsubSearchTimer = null;
+
+async function loadUnsubscribers() {
+  const params = new URLSearchParams({ action: 'unsubscribers', page: _unsubPage });
+  if (_unsubSearch) params.set('search', _unsubSearch);
+
+  document.getElementById('unsubTableBody').innerHTML =
+    '<tr class="loading-row"><td colspan="5">Loading…</td></tr>';
+
+  try {
+    const res  = await api(`?${params}`);
+    const data = await res.json();
+    _unsubTotalPages = data.pages || 1;
+    renderUnsubTable(data.unsubscribers || []);
+    renderUnsubPagination(data.total || 0, data.page || 1, _unsubTotalPages);
+  } catch (e) {
+    document.getElementById('unsubTableBody').innerHTML =
+      `<tr><td colspan="5" style="color:var(--red);text-align:center;padding:2rem;">Error: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+function renderUnsubTable(rows) {
+  const tbody = document.getElementById('unsubTableBody');
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No unsubscribers yet.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="email">${escHtml(r.email)}</td>
+      <td style="max-width:260px" title="${escHtml(r.unsub_reason || '')}">${r.unsub_reason ? escHtml(truncate(r.unsub_reason, 60)) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="badge badge-${escHtml(r.source || 'organic')}">${escHtml(r.source || 'organic')}</span></td>
+      <td style="color:${(r.referral_count||0) > 0 ? 'var(--sage)' : 'var(--muted)'}">${r.referral_count || 0}</td>
+      <td style="white-space:nowrap">${formatDate(r.unsubscribed_at)}</td>
+    </tr>`).join('');
+}
+
+function renderUnsubPagination(total, page, pages) {
+  document.getElementById('unsubPaginationInfo').textContent =
+    total === 0 ? 'No results' : `${(page-1)*50 + 1}–${Math.min(page*50, total)} of ${fmt(total)}`;
+
+  const btns  = document.getElementById('unsubPaginationBtns');
+  const range = pageRange(page, pages);
+  btns.innerHTML = [
+    `<button class="page-btn" onclick="goUnsubPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>`,
+    ...range.map(p => p === '…'
+      ? `<span style="padding:0.35rem 0.4rem;color:var(--muted);font-size:0.78rem">…</span>`
+      : `<button class="page-btn ${p===page?'active':''}" onclick="goUnsubPage(${p})">${p}</button>`),
+    `<button class="page-btn" onclick="goUnsubPage(${page+1})" ${page>=pages?'disabled':''}>Next →</button>`,
+  ].join('');
+}
+
+function goUnsubPage(p) {
+  if (p < 1 || p > _unsubTotalPages) return;
+  _unsubPage = p;
+  loadUnsubscribers();
+}
+
+document.getElementById('unsubSearchInput').addEventListener('input', (e) => {
+  clearTimeout(_unsubSearchTimer);
+  _unsubSearchTimer = setTimeout(() => {
+    _unsubSearch = e.target.value.trim();
+    _unsubPage = 1;
+    loadUnsubscribers();
   }, 350);
 });
 
