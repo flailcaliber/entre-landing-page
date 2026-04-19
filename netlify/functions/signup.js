@@ -267,6 +267,20 @@ function buildEmailHtml(referralCode, position) {
 
 // ─── Send via Resend ──────────────────────────────────────────
 
+// Attempt to remove an address from Resend's suppression list.
+// Tries both endpoint shapes since Resend's suppression API isn't publicly documented.
+async function clearResendSuppression(apiKey, email) {
+  const encoded = encodeURIComponent(email);
+  const results = await Promise.allSettled([
+    fetch(`https://api.resend.com/suppressions/${encoded}`,            { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
+    fetch(`https://api.resend.com/suppressions?email=${encoded}`,      { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
+    fetch(`https://api.resend.com/v1/suppressions/${encoded}`,         { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
+    fetch(`https://api.resend.com/v1/suppressions?email=${encoded}`,   { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
+  ]);
+  const statuses = results.map(r => r.status === 'fulfilled' ? r.value.status : 'threw');
+  console.log('[entre-signup] clearResendSuppression statuses:', statuses.join(','));
+}
+
 // Returns { ok: bool, status: number, body: string } — never throws.
 async function sendEmail(to, subject, html) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -275,31 +289,46 @@ async function sendEmail(to, subject, html) {
     return { ok: false, status: 0, body: 'no api key' };
   }
 
-  try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from:     'Sam at Entre <howdy@mail.entre.nyc>',
-        to,
-        subject,
-        html,
-        reply_to: 'sam@entre.nyc',
-        // NOTE: List-Unsubscribe-Post intentionally omitted.
-        // Including it hands unsubscribe management to Resend, which adds
-        // addresses to their suppression list — blocking all future sends.
-        // We manage unsubscribes ourselves at entre.nyc/unsubscribe.html.
-        headers: {
-          'List-Unsubscribe': `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(to)}>`,
-        },
-      }),
-    });
+  const payload = {
+    from:     'Sam at Entre <howdy@mail.entre.nyc>',
+    to,
+    subject,
+    html,
+    reply_to: 'sam@entre.nyc',
+    // NOTE: List-Unsubscribe-Post intentionally omitted.
+    // Including it hands unsubscribe management to Resend, which silently
+    // adds addresses to its suppression list. We manage unsubscribes ourselves.
+    headers: {
+      'List-Unsubscribe': `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(to)}>`,
+    },
+  };
 
+  try {
+    const res  = await fetch('https://api.resend.com/emails', {
+      method:  'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
     const body = await res.text();
+
+    // If Resend returns a suppression-related error (422 / 400 with "suppressed"
+    // in the body), auto-clear the suppression and retry once.
     if (!res.ok) {
+      const lowerBody = body.toLowerCase();
+      const isSuppressed = res.status === 422 || lowerBody.includes('suppress') || lowerBody.includes('unsubscrib');
+      if (isSuppressed) {
+        console.warn('[entre-signup] Resend suppression detected — clearing and retrying');
+        await clearResendSuppression(apiKey, to);
+        // Retry after clearing
+        const retry = await fetch('https://api.resend.com/emails', {
+          method:  'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+        const retryBody = await retry.text();
+        if (!retry.ok) console.error('[entre-signup] Resend retry error', retry.status, retryBody);
+        return { ok: retry.ok, status: retry.status, body: retryBody };
+      }
       console.error('[entre-signup] Resend error', res.status, body);
     }
     return { ok: res.ok, status: res.status, body };

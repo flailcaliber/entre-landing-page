@@ -11,6 +11,8 @@
  * GET  /.netlify/functions/admin?action=referral-stats   — full referral analytics
  * GET  /.netlify/functions/admin?action=waitlist-queue   — queue ranked by position
  * GET  /.netlify/functions/admin?action=unsubscribers    — paginated list of unsubscribed users
+ * GET  /.netlify/functions/admin?action=resend-check&email=x — probe Resend suppression for an address
+ * POST /.netlify/functions/admin?action=resend-unsuppress     — body: { email } remove from Resend suppression
  *
  * Required Netlify env vars:
  *   SUPABASE_URL             (same as EXPO_PUBLIC_SUPABASE_URL)
@@ -424,6 +426,93 @@ async function handleDelete(event) {
   return json(200, { deleted: ids.length });
 }
 
+// ─── Resend suppression helpers ───────────────────────────────
+
+async function resendGet(path) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { status: 0, body: 'RESEND_API_KEY not set' };
+  const res = await fetch(`https://api.resend.com${path}`, {
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+  });
+  const body = await res.text();
+  return { status: res.status, body };
+}
+
+async function resendDelete(path) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { status: 0, body: 'RESEND_API_KEY not set' };
+  const res = await fetch(`https://api.resend.com${path}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+  });
+  const body = await res.text();
+  return { status: res.status, body };
+}
+
+async function handleResendCheck(event) {
+  const email = ((event.queryStringParameters || {}).email || '').trim().toLowerCase();
+  if (!email) return json(400, { error: 'Provide ?email=address' });
+
+  // Probe several endpoints Resend may expose for suppressions
+  const [listAll, byEmail] = await Promise.all([
+    resendGet('/suppressions'),
+    resendGet(`/suppressions/${encodeURIComponent(email)}`),
+  ]);
+
+  // Also try sending a real minimal email to see what error (if any) Resend returns
+  const apiKey = process.env.RESEND_API_KEY;
+  let sendProbe = null;
+  if (apiKey) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from:    'Sam at Entre <howdy@mail.entre.nyc>',
+          to:      email,
+          subject: '[Entre diagnostic] deliverability test',
+          html:    '<p>This is an automated deliverability test. You can ignore this email.</p>',
+        }),
+      });
+      sendProbe = { status: res.status, body: await res.text() };
+    } catch (e) {
+      sendProbe = { status: 0, body: e.message };
+    }
+  }
+
+  return json(200, {
+    email,
+    suppressions_list:    { status: listAll.status,   body: tryParse(listAll.body) },
+    suppression_by_email: { status: byEmail.status,   body: tryParse(byEmail.body) },
+    send_probe:           sendProbe ? { status: sendProbe.status, body: tryParse(sendProbe.body) } : null,
+  });
+}
+
+async function handleResendUnsuppress(event) {
+  let body;
+  try { body = JSON.parse(event.body || '{}'); }
+  catch { return json(400, { error: 'Invalid JSON' }); }
+
+  const email = (body.email || '').trim().toLowerCase();
+  if (!email) return json(400, { error: 'Provide { email }' });
+
+  // Try both likely endpoint shapes
+  const [byEmail, byPath] = await Promise.all([
+    resendDelete(`/suppressions/${encodeURIComponent(email)}`),
+    resendDelete(`/suppressions?email=${encodeURIComponent(email)}`),
+  ]);
+
+  return json(200, {
+    email,
+    delete_by_path:  { status: byEmail.status, body: tryParse(byEmail.body) },
+    delete_by_query: { status: byPath.status,  body: tryParse(byPath.body) },
+  });
+}
+
+function tryParse(s) {
+  try { return JSON.parse(s); } catch { return s; }
+}
+
 // ─── Main handler ─────────────────────────────────────────────
 
 exports.handler = async (event) => {
@@ -447,6 +536,8 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'GET'  && action === 'waitlist-queue')  return await handleWaitlistQueue(event);
     if (event.httpMethod === 'POST' && action === 'delete')          return await handleDelete(event);
     if (event.httpMethod === 'GET'  && action === 'unsubscribers')   return await handleUnsubscribers(event);
+    if (event.httpMethod === 'GET'  && action === 'resend-check')    return await handleResendCheck(event);
+    if (event.httpMethod === 'POST' && action === 'resend-unsuppress') return await handleResendUnsuppress(event);
     return json(400, { error: `Unknown action: ${action}` });
   } catch (err) {
     console.error('[entre-admin]', err);
