@@ -47,7 +47,7 @@ function json(status, body) {
 
 // ─── Email template ───────────────────────────────────────────
 
-function buildEmailHtml(referralCode, position) {
+function buildEmailHtml(email, referralCode, position) {
   const referralLink = `https://www.entre.nyc/?ref=${referralCode}`;
   const positionLine = position
     ? `You're currently <strong style="color:#131220;">#${position}</strong> on the waitlist.`
@@ -339,11 +339,11 @@ async function sendEmail(to, subject, html) {
 }
 
 function sendConfirmation(email, referralCode, position) {
-  return sendEmail(email, "You're on the list — Entre", buildEmailHtml(referralCode, position));
+  return sendEmail(email, "You're on the list — Entre", buildEmailHtml(email, referralCode, position));
 }
 
 function sendWelcomeBack(email, referralCode, position) {
-  return sendEmail(email, "Welcome back — Entre", buildEmailHtml(referralCode, position));
+  return sendEmail(email, "Welcome back — Entre", buildEmailHtml(email, referralCode, position));
 }
 
 // ─── Main handler ─────────────────────────────────────────────
