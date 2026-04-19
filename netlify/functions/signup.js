@@ -274,29 +274,33 @@ async function sendConfirmation(email, referralCode, position) {
     return;
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from:     'Sam at Entre <howdy@mail.entre.nyc>',
-      to:       email,
-      subject:  "You're on the list — Entre",
-      html:     buildEmailHtml(referralCode, position),
-      reply_to: 'sam@entre.nyc',
+  // Wrapped in try/catch — email failure must never crash the signup handler
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
       headers: {
-        'List-Unsubscribe':      `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-    }),
-  });
+      body: JSON.stringify({
+        from:     'Sam at Entre <howdy@mail.entre.nyc>',
+        to:       email,
+        subject:  "You're on the list — Entre",
+        html:     buildEmailHtml(referralCode, position),
+        reply_to: 'sam@entre.nyc',
+        headers: {
+          'List-Unsubscribe':      `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      }),
+    });
 
-  if (!res.ok) {
-    // Log but don't throw — email failure should never fail the signup
-    const err = await res.text();
-    console.error('[entre-signup] Resend error:', err);
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[entre-signup] Resend error:', err);
+    }
+  } catch (e) {
+    console.error('[entre-signup] sendConfirmation threw:', e.message);
   }
 }
 
@@ -311,6 +315,8 @@ exports.handler = async (event) => {
     return json(405, { error: 'Method not allowed' });
   }
 
+  try {
+  // ── body parse ──────────────────────────────────────────────
   let body;
   try { body = JSON.parse(event.body || '{}'); }
   catch { return json(400, { error: 'Invalid JSON' }); }
@@ -414,4 +420,9 @@ exports.handler = async (event) => {
   await sendConfirmation(email.trim().toLowerCase(), referral_code, position);
 
   return json(200, { success: true, referral_code, position });
+
+  } catch (err) {
+    console.error('[entre-signup] unhandled error:', err);
+    return json(500, { error: err.message || 'Internal server error' });
+  }
 };
