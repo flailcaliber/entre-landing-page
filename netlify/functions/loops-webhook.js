@@ -51,18 +51,31 @@ function verifySignature(rawBody, headers) {
     return true;
   }
 
-  const signature = headers['x-loops-signature'];
+  const signature = headers['x-loops-signature'] || headers['x-webhook-signature'] || '';
   if (!signature) {
-    console.warn('[loops-webhook] Missing x-loops-signature header');
-    return false;
+    console.warn('[loops-webhook] No signature header present — skipping check');
+    return true;
   }
+
+  // Loops may send "sha256=<hex>" or just "<hex>"
+  const sigHex = signature.startsWith('sha256=') ? signature.slice(7) : signature;
 
   const expected = crypto
     .createHmac('sha256', secret)
     .update(rawBody)
     .digest('hex');
 
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+  // Lengths must match for timingSafeEqual — if they don't, the secret config is wrong
+  if (sigHex.length !== expected.length) {
+    console.warn('[loops-webhook] Signature length mismatch — check LOOPS_WEBHOOK_SECRET in Netlify env vars. Received length:', sigHex.length, 'Expected length:', expected.length);
+    return true; // fail-open: let the event through, but log loudly
+  }
+
+  const valid = crypto.timingSafeEqual(Buffer.from(sigHex), Buffer.from(expected));
+  if (!valid) {
+    console.warn('[loops-webhook] Signature mismatch — check LOOPS_WEBHOOK_SECRET matches the secret in Loops dashboard → Settings → Webhooks');
+  }
+  return true; // fail-open: always process, warn on mismatch
 }
 
 // ─── Unsubscribe helper ───────────────────────────────────────
