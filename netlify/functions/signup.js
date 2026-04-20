@@ -81,8 +81,9 @@ function loopsHeaders() {
 // Create or update a contact in Loops Audiences. Custom properties
 // (referralCode, waitlistPosition, etc.) become available as merge
 // tags in Loops broadcast and transactional email templates.
-async function loopsUpsertContact({ email, referralCode, waitlistPosition, referralCount, subscribed = true }) {
-  const payload = { email, referralCode, waitlistPosition, referralCount, subscribed };
+async function loopsUpsertContact({ email, referral_code, waitlist_position, referral_count, subscribed = true }) {
+  // Use snake_case keys — these become the {{merge_tag}} names in Loops templates
+  const payload = { email, referral_code, waitlist_position, referral_count, subscribed };
 
   const res = await fetch(`${LOOPS_API}/contacts/create`, {
     method:  'POST',
@@ -204,11 +205,11 @@ exports.handler = async (event) => {
 
         // Re-activate contact in Loops
         await loopsUpsertContact({
-          email:            email.trim().toLowerCase(),
-          referralCode:     existingCode,
-          waitlistPosition: position ?? 1,
-          referralCount:    0,
-          subscribed:       true,
+          email:             email.trim().toLowerCase(),
+          referral_code:     existingCode,
+          waitlist_position: position ?? 1,
+          referral_count:    0,
+          subscribed:        true,
         }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
 
         return json(200, { success: true, referral_code: existingCode, position });
@@ -236,10 +237,10 @@ exports.handler = async (event) => {
 
   // Create contact in Loops — the "contact added" Loop trigger handles the email
   await loopsUpsertContact({
-    email:            email.trim().toLowerCase(),
-    referralCode:     referral_code,
-    waitlistPosition: position ?? 1,
-    referralCount:    0,
+    email:             email.trim().toLowerCase(),
+    referral_code:     referral_code,
+    waitlist_position: position ?? 1,
+    referral_count:    0,
   }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
 
   // If this signup used a referral code, increment the referrer's count in Loops
@@ -261,8 +262,8 @@ exports.handler = async (event) => {
           .is('unsubscribed_at', null);
 
         await loopsUpsertContact({
-          email:         referrer[0].email,
-          referralCount: refCount ?? 1,
+          email:          referrer[0].email,
+          referral_count: refCount ?? 1,
         }).catch(e => console.warn('[entre-signup] Loops referrer update failed:', e.message));
       }
     } catch (e) {

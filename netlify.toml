@@ -34,6 +34,11 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
 
 [[redirects]]
+  from = "/waitlist"
+  to = "/waitlist.html"
+  status = 200
+
+[[redirects]]
   from = "/api/loops-webhook"
   to = "/.netlify/functions/loops-webhook"
   status = 200
