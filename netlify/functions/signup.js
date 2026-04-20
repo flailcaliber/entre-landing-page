@@ -37,6 +37,20 @@ function generateCode() {
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
+// Strip formatting characters so Loops can import the number cleanly.
+// "(555) 123-4567" → "+15551234567", "555-123-4567" → "+15551234567"
+function normalizePhone(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return null;
+  // Prefix with +1 for 10-digit US numbers that don't already have a country code
+  if (digits.length === 10) return `+1${digits}`;
+  // Already has country code (11+ digits starting with 1 for US)
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  // International or non-standard — just strip non-digits and keep as-is
+  return `+${digits}`;
+}
+
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
@@ -132,7 +146,7 @@ exports.handler = async (event) => {
 
   const { error } = await sb().from('waitlist').insert({
     email:            email.trim().toLowerCase(),
-    phone:            phone || null,
+    phone:            normalizePhone(phone),
     referral_code,
     referred_by_code: referred_by_code || null,
     source:           source || 'organic',
@@ -161,7 +175,7 @@ exports.handler = async (event) => {
           .update({
             unsubscribed_at: null,
             unsub_reason:    null,
-            phone:           phone || null,
+            phone:           normalizePhone(phone),
             pmf_response:    pmf_response || null,
             utm_source:      utm_source   || null,
             utm_medium:      utm_medium   || null,
