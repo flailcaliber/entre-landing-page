@@ -1,8 +1,9 @@
 /**
  * Entre Signup — Netlify Function
  *
- * Handles waitlist signups: inserts into Supabase, then fires a
- * confirmation email via Resend.
+ * Handles waitlist signups: inserts into Supabase, then creates a
+ * Loops contact with waitlist stats. Loops picks up the new contact
+ * via its "contact added" trigger and sends the signup email automatically.
  *
  * POST /.netlify/functions/signup
  * Body: { email, phone?, referred_by_code?, source, utm_*, pmf_response? }
@@ -10,7 +11,11 @@
  * Required Netlify env vars:
  *   SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY
- *   RESEND_API_KEY
+ *   LOOPS_API_KEY
+ *
+ * Loops setup (one-time, in Loops dashboard):
+ *   Create a Loop with trigger: "Contact added"
+ *   Merge tags available in the email: referralCode, waitlistPosition, referralLink
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -45,306 +50,43 @@ function json(status, body) {
   return { statusCode: status, headers: corsHeaders(), body: JSON.stringify(body) };
 }
 
-// ─── Email template ───────────────────────────────────────────
+// ─── Loops helpers ────────────────────────────────────────────
 
-function buildEmailHtml(email, referralCode, position) {
-  const referralLink = `https://www.entre.nyc/?ref=${referralCode}`;
-  const positionLine = position
-    ? `You're currently <strong style="color:#131220;">#${position}</strong> on the waitlist.`
-    : `You're on the waitlist.`;
+const LOOPS_API = 'https://app.loops.so/api/v1';
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light" />
-  <title>You're on the list — Entre</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-    body, table, td, p { margin: 0; padding: 0; }
-    body { background-color: #f5f0eb; font-family: 'DM Sans', Helvetica, Arial, sans-serif; }
-    img  { border: 0; display: block; }
-    a    { color: inherit; }
-  </style>
-</head>
-<body style="background-color:#f5f0eb; margin:0; padding:0;">
-
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb;">
-    <tr>
-      <td align="center" style="padding: 40px 16px;">
-
-        <!-- Card -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px; background-color:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 2px 24px rgba(0,0,0,0.07);">
-
-          <!-- Header -->
-          <tr>
-            <td style="background-color:#131220; padding: 36px 40px 32px;">
-              <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 400; color: #FFF8F0; margin: 0; letter-spacing: 0.01em;">
-                entr<em style="font-style:italic; color:#9ED29E;">e</em>
-              </p>
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 400; color: rgba(255,248,240,0.45); letter-spacing: 0.1em; text-transform: uppercase; margin: 6px 0 0;">
-                Meet in the middle.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Body -->
-          <tr>
-            <td style="padding: 40px 40px 12px;">
-              <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 30px; font-weight: 400; color: #131220; margin: 0 0 20px; line-height: 1.2;">
-                You're on the list.
-              </p>
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 300; color: #3d3a4e; line-height: 1.7; margin: 0 0 16px;">
-                Thank you for signing up. Genuinely. Finding that perfect lunch spot during a busy work day is too complicated. We're on a mission to fix that. We're so glad you're along for the ride.
-              </p>
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 300; color: #3d3a4e; line-height: 1.7; margin: 0;">
-                We're building an app that handles every ounce of logistics when it comes to lunch planning. We find restaurants in between you and your friends, curated to both your tastes, and handle timing/navigation so you can get back to where you need to be without making your boss mad. Ready to book in one tap. NYC first. More cities soon.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Divider -->
-          <tr>
-            <td style="padding: 28px 40px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr><td style="border-top: 1px solid #ede8e2;"></td></tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Referral / move up the line block -->
-          <tr>
-            <td style="padding: 0 40px 36px;">
-              <!-- Position callout -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border-radius:12px; margin-bottom:20px;">
-                <tr>
-                  <td style="padding: 18px 20px;">
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #3d3a4e; margin: 0 0 4px;">
-                      ${positionLine}
-                    </p>
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #7a7585; margin: 0;">
-                      Early access opens from the top of the list first. The more friends you bring along, the sooner you get in.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Move up CTA -->
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #9ED29E; margin: 0 0 10px;">
-                Move up the waitlist
-              </p>
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0 0 16px;">
-                Share your personal link. Every person who joins through your link bumps you up one spot — No limit!
-              </p>
-
-              <!-- Magic link CTA -->
-              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
-                <tr>
-                  <td style="border-radius:8px; background-color:#131220; border:1px solid #2d2b42;">
-                    <a href="https://www.entre.nyc/waitlist?token=${referralCode}"
-                       style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:16px; font-weight:700; color:#FFF8F0; text-decoration:none; padding:12px 24px;">View your waitlist position</a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Referral link box -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border: 1px solid #ede8e2; border-radius:10px; margin-bottom:16px;">
-                <tr>
-                  <td style="padding: 14px 18px;">
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; color: #9b9490; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px;">Your invite link</p>
-                    <a href="${referralLink}" style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; text-decoration: none;">${referralLink}</a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Share button -->
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="border-radius: 8px; background-color: #131220;">
-                    <a href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20Entre%20waitlist%20%E2%80%94%20a%20new%20app%20that%20figures%20out%20where%20you%20and%20your%20friends%20should%20grab%20lunch%20in%20NYC.%20Join%20me%3A%20${encodeURIComponent(referralLink)}"
-                       style="display:inline-block; font-family:'DM Sans',Helvetica,Arial,sans-serif; font-size:13px; font-weight:500; color:#FFF8F0; text-decoration:none; padding:10px 20px;">
-                      Share on X (Twitter)
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Divider -->
-          <tr>
-            <td style="padding: 0 40px 28px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr><td style="border-top: 1px solid #ede8e2;"></td></tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- What's coming -->
-          <tr>
-            <td style="padding: 0 40px 36px;">
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #9ED29E; margin: 0 0 16px;">
-                What to expect
-              </p>
-
-              <!-- Item 1 -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
-                <tr>
-                  <td width="24" valign="top" style="padding-top:2px;">
-                    <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
-                  </td>
-                  <td>
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
-                      <strong style="font-weight:500; color:#131220;">Development updates</strong> — we'll keep you looped in on what we're building, milestones we hit, and the occasional behind-the-scenes look.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Item 2 -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
-                <tr>
-                  <td width="24" valign="top" style="padding-top:2px;">
-                    <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
-                  </td>
-                  <td>
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
-                      <strong style="font-weight:500; color:#131220;">Early access</strong> — doors open from the top of the waitlist first. Get your friends in and climb.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Item 3 -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td width="24" valign="top" style="padding-top:2px;">
-                    <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
-                  </td>
-                  <td>
-                    <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
-                      <strong style="font-weight:500; color:#131220;">No spam, ever</strong> — we'll only reach out when we actually have something worth saying.
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Sign-off -->
-          <tr>
-            <td style="padding: 0 40px 36px;">
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0 0 4px;">
-                Thanks again for joining. Sit tight :)
-              </p>
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; margin: 0;">
-                — Sam, Entre
-              </p>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background-color:#faf7f4; border-top: 1px solid #ede8e2; padding: 12px 40px;">
-              <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; color: #b5b0a8; line-height: 1.5; margin: 0;">
-                You're receiving this because you signed up at <a href="https://www.entre.nyc" style="color:#9ED29E; text-decoration:none;">entre.nyc</a>. Questions? Reply to this email or reach us at <a href="mailto:hello@entre.nyc" style="color:#9ED29E; text-decoration:none;">hello@entre.nyc</a>.
-                &nbsp;&nbsp;·&nbsp;&nbsp;<a href="https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(email)}" style="color:#b5b0a8; text-decoration:underline;">Unsubscribe</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-        <!-- /Card -->
-
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>`;
-}
-
-// ─── Send via Resend ──────────────────────────────────────────
-
-// Attempt to remove an address from Resend's suppression list.
-// Tries both endpoint shapes since Resend's suppression API isn't publicly documented.
-async function clearResendSuppression(apiKey, email) {
-  const encoded = encodeURIComponent(email);
-  const results = await Promise.allSettled([
-    fetch(`https://api.resend.com/suppressions/${encoded}`,            { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
-    fetch(`https://api.resend.com/suppressions?email=${encoded}`,      { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
-    fetch(`https://api.resend.com/v1/suppressions/${encoded}`,         { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
-    fetch(`https://api.resend.com/v1/suppressions?email=${encoded}`,   { method: 'DELETE', headers: { 'Authorization': `Bearer ${apiKey}` } }),
-  ]);
-  const statuses = results.map(r => r.status === 'fulfilled' ? r.value.status : 'threw');
-  console.log('[entre-signup] clearResendSuppression statuses:', statuses.join(','));
-}
-
-// Returns { ok: bool, status: number, body: string } — never throws.
-async function sendEmail(to, subject, html) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn('[entre-signup] RESEND_API_KEY not set — skipping email');
-    return { ok: false, status: 0, body: 'no api key' };
-  }
-
-  const payload = {
-    from:     'Sam at Entre <howdy@mail.entre.nyc>',
-    to,
-    subject,
-    html,
-    reply_to: 'sam@entre.nyc',
-    // NOTE: List-Unsubscribe-Post intentionally omitted.
-    // Including it hands unsubscribe management to Resend, which silently
-    // adds addresses to its suppression list. We manage unsubscribes ourselves.
-    headers: {
-      'List-Unsubscribe': `<https://www.entre.nyc/unsubscribe.html?email=${encodeURIComponent(to)}>`,
-    },
+function loopsHeaders() {
+  return {
+    'Authorization': `Bearer ${process.env.LOOPS_API_KEY}`,
+    'Content-Type':  'application/json',
   };
+}
 
-  try {
-    const res  = await fetch('https://api.resend.com/emails', {
-      method:  'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+// Create or update a contact in Loops Audiences. Custom properties
+// (referralCode, waitlistPosition, etc.) become available as merge
+// tags in Loops broadcast and transactional email templates.
+async function loopsUpsertContact({ email, referralCode, waitlistPosition, referralCount, subscribed = true }) {
+  const payload = { email, referralCode, waitlistPosition, referralCount, subscribed };
+
+  const res = await fetch(`${LOOPS_API}/contacts/create`, {
+    method:  'POST',
+    headers: loopsHeaders(),
+    body:    JSON.stringify(payload),
+  });
+
+  if (res.status === 409) {
+    // Contact already exists — update in place
+    const upd = await fetch(`${LOOPS_API}/contacts/update`, {
+      method:  'PUT',
+      headers: loopsHeaders(),
       body:    JSON.stringify(payload),
     });
-    const body = await res.text();
-
-    // If Resend returns a suppression-related error (422 / 400 with "suppressed"
-    // in the body), auto-clear the suppression and retry once.
-    if (!res.ok) {
-      const lowerBody = body.toLowerCase();
-      const isSuppressed = res.status === 422 || lowerBody.includes('suppress') || lowerBody.includes('unsubscrib');
-      if (isSuppressed) {
-        console.warn('[entre-signup] Resend suppression detected — clearing and retrying');
-        await clearResendSuppression(apiKey, to);
-        // Retry after clearing
-        const retry = await fetch('https://api.resend.com/emails', {
-          method:  'POST',
-          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-          body:    JSON.stringify(payload),
-        });
-        const retryBody = await retry.text();
-        if (!retry.ok) console.error('[entre-signup] Resend retry error', retry.status, retryBody);
-        return { ok: retry.ok, status: retry.status, body: retryBody };
-      }
-      console.error('[entre-signup] Resend error', res.status, body);
-    }
-    return { ok: res.ok, status: res.status, body };
-  } catch (e) {
-    console.error('[entre-signup] sendEmail threw:', e.message);
-    return { ok: false, status: 0, body: e.message };
+    if (!upd.ok) console.error('[entre-signup] Loops contact update failed:', upd.status, await upd.text());
+    return;
   }
+
+  if (!res.ok) console.error('[entre-signup] Loops contact create failed:', res.status, await res.text());
 }
 
-function sendConfirmation(email, referralCode, position) {
-  return sendEmail(email, "You're on the list — Entre", buildEmailHtml(email, referralCode, position));
-}
-
-function sendWelcomeBack(email, referralCode, position) {
-  return sendEmail(email, "Welcome back — Entre", buildEmailHtml(email, referralCode, position));
-}
 
 // ─── Main handler ─────────────────────────────────────────────
 
@@ -434,9 +176,16 @@ exports.handler = async (event) => {
           console.warn('[entre-signup] position lookup failed:', e.message);
         }
 
-        const emailResult = await sendWelcomeBack(email.trim().toLowerCase(), existingCode, position);
-        console.log('[entre-signup] re-subscribe email result:', emailResult.status, emailResult.ok);
-        return json(200, { success: true, referral_code: existingCode, position, _email_ok: emailResult.ok });
+        // Re-activate contact in Loops
+        await loopsUpsertContact({
+          email:            email.trim().toLowerCase(),
+          referralCode:     existingCode,
+          waitlistPosition: position ?? 1,
+          referralCount:    0,
+          subscribed:       true,
+        }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
+
+        return json(200, { success: true, referral_code: existingCode, position });
       }
 
       // Genuine duplicate — still subscribed
@@ -459,8 +208,41 @@ exports.handler = async (event) => {
     console.warn('[entre-signup] position lookup failed:', e.message);
   }
 
-  // Fire confirmation email — non-blocking on failure
-  await sendConfirmation(email.trim().toLowerCase(), referral_code, position);
+  // Create contact in Loops — the "contact added" Loop trigger handles the email
+  await loopsUpsertContact({
+    email:            email.trim().toLowerCase(),
+    referralCode:     referral_code,
+    waitlistPosition: position ?? 1,
+    referralCount:    0,
+  }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
+
+  // If this signup used a referral code, increment the referrer's count in Loops
+  if (referred_by_code) {
+    try {
+      const { data: referrer } = await sb()
+        .from('waitlist')
+        .select('email')
+        .eq('referral_code', referred_by_code)
+        .is('unsubscribed_at', null)
+        .limit(1);
+
+      if (referrer && referrer[0]) {
+        const { count: refCount } = await sb()
+          .from('waitlist')
+          .select('id', { count: 'exact', head: true })
+          .eq('referred_by_code', referred_by_code)
+          .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
+          .is('unsubscribed_at', null);
+
+        await loopsUpsertContact({
+          email:         referrer[0].email,
+          referralCount: refCount ?? 1,
+        }).catch(e => console.warn('[entre-signup] Loops referrer update failed:', e.message));
+      }
+    } catch (e) {
+      console.warn('[entre-signup] referrer count update failed:', e.message);
+    }
+  }
 
   return json(200, { success: true, referral_code, position });
 

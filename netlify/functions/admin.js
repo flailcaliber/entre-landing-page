@@ -11,8 +11,6 @@
  * GET  /.netlify/functions/admin?action=referral-stats   — full referral analytics
  * GET  /.netlify/functions/admin?action=waitlist-queue   — queue ranked by position
  * GET  /.netlify/functions/admin?action=unsubscribers    — paginated list of unsubscribed users
- * GET  /.netlify/functions/admin?action=resend-check&email=x — probe Resend suppression for an address
- * POST /.netlify/functions/admin?action=resend-unsuppress     — body: { email } remove from Resend suppression
  *
  * Required Netlify env vars:
  *   SUPABASE_URL             (same as EXPO_PUBLIC_SUPABASE_URL)
@@ -98,14 +96,14 @@ async function handleList(event) {
   const offset = (page - 1) * limit;
   const search = (params.search || '').trim();
 
+  // Query waitlist_ranked view — includes computed waitlist_position column
   let q = sb()
-    .from('waitlist')
+    .from('waitlist_ranked')
     .select(
-      'id, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at',
+      'id, waitlist_position, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at',
       { count: 'exact' }
     )
-    .is('unsubscribed_at', null)
-    .order('created_at', { ascending: false })
+    .order('waitlist_position', { ascending: true })
     .range(offset, offset + limit - 1);
 
   if (search) q = q.ilike('email', `%${search}%`);
@@ -271,6 +269,22 @@ async function handleImport(event) {
   });
   if (error) throw error;
 
+  // Sync imported contacts to Loops Audiences so they appear in broadcasts.
+  // Fire-and-forget — import success is not gated on Loops availability.
+  if (process.env.LOOPS_API_KEY) {
+    const loopsHeaders = {
+      'Authorization': `Bearer ${process.env.LOOPS_API_KEY}`,
+      'Content-Type':  'application/json',
+    };
+    await Promise.allSettled(records.map(r =>
+      fetch('https://app.loops.so/api/v1/contacts/create', {
+        method:  'POST',
+        headers: loopsHeaders,
+        body:    JSON.stringify({ email: r.email, subscribed: true }),
+      })
+    ));
+  }
+
   return json(200, {
     imported: records.length,
     skipped_invalid: skipped.length,
@@ -362,17 +376,18 @@ async function handleWaitlistQueue(event) {
 }
 
 async function handleExport() {
+  // Query waitlist_ranked view — waitlist_position is computed by Postgres ROW_NUMBER()
   const { data, error } = await sb()
-    .from('waitlist')
-    .select('email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
-    .is('unsubscribed_at', null)
-    .order('created_at', { ascending: false });
+    .from('waitlist_ranked')
+    .select('waitlist_position, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
+    .order('waitlist_position', { ascending: true });
 
   if (error) throw error;
 
-  const cols = ['email', 'phone', 'source', 'referral_code', 'referred_by_code', 'referral_count', 'city', 'pmf_response', 'utm_source', 'utm_medium', 'utm_campaign', 'is_bot_flagged', 'created_at'];
+  const rows = data || [];
+  const cols = ['waitlist_position', 'email', 'phone', 'source', 'referral_code', 'referred_by_code', 'referral_count', 'city', 'pmf_response', 'utm_source', 'utm_medium', 'utm_campaign', 'is_bot_flagged', 'created_at'];
   const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const csv = [cols.join(','), ...(data || []).map(r => cols.map(c => escape(r[c])).join(','))].join('\n');
+  const csv = [cols.join(','), ...rows.map(r => cols.map(c => escape(r[c])).join(','))].join('\n');
 
   return {
     statusCode: 200,
@@ -426,89 +441,6 @@ async function handleDelete(event) {
   return json(200, { deleted: ids.length });
 }
 
-// ─── Resend suppression helpers ───────────────────────────────
-
-async function resendGet(path) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { status: 0, body: 'RESEND_API_KEY not set' };
-  const res = await fetch(`https://api.resend.com${path}`, {
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-  });
-  const body = await res.text();
-  return { status: res.status, body };
-}
-
-async function resendDelete(path) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return { status: 0, body: 'RESEND_API_KEY not set' };
-  const res = await fetch(`https://api.resend.com${path}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-  });
-  const body = await res.text();
-  return { status: res.status, body };
-}
-
-async function handleResendCheck(event) {
-  const email = ((event.queryStringParameters || {}).email || '').trim().toLowerCase();
-  if (!email) return json(400, { error: 'Provide ?email=address' });
-
-  // Probe several endpoints Resend may expose for suppressions
-  const [listAll, byEmail] = await Promise.all([
-    resendGet('/suppressions'),
-    resendGet(`/suppressions/${encodeURIComponent(email)}`),
-  ]);
-
-  // Also try sending a real minimal email to see what error (if any) Resend returns
-  const apiKey = process.env.RESEND_API_KEY;
-  let sendProbe = null;
-  if (apiKey) {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from:    'Sam at Entre <howdy@mail.entre.nyc>',
-          to:      email,
-          subject: '[Entre diagnostic] deliverability test',
-          html:    '<p>This is an automated deliverability test. You can ignore this email.</p>',
-        }),
-      });
-      sendProbe = { status: res.status, body: await res.text() };
-    } catch (e) {
-      sendProbe = { status: 0, body: e.message };
-    }
-  }
-
-  return json(200, {
-    email,
-    suppressions_list:    { status: listAll.status,   body: tryParse(listAll.body) },
-    suppression_by_email: { status: byEmail.status,   body: tryParse(byEmail.body) },
-    send_probe:           sendProbe ? { status: sendProbe.status, body: tryParse(sendProbe.body) } : null,
-  });
-}
-
-async function handleResendUnsuppress(event) {
-  let body;
-  try { body = JSON.parse(event.body || '{}'); }
-  catch { return json(400, { error: 'Invalid JSON' }); }
-
-  const email = (body.email || '').trim().toLowerCase();
-  if (!email) return json(400, { error: 'Provide { email }' });
-
-  // Try both likely endpoint shapes
-  const [byEmail, byPath] = await Promise.all([
-    resendDelete(`/suppressions/${encodeURIComponent(email)}`),
-    resendDelete(`/suppressions?email=${encodeURIComponent(email)}`),
-  ]);
-
-  return json(200, {
-    email,
-    delete_by_path:  { status: byEmail.status, body: tryParse(byEmail.body) },
-    delete_by_query: { status: byPath.status,  body: tryParse(byPath.body) },
-  });
-}
-
 function tryParse(s) {
   try { return JSON.parse(s); } catch { return s; }
 }
@@ -536,8 +468,6 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'GET'  && action === 'waitlist-queue')  return await handleWaitlistQueue(event);
     if (event.httpMethod === 'POST' && action === 'delete')          return await handleDelete(event);
     if (event.httpMethod === 'GET'  && action === 'unsubscribers')   return await handleUnsubscribers(event);
-    if (event.httpMethod === 'GET'  && action === 'resend-check')    return await handleResendCheck(event);
-    if (event.httpMethod === 'POST' && action === 'resend-unsuppress') return await handleResendUnsuppress(event);
     return json(400, { error: `Unknown action: ${action}` });
   } catch (err) {
     console.error('[entre-admin]', err);

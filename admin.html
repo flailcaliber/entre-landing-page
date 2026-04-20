@@ -1169,6 +1169,7 @@
             <thead>
               <tr>
                 <th style="width:36px;"><input type="checkbox" id="selectAll" title="Select all" onchange="toggleSelectAll(this)" style="cursor:pointer;accent-color:var(--sage);" /></th>
+                <th>#</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Source</th>
@@ -1182,7 +1183,7 @@
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr class="loading-row"><td colspan="11">Loading…</td></tr>
+              <tr class="loading-row"><td colspan="12">Loading…</td></tr>
             </tbody>
           </table>
         </div>
@@ -1527,7 +1528,7 @@ async function loadSubscribers() {
   if (_search) params.set('search', _search);
 
   document.getElementById('tableBody').innerHTML =
-    '<tr class="loading-row"><td colspan="11">Loading…</td></tr>';
+    '<tr class="loading-row"><td colspan="12">Loading…</td></tr>';
 
   const res  = await api(`?${params}`);
   const data = await res.json();
@@ -1544,13 +1545,14 @@ function renderTable(rows) {
   updateDeleteBtn();
 
   if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state">No subscribers yet.</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">No subscribers yet.</div></td></tr>';
     return;
   }
 
   tbody.innerHTML = rows.map(r => `
     <tr data-id="${escHtml(r.id)}">
       <td><input type="checkbox" class="row-check" data-id="${escHtml(r.id)}" onchange="updateDeleteBtn()" style="cursor:pointer;accent-color:var(--sage);" /></td>
+      <td style="color:var(--muted);font-size:0.75rem;">#${fmt(r.waitlist_position)}</td>
       <td class="email">${escHtml(r.email)}</td>
       <td>${r.phone ? escHtml(r.phone) : '<span style="color:var(--muted)">—</span>'}</td>
       <td><span class="badge badge-${r.source}">${r.source}</span>${r.is_bot_flagged ? ' <span class="badge badge-flagged">bot?</span>' : ''}</td>

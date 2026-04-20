@@ -1,0 +1,330 @@
+<mjml>
+  <mj-head>
+    <mj-font name="Cormorant Garamond" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" />
+    <mj-font name="DM Sans" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="'DM Sans', Helvetica, Arial, sans-serif" />
+      <mj-body background-color="#f5f0eb" />
+      <mj-text padding="0" font-family="'DM Sans', Helvetica, Arial, sans-serif" />
+      <mj-section padding="0" />
+    </mj-attributes>
+    <!-- overflow:hidden clips card sections to the wrapper's 16px border-radius -->
+    <mj-style>
+      .email-card { overflow: hidden !important; }
+    </mj-style>
+  </mj-head>
+
+  <mj-body background-color="#f5f0eb">
+
+    <!-- ── Top spacer ── -->
+    <mj-section background-color="#f5f0eb" padding="40px 16px 0">
+      <mj-column><mj-spacer height="1px" /></mj-column>
+    </mj-section>
+
+    <!-- ══════════════════════════════════════════════
+         CARD WRAPPER — white bg, 16px rounded corners,
+         overflow:hidden clips dark header into corners
+         seamlessly with no gap to white body below
+         ══════════════════════════════════════════════ -->
+    <mj-wrapper
+      css-class="email-card"
+      background-color="#ffffff"
+      border-radius="16px"
+      padding="0">
+
+      <!-- ── HEADER: dark bg, wordmark (top-left) + logo mark (top-right) ── -->
+      <mj-section background-color="#131220" padding="36px 40px 32px">
+        <mj-column vertical-align="top">
+          <mj-text
+            font-family="'Cormorant Garamond', Georgia, serif"
+            font-size="28px"
+            font-weight="400"
+            color="#FFF8F0"
+            letter-spacing="0.01em"
+            line-height="1">
+            entr<span style="color:#9ED29E; font-style:italic;">e</span>
+          </mj-text>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="11px"
+            font-weight="400"
+            color="rgba(255,248,240,0.45)"
+            letter-spacing="0.1em"
+            padding-top="6px">
+            MEET IN THE MIDDLE.
+          </mj-text>
+        </mj-column>
+        <mj-column width="60px" vertical-align="top">
+          <mj-image
+            src="https://www.entre.nyc/assets/entre-mark.png"
+            width="26px"
+            height="40px"
+            align="right"
+            alt="Entre mark"
+            padding="0" />
+        </mj-column>
+      </mj-section>
+
+      <!-- ── BODY: white bg, heading + 2 paragraphs ── -->
+      <mj-section background-color="#ffffff" padding="40px 40px 12px">
+        <mj-column>
+          <mj-text
+            font-family="'Cormorant Garamond', Georgia, serif"
+            font-size="30px"
+            font-weight="400"
+            color="#131220"
+            line-height="1.2"
+            padding-bottom="20px">
+            You're on the list.
+          </mj-text>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="15px"
+            font-weight="300"
+            color="#3d3a4e"
+            line-height="1.7"
+            padding-bottom="16px">
+            Thank you for signing up. Genuinely. Finding that perfect lunch spot
+            during a busy work day is too complicated. We're on a mission to fix
+            that. We're so glad you're along for the ride.
+          </mj-text>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="15px"
+            font-weight="300"
+            color="#3d3a4e"
+            line-height="1.7">
+            We're building an app that handles every ounce of logistics when it
+            comes to lunch planning. We find restaurants in between you and your
+            friends, curated to both your tastes, and handle timing/navigation so
+            you can get back to where you need to be without making your boss mad.
+            Ready to book in one tap. NYC first. More cities soon.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <!-- ── DIVIDER ── -->
+      <mj-section background-color="#ffffff" padding="28px 40px">
+        <mj-column>
+          <mj-divider border-color="#ede8e2" border-width="1px" padding="0" />
+        </mj-column>
+      </mj-section>
+
+      <!-- ── REFERRAL BLOCK: all in one column for consistent left-edge alignment ── -->
+      <mj-section background-color="#ffffff" padding="0 40px 36px">
+        <mj-column>
+
+          <!-- Position callout box -->
+          <mj-text padding-bottom="20px">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border-radius:12px;">
+              <tr>
+                <td style="padding: 18px 20px;">
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #3d3a4e; margin: 0 0 4px;">
+                    You're currently <strong style="color:#131220; font-weight:500;">#{{waitlist_position}}</strong> on the waitlist.
+                  </p>
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #7a7585; margin: 0;">
+                    Early access opens from the top of the list first. The more friends you bring along, the sooner you get in.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </mj-text>
+
+          <!-- Move up the waitlist label -->
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="11px"
+            font-weight="500"
+            color="#9ED29E"
+            letter-spacing="0.1em"
+            padding-bottom="10px">
+            MOVE UP THE WAITLIST
+          </mj-text>
+
+          <!-- Description -->
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="14px"
+            font-weight="300"
+            color="#3d3a4e"
+            line-height="1.6"
+            padding-bottom="16px">
+            Share your personal link. Every person who joins through your link
+            bumps you up one spot — no limit!
+          </mj-text>
+
+          <!-- View your waitlist position button -->
+          <mj-button
+            href="https://www.entre.nyc/waitlist?token={{referral_code}}"
+            background-color="#131220"
+            color="#FFF8F0"
+            border="1px solid #2d2b42"
+            border-radius="8px"
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="16px"
+            font-weight="700"
+            inner-padding="12px 24px"
+            padding="0 0 20px"
+            align="left">
+            View your waitlist position
+          </mj-button>
+
+          <!-- Referral link box -->
+          <mj-text padding-bottom="16px">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f0eb; border: 1px solid #ede8e2; border-radius:10px;">
+              <tr>
+                <td style="padding: 14px 18px;">
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; color: #9b9490; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px;">YOUR INVITE LINK</p>
+                  <a href="https://www.entre.nyc/?ref={{referral_code}}" style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; text-decoration: none; word-break: break-all;">https://www.entre.nyc/?ref={{referral_code}}</a>
+                </td>
+              </tr>
+            </table>
+          </mj-text>
+
+          <!-- Share on X button -->
+          <mj-button
+            href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20Entre%20waitlist%20%E2%80%94%20a%20new%20app%20that%20figures%20out%20where%20you%20and%20your%20friends%20should%20grab%20lunch%20in%20NYC.%20Join%20me%3A%20https%3A%2F%2Fwww.entre.nyc%2F%3Fref%3D{{referral_code}}"
+            background-color="#131220"
+            color="#FFF8F0"
+            border-radius="8px"
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="13px"
+            font-weight="500"
+            inner-padding="10px 20px"
+            padding="0"
+            align="left">
+            Share on X (Twitter)
+          </mj-button>
+
+        </mj-column>
+      </mj-section>
+
+      <!-- ── DIVIDER ── -->
+      <mj-section background-color="#ffffff" padding="0 40px 28px">
+        <mj-column>
+          <mj-divider border-color="#ede8e2" border-width="1px" padding="0" />
+        </mj-column>
+      </mj-section>
+
+      <!-- ── WHAT TO EXPECT (with green circle bullets) ── -->
+      <mj-section background-color="#ffffff" padding="0 40px 36px">
+        <mj-column>
+
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="11px"
+            font-weight="500"
+            color="#9ED29E"
+            letter-spacing="0.1em"
+            padding-bottom="16px">
+            WHAT TO EXPECT
+          </mj-text>
+
+          <!-- Bullet 1 -->
+          <mj-text padding-bottom="14px">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="24" valign="top" style="padding-top:2px;">
+                  <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
+                </td>
+                <td>
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
+                    <strong style="font-weight:500; color:#131220;">Development updates</strong> — we'll keep you looped in on what we're building, milestones we hit, and the occasional behind-the-scenes look.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </mj-text>
+
+          <!-- Bullet 2 -->
+          <mj-text padding-bottom="14px">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="24" valign="top" style="padding-top:2px;">
+                  <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
+                </td>
+                <td>
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
+                    <strong style="font-weight:500; color:#131220;">Early access</strong> — doors open from the top of the waitlist first. Get your friends in and climb.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </mj-text>
+
+          <!-- Bullet 3 -->
+          <mj-text>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td width="24" valign="top" style="padding-top:2px;">
+                  <div style="width:6px; height:6px; border-radius:50%; background-color:#9ED29E; margin-top:6px;"></div>
+                </td>
+                <td>
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 300; color: #3d3a4e; line-height: 1.6; margin: 0;">
+                    <strong style="font-weight:500; color:#131220;">No spam, ever</strong> — we'll only reach out when we actually have something worth saying.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </mj-text>
+
+        </mj-column>
+      </mj-section>
+
+      <!-- ── SIGN-OFF ── -->
+      <mj-section background-color="#ffffff" padding="0 40px 36px">
+        <mj-column>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="14px"
+            font-weight="300"
+            color="#3d3a4e"
+            line-height="1.6"
+            padding-bottom="4px">
+            Thanks again for joining. Sit tight :)
+          </mj-text>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="14px"
+            font-weight="400"
+            color="#131220">
+            — Sam, Entre
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+      <!-- ── FOOTER ── -->
+      <mj-section
+        background-color="#faf7f4"
+        border-top="1px solid #ede8e2"
+        padding="12px 40px">
+        <mj-column>
+          <mj-text
+            font-family="'DM Sans', Helvetica, Arial, sans-serif"
+            font-size="11px"
+            font-weight="300"
+            color="#b5b0a8"
+            line-height="1.6">
+            You're receiving this because you signed up at
+            <a href="https://www.entre.nyc"
+               style="color:#9ED29E; text-decoration:none;">entre.nyc</a>.
+            Questions? Reply to this email or reach us at
+            <a href="mailto:sam@entre.nyc"
+               style="color:#9ED29E; text-decoration:none;">sam@entre.nyc</a>.
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            <a href="{unsubscribe_link}"
+               style="color:#b5b0a8; text-decoration:underline;">Unsubscribe</a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+
+    </mj-wrapper>
+    <!-- ══ end card ══ -->
+
+    <!-- ── Bottom spacer ── -->
+    <mj-section background-color="#f5f0eb" padding="0 16px 40px">
+      <mj-column><mj-spacer height="1px" /></mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>
