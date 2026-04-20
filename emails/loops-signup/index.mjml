@@ -106,7 +106,7 @@
               <tr>
                 <td style="padding: 18px 20px;">
                   <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #3d3a4e; margin: 0 0 4px;">
-                    You're currently <strong style="color:#131220; font-weight:500;">#{{waitlist_position}}</strong> on the waitlist.
+                    You're currently <strong style="color:#131220; font-weight:500;">#{waitlist_position}</strong> on the waitlist.
                   </p>
                   <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 300; color: #7a7585; margin: 0;">
                     Early access opens from the top of the list first. The more friends you bring along, the sooner you get in.
@@ -141,7 +141,7 @@
 
           <!-- View your waitlist position button -->
           <mj-button
-            href="https://www.entre.nyc/waitlist?token={{referral_code}}"
+            href="https://www.entre.nyc/waitlist?token={referral_code}"
             background-color="#131220"
             color="#FFF8F0"
             border="1px solid #2d2b42"
@@ -161,7 +161,7 @@
               <tr>
                 <td style="padding: 14px 18px;">
                   <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 500; color: #9b9490; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px;">YOUR INVITE LINK</p>
-                  <a href="https://www.entre.nyc/?ref={{referral_code}}" style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; text-decoration: none; word-break: break-all;">https://www.entre.nyc/?ref={{referral_code}}</a>
+                  <a href="https://www.entre.nyc/?ref={referral_code}" style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; color: #131220; text-decoration: none; word-break: break-all;">https://www.entre.nyc/?ref={referral_code}</a>
                 </td>
               </tr>
             </table>
@@ -169,7 +169,7 @@
 
           <!-- Share on X button -->
           <mj-button
-            href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20Entre%20waitlist%20%E2%80%94%20a%20new%20app%20that%20figures%20out%20where%20you%20and%20your%20friends%20should%20grab%20lunch%20in%20NYC.%20Join%20me%3A%20https%3A%2F%2Fwww.entre.nyc%2F%3Fref%3D{{referral_code}}"
+            href="https://twitter.com/intent/tweet?text=I%20just%20joined%20the%20Entre%20waitlist%20%E2%80%94%20a%20new%20app%20that%20figures%20out%20where%20you%20and%20your%20friends%20should%20grab%20lunch%20in%20NYC.%20Join%20me%3A%20https%3A%2F%2Fwww.entre.nyc%2F%3Fref%3D{referral_code}"
             background-color="#131220"
             color="#FFF8F0"
             border-radius="8px"
