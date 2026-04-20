@@ -35,35 +35,19 @@
       <!-- ── HEADER: dark bg, wordmark (top-left) + logo mark (top-right) ── -->
       <mj-section background-color="#131220" padding="36px 40px 32px">
         <mj-column vertical-align="top">
-          <mj-text
-            align="left"
-            font-family="'Cormorant Garamond', Georgia, serif"
-            font-size="28px"
-            font-weight="400"
-            color="#FFF8F0"
-            letter-spacing="0.01em"
-            line-height="1">
-            entr<span style="color:#9ED29E; font-style:italic;">e</span>
+          <mj-text padding="0">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td valign="top">
+                  <p style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; font-weight: 400; color: #FFF8F0; margin: 0; letter-spacing: 0.01em; line-height: 1;">entr<span style="color: #9ED29E; font-style: italic;">e</span></p>
+                  <p style="font-family: 'DM Sans', Helvetica, Arial, sans-serif; font-size: 11px; font-weight: 400; color: rgba(255,248,240,0.45); letter-spacing: 0.1em; margin: 6px 0 0;">MEET IN THE MIDDLE.</p>
+                </td>
+                <td valign="top" align="right" width="36">
+                  <img src="https://www.entre.nyc/assets/entre-mark.png" width="26" height="40" alt="" style="display: block;" />
+                </td>
+              </tr>
+            </table>
           </mj-text>
-          <mj-text
-            align="left"
-            font-family="'DM Sans', Helvetica, Arial, sans-serif"
-            font-size="11px"
-            font-weight="400"
-            color="rgba(255,248,240,0.45)"
-            letter-spacing="0.1em"
-            padding-top="6px">
-            MEET IN THE MIDDLE.
-          </mj-text>
-        </mj-column>
-        <mj-column width="60px" vertical-align="top">
-          <mj-image
-            src="https://www.entre.nyc/assets/entre-mark.png"
-            width="26px"
-            height="40px"
-            align="right"
-            alt=""
-            padding="0" />
         </mj-column>
       </mj-section>
 
