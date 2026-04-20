@@ -55,6 +55,9 @@ function json(status, body) {
 const LOOPS_API = 'https://app.loops.so/api/v1';
 
 function loopsHeaders() {
+  if (!process.env.LOOPS_API_KEY) {
+    throw new Error('LOOPS_API_KEY env var is not set — cannot sync contact to Loops');
+  }
   return {
     'Authorization': `Bearer ${process.env.LOOPS_API_KEY}`,
     'Content-Type':  'application/json',
@@ -80,11 +83,20 @@ async function loopsUpsertContact({ email, referralCode, waitlistPosition, refer
       headers: loopsHeaders(),
       body:    JSON.stringify(payload),
     });
-    if (!upd.ok) console.error('[entre-signup] Loops contact update failed:', upd.status, await upd.text());
+    if (!upd.ok) {
+      const body = await upd.text();
+      console.error('[entre-signup] Loops contact update failed:', upd.status, body);
+    }
     return;
   }
 
-  if (!res.ok) console.error('[entre-signup] Loops contact create failed:', res.status, await res.text());
+  if (!res.ok) {
+    const body = await res.text();
+    console.error('[entre-signup] Loops contact create failed:', res.status, body);
+    throw new Error(`Loops create failed: ${res.status} ${body}`);
+  }
+
+  console.log('[entre-signup] Loops contact created for:', email);
 }
 
 

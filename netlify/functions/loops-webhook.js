@@ -111,6 +111,11 @@ async function markUnsubscribed(email, reason) {
 // ─── Main handler ─────────────────────────────────────────────
 
 exports.handler = async (event) => {
+  // Loops sends a GET to verify the endpoint is reachable before saving it
+  if (event.httpMethod === 'GET' || event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, body: 'ok' };
+  }
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
   }

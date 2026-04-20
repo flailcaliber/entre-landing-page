@@ -32,3 +32,8 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+[[redirects]]
+  from = "/api/loops-webhook"
+  to = "/.netlify/functions/loops-webhook"
+  status = 200
