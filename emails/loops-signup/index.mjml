@@ -36,6 +36,7 @@
       <mj-section background-color="#131220" padding="36px 40px 32px">
         <mj-column vertical-align="top">
           <mj-text
+            align="left"
             font-family="'Cormorant Garamond', Georgia, serif"
             font-size="28px"
             font-weight="400"
@@ -45,6 +46,7 @@
             entr<span style="color:#9ED29E; font-style:italic;">e</span>
           </mj-text>
           <mj-text
+            align="left"
             font-family="'DM Sans', Helvetica, Arial, sans-serif"
             font-size="11px"
             font-weight="400"
@@ -60,7 +62,7 @@
             width="26px"
             height="40px"
             align="right"
-            alt="Entre mark"
+            alt=""
             padding="0" />
         </mj-column>
       </mj-section>
