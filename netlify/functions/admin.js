@@ -380,7 +380,8 @@ async function handleExport() {
   const { data, error } = await sb()
     .from('waitlist_ranked')
     .select('waitlist_position, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
-    .order('waitlist_position', { ascending: true });
+    .order('waitlist_position', { ascending: true })
+    .limit(100000);
 
   if (error) throw error;
 
