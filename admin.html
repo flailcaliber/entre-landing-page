@@ -1016,6 +1016,254 @@
     /* ── Utility ───────────────────────────────────────────── */
     .divider { height: 1px; background: var(--border); margin: 2rem 0; }
     .text-muted { color: var(--muted); }
+
+    /* ── Match engine ──────────────────────────────────────── */
+    .match-input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 700px) { .match-input-grid { grid-template-columns: 1fr; } }
+
+    .match-person {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .match-person-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .match-prefs {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .match-prefs-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .match-pref-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .match-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+    .match-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .match-chip:hover  { border-color: var(--sage-border); color: var(--cream-dim); }
+    .match-chip.active { background: var(--sage-dim); border-color: var(--sage-border); color: var(--sage); }
+
+    .match-run-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .match-run-btn {
+      padding: 0.75rem 2rem;
+      background: var(--sage);
+      color: #131220;
+      border: none;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .match-run-btn:hover    { background: #b5ddb5; }
+    .match-run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .match-status {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.4rem;
+      margin-bottom: 1.75rem;
+    }
+    .match-status.visible { display: block; }
+
+    .match-step-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .match-step {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.8rem;
+      color: rgba(255,248,240,0.22);
+      transition: color 0.2s;
+    }
+    .match-step.done   { color: var(--sage); }
+    .match-step.active { color: var(--cream); }
+    .match-step.error  { color: var(--red); }
+
+    .match-step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .match-step.active .match-step-dot { animation: pulse-dot 1s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+    .match-info-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 800px) { .match-info-banner { grid-template-columns: 1fr 1fr; } }
+
+    .match-info-label {
+      font-size: 0.64rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+    }
+    .match-info-value { font-size: 0.88rem; color: var(--cream); }
+    .match-info-sub   { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+
+    .match-results-header {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .match-cards { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .match-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 1rem;
+      transition: border-color 0.15s;
+    }
+    .match-card:hover  { border-color: rgba(255,248,240,0.14); }
+    .match-card.rank-1 { border-color: var(--sage-border); }
+
+    .match-score-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .match-score-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--cream);
+    }
+    .match-score-num.high { color: var(--sage); }
+    .match-score-num.mid  { color: var(--coral); }
+
+    .match-score-bar {
+      width: 3px;
+      flex: 1;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      min-height: 24px;
+    }
+    .match-score-bar-fill { width: 100%; background: rgba(158,210,158,0.3); border-radius: 2px; transition: height 0.5s ease; }
+    .match-card.rank-1 .match-score-bar-fill { background: var(--sage); }
+
+    .match-card-name { font-size: 0.95rem; font-weight: 400; color: var(--cream); margin-bottom: 0.25rem; }
+
+    .match-card-meta {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .match-card-dist {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.72rem;
+      color: var(--sage);
+    }
+
+    .match-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.55rem; }
+
+    .match-tag {
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      font-size: 0.64rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .match-tag-cuisine { background: rgba(124,58,237,0.12); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
+    .match-tag-dietary { background: var(--sage-dim); color: var(--sage); border: 1px solid var(--sage-border); }
+    .match-tag-quality { background: rgba(232,168,124,0.12); color: var(--coral); border: 1px solid rgba(232,168,124,0.25); }
+
+    .match-card-details {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.25rem;
+    }
+
+    .match-empty { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.85rem; }
+
+    .match-osm-note {
+      font-size: 0.72rem;
+      color: rgba(255,248,240,0.2);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border2);
+    }
   </style>
 </head>
 <body>
@@ -1076,6 +1324,12 @@
       <button class="nav-item" data-tab="referrals" style="position:relative;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7.2 10 5M6 8.8l4 2.4"/></svg>
         Referral Program
+      </button>
+
+      <p class="nav-section-label">Product</p>
+      <button class="nav-item" data-tab="match" style="position:relative;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3"/><circle cx="11" cy="8" r="3"/><line x1="8" y1="5" x2="8" y2="11"/></svg>
+        Match
       </button>
     </div>
 
@@ -1281,6 +1535,79 @@
       </div>
     </div>
 
+    <!-- ── Match pane ───────────────────────────────────────── -->
+    <div class="content-pane" id="tabMatch">
+      <div class="pane-header">
+        <h2 class="pane-title">Match</h2>
+        <div class="pane-actions">
+          <span class="text-muted" style="font-size:0.75rem;">Midpoint restaurant finder</span>
+        </div>
+      </div>
+      <div class="pane-body">
+
+        <p class="section-title">Locations</p>
+        <div class="match-input-grid">
+          <div class="match-person">
+            <p class="match-person-label">Person A</p>
+            <input class="field-input" id="matchAddrA" type="text" placeholder="e.g. Williamsburg, Brooklyn" autocomplete="off" />
+          </div>
+          <div class="match-person">
+            <p class="match-person-label">Person B</p>
+            <input class="field-input" id="matchAddrB" type="text" placeholder="e.g. Upper West Side, Manhattan" autocomplete="off" />
+          </div>
+        </div>
+
+        <p class="section-title">Preferences</p>
+        <div class="match-prefs">
+          <div class="match-prefs-row">
+            <div class="match-pref-group" style="flex:2;min-width:200px;">
+              <p class="field-label">Cuisine type (optional)</p>
+              <input class="field-input" id="matchCuisine" type="text" placeholder="e.g. italian, japanese, thai…" autocomplete="off" />
+            </div>
+            <div class="match-pref-group">
+              <p class="field-label">Budget</p>
+              <div class="match-chips">
+                <button class="match-chip" data-budget="$">$</button>
+                <button class="match-chip" data-budget="$$">$$</button>
+                <button class="match-chip" data-budget="$$$">$$$</button>
+                <button class="match-chip" data-budget="$$$$">$$$$</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p class="field-label" style="margin-bottom:0.5rem;">Dietary requirements</p>
+            <div class="match-chips">
+              <button class="match-chip" data-dietary="vegetarian">Vegetarian</button>
+              <button class="match-chip" data-dietary="vegan">Vegan</button>
+              <button class="match-chip" data-dietary="gluten_free">Gluten-free</button>
+              <button class="match-chip" data-dietary="halal">Halal</button>
+              <button class="match-chip" data-dietary="kosher">Kosher</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="match-run-wrap">
+          <button class="match-run-btn" id="matchRunBtn" onclick="runMatch()">Find Meeting Spot</button>
+          <button class="btn-sm" id="matchClearBtn" onclick="clearMatch()" style="display:none;">Clear results</button>
+        </div>
+
+        <!-- Status log -->
+        <div class="match-status" id="matchStatus">
+          <div class="match-step-list">
+            <div class="match-step" id="matchStep0"><span class="match-step-dot"></span> Geocoding Person A</div>
+            <div class="match-step" id="matchStep1"><span class="match-step-dot"></span> Geocoding Person B</div>
+            <div class="match-step" id="matchStep2"><span class="match-step-dot"></span> Calculating midpoint</div>
+            <div class="match-step" id="matchStep3"><span class="match-step-dot"></span> Searching restaurants via OpenStreetMap</div>
+            <div class="match-step" id="matchStep4"><span class="match-step-dot"></span> Scoring &amp; ranking results</div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="matchResults"></div>
+
+      </div>
+    </div>
+
   </div><!-- /content-area -->
 
 </div><!-- /dashboard -->
@@ -1396,7 +1723,7 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
 
 // ── Dashboard init ─────────────────────────────────────────────
 async function initDashboard() {
-  // Overview loads by default (first tab)
+  initMatchChips();
   switchTab('overview');
 }
 
@@ -1966,6 +2293,341 @@ function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ── Match Engine ───────────────────────────────────────────────
+
+let _matchBudget  = null;
+let _matchDietary = new Set();
+
+// Preference chip toggles (must wait for DOM, attached in initDashboard)
+function initMatchChips() {
+  document.querySelectorAll('.match-chip[data-dietary]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset.dietary;
+      if (_matchDietary.has(d)) { _matchDietary.delete(d); btn.classList.remove('active'); }
+      else                       { _matchDietary.add(d);    btn.classList.add('active'); }
+    });
+  });
+
+  document.querySelectorAll('.match-chip[data-budget]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const already = btn.classList.contains('active');
+      document.querySelectorAll('.match-chip[data-budget]').forEach(b => b.classList.remove('active'));
+      _matchBudget = already ? null : btn.dataset.budget;
+      if (!already) btn.classList.add('active');
+    });
+  });
+
+  ['matchAddrA', 'matchAddrB', 'matchCuisine'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') runMatch();
+    });
+  });
+}
+
+function matchStepSet(i, state, msg) {
+  const el = document.getElementById(`matchStep${i}`);
+  el.className = `match-step ${state}`;
+  if (msg) el.innerHTML = `<span class="match-step-dot"></span> ${escHtml(msg)}`;
+}
+
+function matchResetSteps() {
+  for (let i = 0; i < 5; i++) matchStepSet(i, '');
+}
+
+async function runMatch() {
+  const addrA = document.getElementById('matchAddrA').value.trim();
+  const addrB = document.getElementById('matchAddrB').value.trim();
+  if (!addrA || !addrB) { alert('Please enter both addresses.'); return; }
+
+  const btn = document.getElementById('matchRunBtn');
+  btn.disabled = true;
+  document.getElementById('matchResults').innerHTML = '';
+  document.getElementById('matchClearBtn').style.display = 'none';
+  document.getElementById('matchStatus').classList.add('visible');
+  matchResetSteps();
+
+  const prefs = {
+    cuisine:  document.getElementById('matchCuisine').value.trim().toLowerCase() || null,
+    dietary:  [..._matchDietary],
+    budget:   _matchBudget,
+  };
+
+  try {
+    // Stage 1: Geocode A
+    matchStepSet(0, 'active', 'Geocoding Person A…');
+    const geoA = await matchGeocode(addrA);
+    matchStepSet(0, 'done', `Person A → ${geoA.display.split(',')[0].trim()}`);
+
+    // Nominatim hard rate-limit: 1 req/sec
+    await matchSleep(1100);
+
+    // Stage 2: Geocode B
+    matchStepSet(1, 'active', 'Geocoding Person B…');
+    const geoB = await matchGeocode(addrB);
+    matchStepSet(1, 'done', `Person B → ${geoB.display.split(',')[0].trim()}`);
+
+    // Stage 3: Midpoint
+    matchStepSet(2, 'active', 'Calculating midpoint…');
+    const midpoint  = matchCalcMidpoint(geoA.lat, geoA.lng, geoB.lat, geoB.lng);
+    const totalDist = matchHaversine(geoA.lat, geoA.lng, geoB.lat, geoB.lng);
+    const radius    = matchCalcRadius(totalDist);
+    matchStepSet(2, 'done', `Midpoint ${midpoint.lat.toFixed(4)}, ${midpoint.lng.toFixed(4)} · radius ${Math.round(radius)}m`);
+
+    // Stage 4: Restaurants
+    matchStepSet(3, 'active', 'Querying OpenStreetMap…');
+    const restaurants = await matchQueryRestaurants(midpoint.lat, midpoint.lng, radius);
+    if (restaurants.length === 0) {
+      matchStepSet(3, 'error', 'No restaurants found (OSM data sparse here — try a denser area)');
+      btn.disabled = false;
+      return;
+    }
+    matchStepSet(3, 'done', `Found ${restaurants.length} restaurant${restaurants.length !== 1 ? 's' : ''}`);
+
+    // Stage 5: Score
+    matchStepSet(4, 'active', 'Scoring results…');
+    await matchSleep(150);
+    const ranked = matchHeuristicScore(restaurants, prefs);
+    matchStepSet(4, 'done', `Ranked ${ranked.length} results`);
+
+    matchRenderResults(ranked, { geoA, geoB, midpoint, totalDist, radius }, prefs);
+    document.getElementById('matchClearBtn').style.display = '';
+
+  } catch (err) {
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById(`matchStep${i}`);
+      if (el.classList.contains('active')) {
+        matchStepSet(i, 'error', el.textContent.trim() + ` — ${err.message}`);
+        break;
+      }
+    }
+    console.error('[entre-match]', err);
+  }
+
+  btn.disabled = false;
+}
+
+function clearMatch() {
+  document.getElementById('matchResults').innerHTML = '';
+  document.getElementById('matchStatus').classList.remove('visible');
+  document.getElementById('matchClearBtn').style.display = 'none';
+  matchResetSteps();
+}
+
+// ── Geo math ───────────────────────────────────────────────────
+
+async function matchGeocode(address) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&addressdetails=1`;
+  const res = await fetch(url, { headers: { 'User-Agent': 'EntreOS/1.0', 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error(`Nominatim returned ${res.status}`);
+  const data = await res.json();
+  if (!data.length) throw new Error(`Address not found: "${address}" — try a more specific location`);
+  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display: data[0].display_name };
+}
+
+function matchCalcMidpoint(lat1, lng1, lat2, lng2) {
+  const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+  const φ1 = lat1 * D2R, φ2 = lat2 * D2R;
+  const λ1 = lng1 * D2R, dλ  = (lng2 - lng1) * D2R;
+  const Bx = Math.cos(φ2) * Math.cos(dλ);
+  const By = Math.cos(φ2) * Math.sin(dλ);
+  const φm = Math.atan2(Math.sin(φ1) + Math.sin(φ2), Math.sqrt((Math.cos(φ1) + Bx) ** 2 + By ** 2));
+  const λm = λ1 + Math.atan2(By, Math.cos(φ1) + Bx);
+  return { lat: φm * R2D, lng: λm * R2D };
+}
+
+function matchHaversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000, D2R = Math.PI / 180;
+  const dLat = (lat2 - lat1) * D2R, dLng = (lng2 - lng1) * D2R;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * D2R) * Math.cos(lat2 * D2R) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function matchCalcRadius(totalDistM) {
+  return Math.min(5000, Math.max(500, Math.round(totalDistM * 0.4)));
+}
+
+function matchSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Overpass query ─────────────────────────────────────────────
+
+async function matchQueryRestaurants(lat, lng, radiusM) {
+  const q = `[out:json][timeout:25];\n(\n  node["amenity"="restaurant"](around:${radiusM},${lat},${lng});\n  way["amenity"="restaurant"](around:${radiusM},${lat},${lng});\n  node["amenity"="cafe"]["cuisine"](around:${radiusM},${lat},${lng});\n);\nout body; >; out skel qt;`;
+  const servers = [
+    'https://overpass-api.de/api/interpreter',
+    'https://lz4.overpass-api.de/api/interpreter',
+    'https://z.overpass-api.de/api/interpreter',
+  ];
+  let lastErr;
+  for (const srv of servers) {
+    try {
+      const res = await fetch(srv, { method: 'POST', body: q, headers: { 'Content-Type': 'text/plain' } });
+      if (!res.ok) { lastErr = new Error(`Overpass ${res.status}`); continue; }
+      const data = await res.json();
+      return matchParseOsm(data.elements || [], lat, lng);
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('All Overpass servers failed');
+}
+
+function matchParseOsm(elements, midLat, midLng) {
+  const map = new Map();
+  for (const el of elements) {
+    const t = el.tags || {};
+    if (!t.name) continue;
+    const lat = el.lat ?? el.center?.lat;
+    const lng = el.lon ?? el.center?.lon;
+    if (lat == null || lng == null) continue;
+    const r = {
+      name:     t.name,
+      cuisine:  t.cuisine || '',
+      address:  [t['addr:housenumber'], t['addr:street']].filter(Boolean).join(' '),
+      phone:    t.phone || t['contact:phone'] || '',
+      website:  t.website || t['contact:website'] || '',
+      hours:    t.opening_hours || '',
+      dietary:  {
+        vegetarian:  t['diet:vegetarian'],
+        vegan:       t['diet:vegan'],
+        gluten_free: t['diet:gluten_free'],
+        halal:       t['diet:halal'],
+        kosher:      t['diet:kosher'],
+      },
+      outdoor:  t.outdoor_seating === 'yes',
+      distance: matchHaversine(midLat, midLng, lat, lng),
+      lat, lng,
+    };
+    const meta = [r.cuisine, r.address, r.phone, r.website, r.hours].filter(Boolean).length;
+    if (!map.has(r.name) || meta > (map.get(r.name)._m || 0)) { r._m = meta; map.set(r.name, r); }
+  }
+  return [...map.values()].sort((a, b) => a.distance - b.distance).slice(0, 30);
+}
+
+// ── Heuristic scoring ──────────────────────────────────────────
+
+function matchHeuristicScore(restaurants, prefs) {
+  const maxDist = Math.max(...restaurants.map(r => r.distance), 1);
+  return restaurants.map(r => {
+    let score = 40;
+    const highlights = [];
+
+    // Distance: 0–30 pts (inverse linear)
+    score += Math.round(30 * (1 - r.distance / maxDist));
+    if (r.distance < 200)      highlights.push('at midpoint');
+    else if (r.distance < 500) highlights.push('near midpoint');
+
+    // Cuisine match: +20 pts
+    if (prefs.cuisine && r.cuisine) {
+      const cuisines = r.cuisine.toLowerCase().split(/[;,\s]+/).map(c => c.trim()).filter(Boolean);
+      const q        = prefs.cuisine;
+      if (cuisines.some(c => c.includes(q) || q.includes(c))) {
+        score += 20; highlights.push('cuisine match');
+      }
+    }
+
+    // Quality signals: up to +15 pts
+    let qScore = 0;
+    if (r.hours)   qScore += 5;
+    if (r.website) qScore += 5;
+    if (r.phone)   qScore += 5;
+    score += qScore;
+    if (qScore >= 10) highlights.push('well-listed');
+
+    // Dietary: +10 pts each
+    for (const d of (prefs.dietary || [])) {
+      if (r.dietary[d] === 'yes' || r.dietary[d] === 'only') {
+        score += 10;
+        highlights.push(d.replace('_', ' ') + '-friendly');
+      }
+    }
+
+    return { ...r, score: Math.min(100, score), highlights };
+  }).sort((a, b) => b.score - a.score);
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function matchRenderResults(ranked, info, prefs) {
+  const { geoA, geoB, midpoint, totalDist, radius } = info;
+  const distKm = (totalDist / 1000).toFixed(1);
+
+  const banner = `
+    <div class="match-info-banner">
+      <div>
+        <p class="match-info-label">Person A</p>
+        <p class="match-info-value">${escHtml(geoA.display.split(',').slice(0, 2).join(','))}</p>
+      </div>
+      <div>
+        <p class="match-info-label">Person B</p>
+        <p class="match-info-value">${escHtml(geoB.display.split(',').slice(0, 2).join(','))}</p>
+      </div>
+      <div>
+        <p class="match-info-label">Midpoint</p>
+        <p class="match-info-value">${midpoint.lat.toFixed(4)}, ${midpoint.lng.toFixed(4)}</p>
+        <p class="match-info-sub">${distKm} km apart · ${Math.round(radius)}m search radius</p>
+      </div>
+    </div>`;
+
+  const cards = ranked.length === 0
+    ? `<div class="match-empty">No restaurants found in this area.<br>OSM coverage may be thin here — try denser neighborhoods.</div>`
+    : ranked.map((r, i) => matchRenderCard(r, i)).join('');
+
+  document.getElementById('matchResults').innerHTML = `
+    ${banner}
+    <p class="match-results-header">${ranked.length} restaurant${ranked.length !== 1 ? 's' : ''} ranked</p>
+    <div class="match-cards">${cards}</div>
+    <p class="match-osm-note">Restaurant data from OpenStreetMap · Scoring is heuristic (distance + cuisine + quality signals + dietary) · OSM coverage varies — many restaurants lack hours, cuisine tags, or dietary info</p>
+  `;
+}
+
+function matchRenderCard(r, i) {
+  const scoreColor = r.score >= 75 ? 'high' : r.score >= 55 ? 'mid' : '';
+  const rankClass  = i === 0 ? 'rank-1' : '';
+
+  const tags = [];
+  if (r.cuisine) {
+    r.cuisine.split(/[;,]/).slice(0, 3).forEach(c => {
+      const label = c.trim();
+      if (label) tags.push(`<span class="match-tag match-tag-cuisine">${escHtml(label)}</span>`);
+    });
+  }
+  r.highlights.filter(h => h.includes('-friendly')).forEach(h => {
+    tags.push(`<span class="match-tag match-tag-dietary">${escHtml(h)}</span>`);
+  });
+  if (r.highlights.includes('well-listed')) tags.push(`<span class="match-tag match-tag-quality">established</span>`);
+  if (r.outdoor) tags.push(`<span class="match-tag match-tag-quality">outdoor seating</span>`);
+
+  const distText = r.distance < 1000 ? `${Math.round(r.distance)}m` : `${(r.distance / 1000).toFixed(1)}km`;
+
+  const details = [];
+  if (r.address) details.push(`📍 ${escHtml(r.address)}`);
+  if (r.hours)   details.push(`🕐 ${escHtml(truncate(r.hours, 55))}`);
+  if (r.website) {
+    const display = r.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+    details.push(`<a href="${escHtml(r.website)}" target="_blank" rel="noopener" style="color:var(--sage);text-decoration:none;">${escHtml(truncate(display, 40))}</a>`);
+  }
+  if (r.phone) details.push(`📞 ${escHtml(r.phone)}`);
+
+  return `
+    <div class="match-card ${rankClass}">
+      <div class="match-score-col">
+        <span class="match-score-num ${scoreColor}">${r.score}</span>
+        <div class="match-score-bar"><div class="match-score-bar-fill" style="height:${r.score}%"></div></div>
+      </div>
+      <div>
+        <p class="match-card-name">${i === 0 ? '★ ' : ''}${escHtml(r.name)}</p>
+        <div class="match-card-meta">
+          <span class="match-card-dist">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#9ED29E" stroke-width="1.2"/></svg>
+            ${distText} from midpoint
+          </span>
+          ${r.highlights.includes('cuisine match') ? '<span style="font-size:0.72rem;color:var(--coral)">cuisine match</span>' : ''}
+          ${r.highlights.includes('at midpoint') || r.highlights.includes('near midpoint') ? `<span style="font-size:0.72rem;color:var(--sage)">${escHtml(r.highlights[0])}</span>` : ''}
+        </div>
+        ${tags.length > 0 ? `<div class="match-card-tags">${tags.join('')}</div>` : ''}
+        ${details.length > 0 ? `<div class="match-card-details">${details.map(d => `<span>${d}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>`;
 }
 </script>
 
