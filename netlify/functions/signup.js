@@ -137,13 +137,16 @@ exports.handler = async (event) => {
     referred_by_code, source,
     utm_source, utm_medium, utm_campaign, utm_content, utm_term,
     pmf_response,
+    _hp,
   } = body;
 
   if (!email || !email.includes('@')) {
     return json(400, { error: 'Valid email required' });
   }
 
-  const referral_code = generateCode();
+  // Honeypot: _hp is a hidden field real users never see or fill.
+  // Any submission with it populated is a bot.
+  const is_bot_flagged = _hp ? true : null;
 
   const { error } = await sb().from('waitlist').insert({
     email:            email.trim().toLowerCase(),
@@ -157,6 +160,7 @@ exports.handler = async (event) => {
     utm_content:      utm_content   || null,
     utm_term:         utm_term      || null,
     pmf_response:     pmf_response  || null,
+    is_bot_flagged:   is_bot_flagged,
   });
 
   if (error) {
@@ -233,6 +237,12 @@ exports.handler = async (event) => {
     position = total;
   } catch (e) {
     console.warn('[entre-signup] position lookup failed:', e.message);
+  }
+
+  // Skip Loops entirely for bot-flagged signups — no confirmation email, no contact record
+  if (is_bot_flagged) {
+    console.log('[entre-signup] bot-flagged signup, skipping Loops:', email.trim().toLowerCase());
+    return json(200, { success: true, referral_code, position: null });
   }
 
   // Create contact in Loops — the "contact added" Loop trigger handles the email

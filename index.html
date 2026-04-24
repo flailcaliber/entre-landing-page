@@ -851,6 +851,16 @@
               autocomplete="off"
             />
           </div>
+          <!-- Honeypot: hidden from real users, bots fill it automatically -->
+          <input
+            id="_hp"
+            name="_hp"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+            aria-hidden="true"
+            style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
+          />
           <button class="submit-btn" type="submit" id="submitBtn">
             Join the waitlist
           </button>
@@ -1002,6 +1012,7 @@
     const input      = document.getElementById('emailInput');
     const phoneInput = document.getElementById('phoneInput');
     const pmfInput   = document.getElementById('pmfInput');
+    const hpInput    = document.getElementById('_hp');
     const successMsg = document.getElementById('successMsg');
     const formNote   = document.getElementById('formNote');
     const formError  = document.getElementById('formError');
@@ -1038,6 +1049,7 @@
             utm_content:      _utm.content,
             utm_term:         _utm.term,
             pmf_response:     pmfInput.value.trim() || null,
+            _hp:              hpInput.value || undefined,
           }),
         });
         data = await res.json();
