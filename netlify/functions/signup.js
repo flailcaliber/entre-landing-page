@@ -144,6 +144,8 @@ exports.handler = async (event) => {
     return json(400, { error: 'Valid email required' });
   }
 
+  const referral_code = generateCode();
+
   // Honeypot: _hp is a hidden field real users never see or fill.
   // Any submission with it populated is a bot.
   const is_bot_flagged = _hp ? true : null;
