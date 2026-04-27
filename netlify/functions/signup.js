@@ -148,7 +148,7 @@ exports.handler = async (event) => {
 
   // Honeypot: _hp is a hidden field real users never see or fill.
   // Any submission with it populated is a bot.
-  const is_bot_flagged = _hp ? true : null;
+  const is_bot_flagged = !!_hp;
 
   const { error } = await sb().from('waitlist').insert({
     email:            email.trim().toLowerCase(),
