@@ -88,7 +88,8 @@ exports.handler = async (event) => {
       .lt('created_at', data.created_at),
   ]);
 
-  const position = (aheadByCount.count || 0) + (aheadByDate.count || 0) + 1;
+  const POSITION_OFFSET = 2000;
+  const position = (aheadByCount.count || 0) + (aheadByDate.count || 0) + 1 + POSITION_OFFSET;
 
   return json(200, {
     referral_code:  data.referral_code,

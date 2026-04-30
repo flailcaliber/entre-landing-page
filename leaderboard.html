@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Waitlist Leaderboard — Entre</title>
+  <meta name="description" content="See who's referring the most friends to Entre." />
+  <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #131220;
+      --surface:     #1c1b2e;
+      --cream:       #FFF8F0;
+      --cream-dim:   rgba(255,248,240,0.55);
+      --cream-faint: rgba(255,248,240,0.18);
+      --sage:        #9ED29E;
+      --sage-dim:    rgba(158,210,158,0.12);
+      --sage-border: rgba(158,210,158,0.28);
+      --gold:        #D4A853;
+      --gold-dim:    rgba(212,168,83,0.12);
+      --gold-border: rgba(212,168,83,0.30);
+      --silver:      #A8B8C8;
+      --silver-dim:  rgba(168,184,200,0.10);
+      --bronze:      #C07840;
+      --bronze-dim:  rgba(192,120,64,0.10);
+      --muted:       rgba(255,248,240,0.35);
+      --border:      rgba(255,248,240,0.08);
+    }
+
+    html { font-size: 16px; background: #131220; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.25rem 4rem;
+      padding-top: calc(5rem + env(safe-area-inset-top));
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      padding-top: calc(1.25rem + env(safe-area-inset-top));
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(19,18,32,0.95) 60%, transparent);
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .logo em { font-style: italic; color: var(--sage); }
+
+    .back-link {
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--cream); }
+
+    /* ── Page header ─────────────────────────────────────────── */
+    .page-header {
+      width: 100%;
+      max-width: 480px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .page-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 0.6rem;
+    }
+
+    .page-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Leaderboard card ────────────────────────────────────── */
+    .board {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .board-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: border-color 0.2s;
+      animation: fade-up 0.4s ease both;
+    }
+
+    .board-row:hover { border-color: rgba(255,248,240,0.14); }
+
+    .board-row.rank-1 {
+      background: var(--gold-dim);
+      border-color: var(--gold-border);
+    }
+    .board-row.rank-2 {
+      background: var(--silver-dim);
+      border-color: rgba(168,184,200,0.22);
+    }
+    .board-row.rank-3 {
+      background: var(--bronze-dim);
+      border-color: rgba(192,120,64,0.22);
+    }
+
+    .rank-badge {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      width: 2rem;
+      text-align: center;
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+
+    .board-row.rank-1 .rank-badge { color: var(--gold); }
+    .board-row.rank-2 .rank-badge { color: var(--silver); }
+    .board-row.rank-3 .rank-badge { color: var(--bronze); }
+
+    .email-masked {
+      flex: 1;
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ref-count {
+      flex-shrink: 0;
+      font-size: 0.82rem;
+      color: var(--sage);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    /* ── Empty / loading states ──────────────────────────────── */
+    .state-msg {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      padding: 3rem 1rem;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    /* ── CTA ─────────────────────────────────────────────────── */
+    .cta {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 2rem;
+      background: var(--sage-dim);
+      border: 1px solid var(--sage-border);
+      border-radius: 16px;
+      padding: 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .cta-text {
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      line-height: 1.55;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: var(--sage);
+      color: #131220;
+      border: none;
+      border-radius: 100px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .cta-btn:hover { background: #b5ddb5; transform: translateY(-1px); }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header { animation: fade-up 0.5s ease both; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="logo" href="/">entr<em>e</em></a>
+    <a class="back-link" href="/">← Back to home</a>
+  </nav>
+
+  <div class="page-header">
+    <h1 class="page-title">The referral board.</h1>
+    <p class="page-sub">The people bringing their whole city to Entre.<br>Each referral moves you up the waitlist.</p>
+  </div>
+
+  <div class="board" id="board">
+    <p class="state-msg" id="stateMsg">Loading…</p>
+  </div>
+
+  <div class="cta" id="cta" style="display:none;">
+    <p class="cta-text">Check your own position — or grab your invite link and start climbing.</p>
+    <a class="cta-btn" href="/waitlist.html">Check my position →</a>
+  </div>
+
+  <script>
+    const MEDAL = ['🥇', '🥈', '🥉'];
+
+    async function load() {
+      const board   = document.getElementById('board');
+      const stateMsg = document.getElementById('stateMsg');
+
+      let data;
+      try {
+        const res = await fetch('/.netlify/functions/leaderboard?limit=10');
+        data = await res.json();
+      } catch (e) {
+        stateMsg.textContent = 'Couldn\'t load the leaderboard. Try again later.';
+        return;
+      }
+
+      const leaders = data.leaders || [];
+
+      if (leaders.length === 0) {
+        stateMsg.textContent = 'No referrals yet — be the first to share your link.';
+        document.getElementById('cta').style.display = '';
+        return;
+      }
+
+      board.innerHTML = '';
+
+      leaders.forEach((row, i) => {
+        const el = document.createElement('div');
+        el.className = 'board-row' + (i < 3 ? ` rank-${i + 1}` : '');
+        el.style.animationDelay = `${i * 0.05}s`;
+
+        const badge = i < 3
+          ? `<span class="rank-badge">${MEDAL[i]}</span>`
+          : `<span class="rank-badge">${row.rank}</span>`;
+
+        const plural = row.referral_count === 1 ? 'referral' : 'referrals';
+
+        el.innerHTML = `
+          ${badge}
+          <span class="email-masked">${row.email_masked}</span>
+          <span class="ref-count">${row.referral_count} ${plural}</span>
+        `;
+        board.appendChild(el);
+      });
+
+      document.getElementById('cta').style.display = '';
+    }
+
+    load();
+  </script>
+</body>
+</html>

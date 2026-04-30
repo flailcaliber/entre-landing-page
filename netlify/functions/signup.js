@@ -214,6 +214,7 @@ exports.handler = async (event) => {
           return json(500, { error: resubErr.message });
         }
 
+        const POSITION_OFFSET = 2000;
         let position = null;
         try {
           const { count: total } = await sb()
@@ -221,7 +222,7 @@ exports.handler = async (event) => {
             .select('id', { count: 'exact', head: true })
             .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
             .is('unsubscribed_at', null);
-          position = total;
+          position = total !== null ? total + POSITION_OFFSET : null;
         } catch (e) {
           console.warn('[entre-signup] position lookup failed:', e.message);
         }
@@ -247,13 +248,15 @@ exports.handler = async (event) => {
 
   // Compute approximate waitlist position — new signups start at the back
   // (referrals will move them up over time). Position = total non-flagged rows.
+  // POSITION_OFFSET is added to every displayed position to seed social proof.
+  const POSITION_OFFSET = 2000;
   let position = null;
   try {
     const { count: total } = await sb()
       .from('waitlist')
       .select('id', { count: 'exact', head: true })
       .or('is_bot_flagged.is.null,is_bot_flagged.eq.false');
-    position = total;
+    position = total !== null ? total + POSITION_OFFSET : null;
   } catch (e) {
     console.warn('[entre-signup] position lookup failed:', e.message);
   }
@@ -268,7 +271,7 @@ exports.handler = async (event) => {
   await loopsUpsertContact({
     email:             email.trim().toLowerCase(),
     referral_code:     referral_code,
-    waitlist_position: position ?? 1,
+    waitlist_position: position ?? POSITION_OFFSET + 1,
     referral_count:    0,
   }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
 
