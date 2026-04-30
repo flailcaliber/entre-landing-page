@@ -115,6 +115,23 @@ async function loopsUpsertContact({ email, referral_code, waitlist_position, ref
 }
 
 
+// ─── Launchlist helper ────────────────────────────────────────
+
+const LAUNCHLIST_ENDPOINT = 'https://getlaunchlist.com/s/WjTPlU';
+
+async function launchlistSync(email) {
+  const body = new URLSearchParams({ email });
+  const res = await fetch(LAUNCHLIST_ENDPOINT, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    body.toString(),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    console.warn('[entre-signup] Launchlist sync failed:', res.status, text);
+  }
+}
+
 // ─── Main handler ─────────────────────────────────────────────
 
 exports.handler = async (event) => {
@@ -254,6 +271,10 @@ exports.handler = async (event) => {
     waitlist_position: position ?? 1,
     referral_count:    0,
   }).catch(e => console.warn('[entre-signup] Loops upsert failed:', e.message));
+
+  // Sync to Launchlist for viral referral loop tracking
+  launchlistSync(email.trim().toLowerCase())
+    .catch(e => console.warn('[entre-signup] Launchlist sync error:', e.message));
 
   // If this signup used a referral code, increment the referrer's count in Loops
   if (referred_by_code) {
