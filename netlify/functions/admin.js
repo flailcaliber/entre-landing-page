@@ -96,14 +96,15 @@ async function handleList(event) {
   const offset = (page - 1) * limit;
   const search = (params.search || '').trim();
 
-  // Query waitlist_ranked view — includes computed waitlist_position column
   let q = sb()
-    .from('waitlist_ranked')
+    .from('waitlist')
     .select(
-      'id, waitlist_position, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at',
+      'id, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at',
       { count: 'exact' }
     )
-    .order('waitlist_position', { ascending: true })
+    .is('unsubscribed_at', null)
+    .order('referral_count', { ascending: false })
+    .order('created_at',     { ascending: true  })
     .range(offset, offset + limit - 1);
 
   if (search) q = q.ilike('email', `%${search}%`);
@@ -111,7 +112,12 @@ async function handleList(event) {
   const { data, error, count } = await q;
   if (error) throw error;
 
-  return json(200, { subscribers: data, total: count, page, limit, pages: Math.ceil((count || 0) / limit) });
+  const subscribers = (data || []).map((r, i) => ({
+    ...r,
+    waitlist_position: offset + i + 1,
+  }));
+
+  return json(200, { subscribers, total: count, page, limit, pages: Math.ceil((count || 0) / limit) });
 }
 
 async function handleAnalytics() {
@@ -376,16 +382,17 @@ async function handleWaitlistQueue(event) {
 }
 
 async function handleExport() {
-  // Query waitlist_ranked view — waitlist_position is computed by Postgres ROW_NUMBER()
   const { data, error } = await sb()
-    .from('waitlist_ranked')
-    .select('waitlist_position, email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
-    .order('waitlist_position', { ascending: true })
+    .from('waitlist')
+    .select('email, phone, source, referral_code, referred_by_code, referral_count, city, pmf_response, utm_source, utm_medium, utm_campaign, is_bot_flagged, created_at')
+    .is('unsubscribed_at', null)
+    .order('referral_count', { ascending: false })
+    .order('created_at',     { ascending: true  })
     .limit(100000);
 
   if (error) throw error;
 
-  const rows = data || [];
+  const rows = (data || []).map((r, i) => ({ waitlist_position: i + 1, ...r }));
   const cols = ['waitlist_position', 'email', 'phone', 'source', 'referral_code', 'referred_by_code', 'referral_count', 'city', 'pmf_response', 'utm_source', 'utm_medium', 'utm_campaign', 'is_bot_flagged', 'created_at'];
   const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [cols.join(','), ...rows.map(r => cols.map(c => escape(r[c])).join(','))].join('\n');

@@ -1857,12 +1857,23 @@ async function loadSubscribers() {
   document.getElementById('tableBody').innerHTML =
     '<tr class="loading-row"><td colspan="12">Loading…</td></tr>';
 
-  const res  = await api(`?${params}`);
-  const data = await res.json();
+  try {
+    const res  = await api(`?${params}`);
+    const data = await res.json();
 
-  _totalPages = data.pages || 1;
-  renderTable(data.subscribers || []);
-  renderPagination(data.total || 0, data.page || 1, _totalPages);
+    if (!res.ok) {
+      document.getElementById('tableBody').innerHTML =
+        `<tr><td colspan="12" style="color:var(--red);text-align:center;padding:2rem;">Error ${res.status}: ${escHtml(data.error || 'Unknown error')}</td></tr>`;
+      return;
+    }
+
+    _totalPages = data.pages || 1;
+    renderTable(data.subscribers || []);
+    renderPagination(data.total || 0, data.page || 1, _totalPages);
+  } catch (e) {
+    document.getElementById('tableBody').innerHTML =
+      `<tr><td colspan="12" style="color:var(--red);text-align:center;padding:2rem;">Connection error: ${escHtml(e.message)}</td></tr>`;
+  }
 }
 
 function renderTable(rows) {
