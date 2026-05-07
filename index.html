@@ -803,7 +803,7 @@
     <!-- Hero -->
     <main class="hero">
 
-      <span class="pill">
+      <span class="pill" id="pill" style="opacity:0;transition:opacity 0.15s ease">
         <span class="pill-dot"></span>
         <span id="pillText">Waitlist: 2,000+ people</span>
       </span>
@@ -1008,6 +1008,7 @@
 
     // ── Waitlist count pill ──────────────────────────────────
     (async () => {
+      const pill = document.getElementById('pill');
       try {
         const res  = await fetch('/.netlify/functions/lookup?action=count');
         const data = await res.json();
@@ -1016,6 +1017,7 @@
             'Waitlist: ' + data.count.toLocaleString() + ' people';
         }
       } catch (_) {}
+      pill.style.opacity = '1';
     })();
 
     // ── Waitlist form ────────────────────────────────────────
