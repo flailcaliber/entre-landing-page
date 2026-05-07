@@ -49,6 +49,21 @@ exports.handler = async (event) => {
   const email  = (params.email  || '').trim().toLowerCase();
   const token  = (params.token  || '').trim().toUpperCase();
 
+  if (params.action === 'count') {
+    const POSITION_OFFSET = 2000;
+    const { count: total, error: countErr } = await sb()
+      .from('waitlist')
+      .select('id', { count: 'exact', head: true })
+      .or('is_bot_flagged.is.null,is_bot_flagged.eq.false')
+      .is('unsubscribed_at', null);
+
+    if (countErr) {
+      console.error('[entre-lookup] count error:', countErr);
+      return json(500, { error: 'Count failed' });
+    }
+    return json(200, { count: (total || 0) + POSITION_OFFSET });
+  }
+
   if (!email && !token) {
     return json(400, { error: 'Provide email or token' });
   }

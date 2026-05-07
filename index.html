@@ -805,7 +805,7 @@
 
       <span class="pill">
         <span class="pill-dot"></span>
-        Now accepting early members
+        <span id="pillText">Waitlist: 2,000+ people</span>
       </span>
 
       <h1>
@@ -1005,6 +1005,18 @@
       requestAnimationFrame(animateGlow);
     }
     animateGlow();
+
+    // ── Waitlist count pill ──────────────────────────────────
+    (async () => {
+      try {
+        const res  = await fetch('/.netlify/functions/lookup?action=count');
+        const data = await res.json();
+        if (data.count) {
+          document.getElementById('pillText').textContent =
+            'Waitlist: ' + data.count.toLocaleString() + ' people';
+        }
+      } catch (_) {}
+    })();
 
     // ── Waitlist form ────────────────────────────────────────
     const form       = document.getElementById('waitlistForm');
