@@ -392,7 +392,8 @@ async function handleExport() {
 
   if (error) throw error;
 
-  const rows = (data || []).map((r, i) => ({ waitlist_position: i + 1, ...r }));
+  const POSITION_OFFSET = 2000;
+  const rows = (data || []).map((r, i) => ({ waitlist_position: i + 1 + POSITION_OFFSET, ...r }));
   const cols = ['waitlist_position', 'email', 'phone', 'source', 'referral_code', 'referred_by_code', 'referral_count', 'city', 'pmf_response', 'utm_source', 'utm_medium', 'utm_campaign', 'is_bot_flagged', 'created_at'];
   const escape = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [cols.join(','), ...rows.map(r => cols.map(c => escape(r[c])).join(','))].join('\n');
