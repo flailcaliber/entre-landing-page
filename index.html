@@ -23,6 +23,7 @@
   <meta name="twitter:image"       content="https://www.entre.nyc/assets/og-image.png" />
   <meta name="twitter:image:alt"   content="Entre — the restaurant between you two." />
 
+  <script>try{var _et=localStorage.getItem('entre-theme');if(_et==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
   <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -56,7 +57,7 @@
     html {
       font-size: 16px;
       scroll-behavior: smooth;
-      background: #131220;
+      background: var(--bg);
     }
 
     body {
@@ -198,8 +199,6 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
-      opacity: 0;
-      animation: fade-up 0.7s ease 0.2s forwards;
     }
 
     .nav-badge::before {
@@ -763,6 +762,111 @@
       transition: opacity 0.3s;
       will-change: left, top;
     }
+
+    /* ─── Theme toggle ──────────────────────────────────── */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      opacity: 0;
+      animation: fade-up 0.7s ease 0.2s forwards;
+    }
+
+    .theme-toggle {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: color 0.25s ease;
+    }
+    .theme-toggle:hover { color: var(--cream-dim); }
+
+    .toggle-icon {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toggle-sun  { opacity: 1; transform: rotate(0deg)   scale(1);   }
+    .toggle-moon { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+
+    :root[data-theme="light"] .toggle-sun  { opacity: 0; transform: rotate(90deg)  scale(0.4); }
+    :root[data-theme="light"] .toggle-moon { opacity: 1; transform: rotate(0deg)   scale(1);   }
+
+    /* ─── Light mode palette ────────────────────────────── */
+    :root[data-theme="light"] {
+      --bg:          #FEF7E8;
+      --surface:     #F0E5CE;
+      --cream:       #1A0F2E;
+      --cream-dim:   rgba(26, 15, 46, 0.62);
+      --cream-faint: rgba(26, 15, 46, 0.20);
+      --sage:        #38913A;
+      --sage-dim:    rgba(56, 145, 58, 0.12);
+      --purple:      #6D28D9;
+      --purple-soft: rgba(109, 40, 217, 0.08);
+      --coral:       #B84A1A;
+      --muted:       rgba(26, 15, 46, 0.38);
+      --border:      rgba(26, 15, 46, 0.09);
+    }
+
+    /* ─── Theme-switch base transitions ─────────────────── */
+    html { transition: background-color 0.45s ease; }
+    body { transition: background-color 0.45s ease, color 0.45s ease; }
+    .blob { transition: background 0.45s ease; }
+
+    /* ─── Light mode blob overrides ─────────────────────── */
+    :root[data-theme="light"] .blob-a {
+      background: radial-gradient(circle, rgba(220,110,40,0.26) 0%, rgba(220,110,40,0.04) 70%);
+    }
+    :root[data-theme="light"] .blob-b {
+      background: radial-gradient(circle, rgba(109,40,217,0.18) 0%, rgba(109,40,217,0.03) 70%);
+    }
+    :root[data-theme="light"] .blob-c {
+      background: radial-gradient(circle, rgba(56,145,58,0.20) 0%, rgba(56,145,58,0.04) 70%);
+    }
+    :root[data-theme="light"] .blob-top {
+      background: radial-gradient(circle, rgba(220,110,40,0.30) 0%, rgba(220,110,40,0.04) 70%);
+    }
+    :root[data-theme="light"] .blob-bottom {
+      background: radial-gradient(circle, rgba(109,40,217,0.22) 0%, rgba(109,40,217,0.04) 70%);
+    }
+
+    /* ─── Light mode surface overrides ─────────────────── */
+    :root[data-theme="light"] .pill {
+      background: rgba(26, 15, 46, 0.05);
+    }
+    :root[data-theme="light"] .input-row {
+      background: rgba(26, 15, 46, 0.045);
+    }
+    :root[data-theme="light"] .referral-link-row {
+      background: rgba(26, 15, 46, 0.04);
+    }
+    :root[data-theme="light"] .bg-canvas::after {
+      opacity: 0.18;
+    }
+    :root[data-theme="light"] .submit-btn:hover {
+      background: #2a7a2b;
+      box-shadow: 0 4px 20px rgba(56, 145, 58, 0.28);
+    }
+    :root[data-theme="light"] .copy-btn.copied {
+      background: rgba(56, 145, 58, 0.15);
+      color: var(--sage);
+    }
+
+    @media (max-width: 600px) {
+      :root[data-theme="light"] .feat-icon {
+        background: rgba(26, 15, 46, 0.06);
+      }
+    }
   </style>
 </head>
 <body>
@@ -797,7 +901,29 @@
         </svg>
         <span class="wordmark-text">entr<em>e</em></span>
       </a>
-      <span class="nav-badge">Coming to NYC</span>
+      <div class="nav-right">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <span class="toggle-icon toggle-sun">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="2.8" stroke="currentColor" stroke-width="1.35"/>
+              <line x1="8" y1="1.2" x2="8" y2="3.2" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="8" y1="12.8" x2="8" y2="14.8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="1.2" y1="8" x2="3.2" y2="8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="12.8" y1="8" x2="14.8" y2="8" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="3.27" y1="3.27" x2="4.68" y2="4.68" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="11.32" y1="11.32" x2="12.73" y2="12.73" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="12.73" y1="3.27" x2="11.32" y2="4.68" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+              <line x1="4.68" y1="11.32" x2="3.27" y2="12.73" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="toggle-icon toggle-moon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M13.8 10.5A6.5 6.5 0 0 1 5.5 2.2a6.5 6.5 0 1 0 8.3 8.3z" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <span class="nav-badge">Coming to NYC</span>
+      </div>
     </nav>
 
     <!-- Hero -->
@@ -1005,6 +1131,18 @@
       requestAnimationFrame(animateGlow);
     }
     animateGlow();
+
+    // ── Theme toggle ─────────────────────────────────────────
+    document.getElementById('themeToggle').addEventListener('click', function() {
+      var html = document.documentElement;
+      if (html.getAttribute('data-theme') === 'light') {
+        html.removeAttribute('data-theme');
+        try { localStorage.removeItem('entre-theme'); } catch(e) {}
+      } else {
+        html.setAttribute('data-theme', 'light');
+        try { localStorage.setItem('entre-theme', 'light'); } catch(e) {}
+      }
+    });
 
     // ── Waitlist count pill ──────────────────────────────────
     (async () => {
