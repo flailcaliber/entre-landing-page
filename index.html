@@ -823,22 +823,8 @@
     body { transition: background-color 0.45s ease, color 0.45s ease; }
     .blob { transition: background 0.45s ease; }
 
-    /* ─── Light mode blob overrides ─────────────────────── */
-    :root[data-theme="light"] .blob-a {
-      background: radial-gradient(circle, rgba(90,112,80,0.55) 0%, rgba(90,112,80,0.12) 70%);
-    }
-    :root[data-theme="light"] .blob-b {
-      background: radial-gradient(circle, rgba(109,40,217,0.42) 0%, rgba(109,40,217,0.08) 70%);
-    }
-    :root[data-theme="light"] .blob-c {
-      background: radial-gradient(circle, rgba(90,112,80,0.38) 0%, rgba(90,112,80,0.07) 70%);
-    }
-    :root[data-theme="light"] .blob-top {
-      background: radial-gradient(circle, rgba(90,112,80,0.60) 0%, rgba(90,112,80,0.12) 70%);
-    }
-    :root[data-theme="light"] .blob-bottom {
-      background: radial-gradient(circle, rgba(109,40,217,0.48) 0%, rgba(109,40,217,0.10) 70%);
-    }
+    /* ─── Light mode: no blobs ──────────────────────────── */
+    :root[data-theme="light"] .blob { display: none; }
 
     /* ─── Light mode surface overrides ─────────────────── */
     :root[data-theme="light"] .pill {
