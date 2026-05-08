@@ -23,7 +23,7 @@
   <meta name="twitter:image"       content="https://www.entre.nyc/assets/og-image.png" />
   <meta name="twitter:image:alt"   content="Entre — the restaurant between you two." />
 
-  <script>try{var _et=localStorage.getItem('entre-theme');if(_et==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+  <script>try{var _et=localStorage.getItem('entre-theme');if(_et!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
   <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -231,24 +231,24 @@
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
-      padding: 0.35rem 0.9rem;
+      gap: 0.5rem;
+      padding: 0.45rem 1.15rem;
       border: 1px solid var(--border);
       border-radius: 100px;
-      font-size: 0.7rem;
+      font-size: 0.78rem;
       font-weight: 400;
-      letter-spacing: 0.13em;
+      letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: var(--muted);
-      background: rgba(255,255,255,0.03);
+      color: var(--cream-dim);
+      background: rgba(255,255,255,0.06);
       margin-bottom: 2.2rem;
       opacity: 0;
       animation: fade-up 0.7s ease 0.3s forwards;
     }
 
     .pill-dot {
-      width: 4px;
-      height: 4px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: var(--sage);
       display: inline-block;
@@ -809,8 +809,8 @@
       --cream:       #1A0F2E;
       --cream-dim:   rgba(26, 15, 46, 0.62);
       --cream-faint: rgba(26, 15, 46, 0.20);
-      --sage:        #38913A;
-      --sage-dim:    rgba(56, 145, 58, 0.12);
+      --sage:        #5A7050;
+      --sage-dim:    rgba(90, 112, 80, 0.14);
       --purple:      #6D28D9;
       --purple-soft: rgba(109, 40, 217, 0.08);
       --coral:       #B84A1A;
@@ -825,19 +825,19 @@
 
     /* ─── Light mode blob overrides ─────────────────────── */
     :root[data-theme="light"] .blob-a {
-      background: radial-gradient(circle, rgba(220,110,40,0.26) 0%, rgba(220,110,40,0.04) 70%);
+      background: radial-gradient(circle, rgba(90,112,80,0.55) 0%, rgba(90,112,80,0.12) 70%);
     }
     :root[data-theme="light"] .blob-b {
-      background: radial-gradient(circle, rgba(109,40,217,0.18) 0%, rgba(109,40,217,0.03) 70%);
+      background: radial-gradient(circle, rgba(109,40,217,0.42) 0%, rgba(109,40,217,0.08) 70%);
     }
     :root[data-theme="light"] .blob-c {
-      background: radial-gradient(circle, rgba(56,145,58,0.20) 0%, rgba(56,145,58,0.04) 70%);
+      background: radial-gradient(circle, rgba(90,112,80,0.38) 0%, rgba(90,112,80,0.07) 70%);
     }
     :root[data-theme="light"] .blob-top {
-      background: radial-gradient(circle, rgba(220,110,40,0.30) 0%, rgba(220,110,40,0.04) 70%);
+      background: radial-gradient(circle, rgba(90,112,80,0.60) 0%, rgba(90,112,80,0.12) 70%);
     }
     :root[data-theme="light"] .blob-bottom {
-      background: radial-gradient(circle, rgba(109,40,217,0.22) 0%, rgba(109,40,217,0.04) 70%);
+      background: radial-gradient(circle, rgba(109,40,217,0.48) 0%, rgba(109,40,217,0.10) 70%);
     }
 
     /* ─── Light mode surface overrides ─────────────────── */
@@ -853,12 +853,19 @@
     :root[data-theme="light"] .bg-canvas::after {
       opacity: 0.18;
     }
-    :root[data-theme="light"] .submit-btn:hover {
-      background: #2a7a2b;
-      box-shadow: 0 4px 20px rgba(56, 145, 58, 0.28);
+    :root[data-theme="light"] .submit-btn {
+      color: #FEF7E8;
     }
+    :root[data-theme="light"] .submit-btn:hover {
+      background: #4a5e40;
+      box-shadow: 0 4px 20px rgba(90, 112, 80, 0.32);
+    }
+    :root[data-theme="light"] .copy-btn {
+      color: #FEF7E8;
+    }
+    :root[data-theme="light"] .copy-btn:hover { background: #4a5e40; }
     :root[data-theme="light"] .copy-btn.copied {
-      background: rgba(56, 145, 58, 0.15);
+      background: rgba(90, 112, 80, 0.15);
       color: var(--sage);
     }
 
@@ -1137,7 +1144,7 @@
       var html = document.documentElement;
       if (html.getAttribute('data-theme') === 'light') {
         html.removeAttribute('data-theme');
-        try { localStorage.removeItem('entre-theme'); } catch(e) {}
+        try { localStorage.setItem('entre-theme', 'dark'); } catch(e) {}
       } else {
         html.setAttribute('data-theme', 'light');
         try { localStorage.setItem('entre-theme', 'light'); } catch(e) {}
