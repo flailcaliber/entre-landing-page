@@ -860,6 +860,66 @@
         background: rgba(26, 15, 46, 0.06);
       }
     }
+
+    /* ─── Light mode navigation routes ─────────────────── */
+    .route-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+      overflow: visible;
+    }
+
+    :root[data-theme="light"] .route-svg { display: block; }
+
+    /* Paths start invisible (full dashoffset), animate to drawn */
+    .route-a-path, .route-b-path {
+      stroke-dasharray: 1600;
+      stroke-dashoffset: 1600;
+    }
+
+    :root[data-theme="light"] .route-a-path {
+      animation: draw-route 1.9s ease-out 0.6s forwards;
+    }
+    :root[data-theme="light"] .route-b-path {
+      animation: draw-route 2.1s ease-out 0.95s forwards;
+    }
+
+    @keyframes draw-route {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Origin dot pulse — plays before route starts drawing */
+    .pulse-a, .pulse-b { opacity: 0; }
+
+    :root[data-theme="light"] .pulse-a {
+      animation: pulse-origin 1.2s ease-out 0.3s 2 forwards;
+    }
+    :root[data-theme="light"] .pulse-b {
+      animation: pulse-origin 1.2s ease-out 0.6s 2 forwards;
+    }
+
+    @keyframes pulse-origin {
+      0%   { r: 5;  opacity: 0.6; }
+      100% { r: 18; opacity: 0; }
+    }
+
+    /* Meeting point ring — pings when both routes arrive */
+    :root[data-theme="light"] .meet-ring {
+      animation: arrive-ping 0.7s ease-out 2.9s forwards;
+    }
+
+    @keyframes arrive-ping {
+      0%   { r: 4;  opacity: 0.55; }
+      100% { r: 22; opacity: 0; }
+    }
+
+    /* Hide on mobile — layout shifts make coordinates unreliable */
+    @media (max-width: 768px) {
+      .route-svg { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -871,6 +931,48 @@
     <div class="blob blob-c"></div>
     <div class="blob blob-top"></div>
     <div class="blob blob-bottom"></div>
+
+    <!-- Light-mode navigation routes — two people converging on "between" -->
+    <svg class="route-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet"
+         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+
+      <!-- Route A: sage green, arrives from upper-left -->
+      <g class="route-a">
+        <circle cx="18" cy="84" r="5" fill="#5A7050" opacity="0.9"/>
+        <circle cx="18" cy="84" r="9" fill="none" stroke="#5A7050" stroke-width="1" opacity="0.35" class="pulse-a"/>
+        <path class="route-a-path"
+          d="M 18,84
+             C 105,84 158,84 182,84
+             C 224,84 242,144 242,198
+             C 242,252 260,270 320,274
+             C 378,278 418,252 460,272
+             C 502,292 550,317 617,340
+             C 662,356 694,368 720,376"
+          stroke="#5A7050" stroke-width="2.4" fill="none"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+      </g>
+
+      <!-- Route B: warm amber-copper, arrives from upper-right -->
+      <g class="route-b">
+        <circle cx="1422" cy="110" r="5" fill="#A86038" opacity="0.9"/>
+        <circle cx="1422" cy="110" r="9" fill="none" stroke="#A86038" stroke-width="1" opacity="0.35" class="pulse-b"/>
+        <path class="route-b-path"
+          d="M 1422,110
+             C 1337,110 1282,110 1257,110
+             C 1215,110 1197,170 1197,224
+             C 1197,278 1179,296 1119,300
+             C 1062,304 1022,280 979,300
+             C 935,320 889,346 825,358
+             C 777,366 749,371 720,376"
+          stroke="#A86038" stroke-width="2.4" fill="none"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+      </g>
+
+      <!-- Meeting point -->
+      <circle class="meet-ring" cx="720" cy="376" r="10" fill="none" stroke="#1A0F2E" stroke-width="1" opacity="0"/>
+      <circle cx="720" cy="376" r="4" fill="none" stroke="#1A0F2E" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="720" cy="376" r="1.8" fill="#1A0F2E" opacity="0.28"/>
+    </svg>
   </div>
 
   <!-- Cursor glow -->
