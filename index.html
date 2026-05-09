@@ -1175,26 +1175,27 @@
     function _updateRoutes() {
       var svg = document.querySelector('.route-svg');
       if (!svg) return;
-      // Query the em element directly — its rect gives the actual word bounds.
-      // This is safe at 1450ms (after the 0.5s delay + 0.9s animation = 1.4s).
-      // The 80ms early call just sets SVG height; its path geometry is overwritten at 1450ms.
-      var em = document.querySelector('h1 em');
-      if (!em) return;
+      // Use the h1-line container for lane/trajectory so routes hug the screen edges,
+      // but use the em element for the final endpoints so they target the actual word.
+      var emLine = document.querySelector('h1 .h1-line:nth-child(2)');
+      var em     = document.querySelector('h1 em');
+      if (!emLine || !em) return;
       var footer   = document.querySelector('footer');
       var scrollY  = window.scrollY || window.pageYOffset || 0;
       var vw       = window.innerWidth;
       var docH     = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
       svg.style.height = docH + 'px';
 
-      var r     = em.getBoundingClientRect();
-      // Document-relative vertical center of "between"
-      var midY  = Math.round(r.top + r.height * 0.5 + scrollY);
-      // stroke-linecap="round" extends the cap 8px past the endpoint (half of stroke-width 16).
-      // Offset by 10px so the cap stops just short of the word edge.
-      var leftX  = Math.round(r.left)  - 10;
-      var rightX = Math.round(r.right) + 10;
-      var leftLane  = Math.max(Math.round(r.left) - 160, 140);
-      var rightLane = Math.min(Math.round(r.right) + 160, vw - 125);
+      var rLine  = emLine.getBoundingClientRect();
+      var rWord  = em.getBoundingClientRect();
+      // Vertical center from the word itself (safe at 1450ms — animation complete)
+      var midY      = Math.round(rWord.top + rWord.height * 0.5 + scrollY);
+      // Lanes use the full-width h1-line container so routes hug the screen edges
+      var leftLane  = Math.max(Math.round(rLine.left)  - 160, 140);
+      var rightLane = Math.min(Math.round(rLine.right) + 160, vw - 125);
+      // Endpoints target the actual word; 20px offset leaves a visible gap
+      var leftX  = Math.round(rWord.left)  - 20;
+      var rightX = Math.round(rWord.right) + 20;
       var cx = Math.round(vw / 2);
 
       // Green: starts at top-center of document
