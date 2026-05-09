@@ -1248,9 +1248,9 @@
       });
     }
 
-    // _updateRoutes runs immediately (h1-line container is stable before inner animation).
-    // _playRoutes fires after the h1 slide-up animation completes (~1.4s).
-    setTimeout(_updateRoutes, 80);
+    // Paths start with d="" so nothing renders until geometry is set.
+    // Wait for h1 slide-up to finish (0.5s delay + 0.9s duration = 1.4s) before
+    // computing coordinates and starting the draw animation.
     setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 1450);
     var _rrt;
     window.addEventListener('resize', function(){
