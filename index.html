@@ -1186,8 +1186,8 @@
       var r     = emLine.getBoundingClientRect();
       // Document-relative vertical center of the "between" row
       var midY  = Math.round(r.top + r.height * 0.5 + scrollY);
-      var leftX = Math.round(r.left) - 20;
-      var rightX = Math.round(r.right) + 20;
+      var leftX = Math.round(r.left) - 4;
+      var rightX = Math.round(r.right) + 4;
       var leftLane  = Math.max(Math.round(r.left) - 160, 140);
       var rightLane = Math.min(Math.round(r.right) + 160, vw - 125);
       var cx = Math.round(vw / 2);
