@@ -861,24 +861,6 @@
       }
     }
 
-    /* ─── Light mode navigation routes ─────────────────── */
-    /* Absolute so routes scroll with the page content.
-       Height set by JS to full document scroll height. */
-    .route-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      pointer-events: none;
-      display: none;
-      z-index: 0;
-    }
-
-    :root[data-theme="light"] .route-svg { display: block; }
-
-    @media (max-width: 768px) {
-      .route-svg { display: none !important; }
-    }
   </style>
 </head>
 <body>
@@ -893,27 +875,6 @@
 
   </div>
 
-  <!-- Light-mode navigation routes — SVG outside .bg-canvas so it scrolls with content -->
-  <svg class="route-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- Route A: sage green — top center → left of "between" -->
-    <g class="route-a">
-      <circle class="dot-a"      r="8" fill="#9ED29E"/>
-      <circle class="dot-a-ring" r="8" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
-      <path class="route-a-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="28"
-            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path class="route-a-path" d="" stroke="#9ED29E" stroke-width="16"
-            fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
-    </g>
-    <!-- Route B: warm amber — above footer → right of "between" -->
-    <g class="route-b">
-      <circle class="dot-b"      r="8" fill="#0EA5E9"/>
-      <circle class="dot-b-ring" r="8" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
-      <path class="route-b-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="28"
-            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      <path class="route-b-path" d="" stroke="#0EA5E9" stroke-width="16"
-            fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
-    </g>
-  </svg>
 
   <!-- Cursor glow -->
   <div class="cursor-glow" id="cursorGlow"></div>
@@ -1083,16 +1044,20 @@
       <!-- Feature callouts -->
       <div class="features">
         <div class="feat">
-          <span class="feat-icon">📍</span>
-          <span class="feat-label">Enter two addresses, get restaurants in the middle</span>
+          <span class="feat-icon">🤝</span>
+          <span class="feat-label">Choose a friend (or friends) to invite to a session</span>
         </div>
         <div class="feat">
-          <span class="feat-icon">✦</span>
-          <span class="feat-label">Match on cuisine, budget &amp; diet — both of you</span>
+          <span class="feat-icon">📍</span>
+          <span class="feat-label">We find restaurants in between everyone — curated by real‑time cuisine, budget &amp; time preferences</span>
         </div>
         <div class="feat">
           <span class="feat-icon">↗</span>
-          <span class="feat-label">One tap to recommend, one tap to accept</span>
+          <span class="feat-label">One tap to recommend a spot, one tap to accept it</span>
+        </div>
+        <div class="feat">
+          <span class="feat-icon">🎉</span>
+          <span class="feat-label">All done! We'll navigate you to the restaurant and let you know when you should wrap up</span>
         </div>
       </div>
 
@@ -1167,97 +1132,6 @@
     }
     animateGlow();
 
-    // ── Navigation routes ────────────────────────────────────
-    // SVG is position:absolute — all coordinates are document-relative (px from top of page).
-    // We query .h1-line:nth-child(2) (the overflow:hidden container) because it doesn't
-    // transform during the slide-up animation — the inner span moves inside it.
-    // Adding scrollY converts viewport rects to document coords.
-    function _updateRoutes() {
-      var svg = document.querySelector('.route-svg');
-      if (!svg) return;
-      // Use the h1-line container for lane/trajectory so routes hug the screen edges,
-      // but use the em element for the final endpoints so they target the actual word.
-      var emLine = document.querySelector('h1 .h1-line:nth-child(2)');
-      var em     = document.querySelector('h1 em');
-      if (!emLine || !em) return;
-      var footer   = document.querySelector('footer');
-      var scrollY  = window.scrollY || window.pageYOffset || 0;
-      var vw       = window.innerWidth;
-      var docH     = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
-      svg.style.height = docH + 'px';
-
-      var rLine  = emLine.getBoundingClientRect();
-      var rWord  = em.getBoundingClientRect();
-      // Vertical center from the word itself (safe at 1450ms — animation complete)
-      var midY      = Math.round(rWord.top + rWord.height * 0.5 + scrollY);
-      // Lanes use the full-width h1-line container so routes hug the screen edges
-      var leftLane  = Math.max(Math.round(rLine.left)  - 160, 140);
-      var rightLane = Math.min(Math.round(rLine.right) + 160, vw - 125);
-      // Endpoints target the actual word; 20px offset leaves a visible gap
-      var leftX  = Math.round(rWord.left)  - 20;
-      var rightX = Math.round(rWord.right) + 20;
-      var cx = Math.round(vw / 2);
-
-      // Green: starts at top-center of document
-      var dA = 'M ' + cx + ',2 V 65 H ' + leftLane + ' V ' + midY + ' H ' + leftX;
-
-      // Amber: starts just above the footer (right edge, hidden until user scrolls down)
-      var footerDocY = footer
-        ? Math.round(footer.getBoundingClientRect().top + scrollY) - 60
-        : docH - 120;
-      var dB = 'M ' + (vw - 5) + ',' + footerDocY + ' H ' + rightLane + ' V ' + midY + ' H ' + rightX;
-
-      svg.querySelectorAll('.route-a-path,.route-a-halo').forEach(function(el){ el.setAttribute('d', dA); });
-      svg.querySelectorAll('.route-b-path,.route-b-halo').forEach(function(el){ el.setAttribute('d', dB); });
-      svg.querySelectorAll('.dot-a,.dot-a-ring').forEach(function(el){
-        el.setAttribute('cx', cx); el.setAttribute('cy', 5);
-      });
-      svg.querySelectorAll('.dot-b,.dot-b-ring').forEach(function(el){
-        el.setAttribute('cx', vw - 5); el.setAttribute('cy', footerDocY);
-      });
-    }
-
-    function _playRoutes() {
-      if (document.documentElement.getAttribute('data-theme') !== 'light') return;
-      var svg = document.querySelector('.route-svg');
-      if (!svg) return;
-      [
-        ['.route-a-path', '.route-a-halo', 0],
-        ['.route-b-path', '.route-b-halo', 280]
-      ].forEach(function(cfg) {
-        var p = svg.querySelector(cfg[0]);
-        var h = svg.querySelector(cfg[1]);
-        var delay = cfg[2];
-        if (!p) return;
-        var len = Math.ceil(p.getTotalLength()) + 5;
-        [p, h].forEach(function(el) {
-          if (!el) return;
-          el.style.strokeDasharray = len;
-          el.style.strokeDashoffset = len;
-          if (el.getAnimations) el.getAnimations().forEach(function(a){ a.cancel(); });
-        });
-        [p, h].forEach(function(el) {
-          if (!el) return;
-          setTimeout(function() {
-            el.animate(
-              [{ strokeDashoffset: String(len) }, { strokeDashoffset: '0' }],
-              { duration: 1800, easing: 'ease-out', fill: 'forwards' }
-            );
-          }, delay);
-        });
-      });
-    }
-
-    // Paths start with d="" so nothing renders until geometry is set.
-    // Wait for h1 slide-up to finish (0.5s delay + 0.9s duration = 1.4s) before
-    // computing coordinates and starting the draw animation.
-    setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 1450);
-    var _rrt;
-    window.addEventListener('resize', function(){
-      clearTimeout(_rrt);
-      _rrt = setTimeout(_updateRoutes, 200);
-    });
-
     // ── Theme toggle ─────────────────────────────────────────
     document.getElementById('themeToggle').addEventListener('click', function() {
       var html = document.documentElement;
@@ -1267,7 +1141,6 @@
       } else {
         html.setAttribute('data-theme', 'light');
         try { localStorage.setItem('entre-theme', 'light'); } catch(e) {}
-        setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 50);
       }
     });
 
