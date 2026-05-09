@@ -862,14 +862,13 @@
     }
 
     /* ─── Light mode navigation routes ─────────────────── */
-    /* Fixed so routes never scroll. Paths computed by JS using
-       getBoundingClientRect on <em>between</em> for exact alignment. */
+    /* Absolute so routes scroll with the page content.
+       Height set by JS to full document scroll height. */
     .route-svg {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
       pointer-events: none;
       display: none;
       z-index: 0;
@@ -892,28 +891,29 @@
     <div class="blob blob-top"></div>
     <div class="blob blob-bottom"></div>
 
-    <!-- Light-mode navigation routes — JS positions paths to actual "between" coordinates -->
-    <svg class="route-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <!-- Route A: sage green — top center → left of "between" -->
-      <g class="route-a">
-        <circle class="dot-a"      r="7" fill="#5A7050"/>
-        <circle class="dot-a-ring" r="7" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
-        <path class="route-a-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="18"
-              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="route-a-path" d="" stroke="#5A7050" stroke-width="10"
-              fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
-      </g>
-      <!-- Route B: warm amber — bottom right → right of "between" -->
-      <g class="route-b">
-        <circle class="dot-b"      r="7" fill="#A86038"/>
-        <circle class="dot-b-ring" r="7" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
-        <path class="route-b-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="18"
-              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="route-b-path" d="" stroke="#A86038" stroke-width="10"
-              fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
-      </g>
-    </svg>
   </div>
+
+  <!-- Light-mode navigation routes — SVG outside .bg-canvas so it scrolls with content -->
+  <svg class="route-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Route A: sage green — top center → left of "between" -->
+    <g class="route-a">
+      <circle class="dot-a"      r="8" fill="#5A7050"/>
+      <circle class="dot-a-ring" r="8" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
+      <path class="route-a-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="28"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="route-a-path" d="" stroke="#5A7050" stroke-width="16"
+            fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
+    </g>
+    <!-- Route B: warm amber — above footer → right of "between" -->
+    <g class="route-b">
+      <circle class="dot-b"      r="8" fill="#A86038"/>
+      <circle class="dot-b-ring" r="8" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3"/>
+      <path class="route-b-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="28"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="route-b-path" d="" stroke="#A86038" stroke-width="16"
+            fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
+    </g>
+  </svg>
 
   <!-- Cursor glow -->
   <div class="cursor-glow" id="cursorGlow"></div>
@@ -1168,34 +1168,46 @@
     animateGlow();
 
     // ── Navigation routes ────────────────────────────────────
-    // Uses getBoundingClientRect on <em>between</em> so paths always
-    // align to the exact vertical center of the word regardless of viewport size.
+    // SVG is position:absolute — all coordinates are document-relative (px from top of page).
+    // We query .h1-line:nth-child(2) (the overflow:hidden container) because it doesn't
+    // transform during the slide-up animation — the inner span moves inside it.
+    // Adding scrollY converts viewport rects to document coords.
     function _updateRoutes() {
       var svg = document.querySelector('.route-svg');
       if (!svg) return;
-      var em = document.querySelector('h1 em');
-      if (!em) return;
-      var r        = em.getBoundingClientRect();
+      var emLine = document.querySelector('h1 .h1-line:nth-child(2)');
+      if (!emLine) return;
+      var footer   = document.querySelector('footer');
+      var scrollY  = window.scrollY || window.pageYOffset || 0;
       var vw       = window.innerWidth;
-      var vh       = window.innerHeight;
-      var midY     = Math.round(r.top + r.height * 0.5);
-      var leftX    = Math.round(r.left)  - 18;
-      var rightX   = Math.round(r.right) + 18;
-      // Column lanes: comfortably outside text block
-      var leftLane  = Math.max(Math.round(r.left)  - 160, 140);
+      var docH     = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
+      svg.style.height = docH + 'px';
+
+      var r     = emLine.getBoundingClientRect();
+      // Document-relative vertical center of the "between" row
+      var midY  = Math.round(r.top + r.height * 0.5 + scrollY);
+      var leftX = Math.round(r.left) - 20;
+      var rightX = Math.round(r.right) + 20;
+      var leftLane  = Math.max(Math.round(r.left) - 160, 140);
       var rightLane = Math.min(Math.round(r.right) + 160, vw - 125);
       var cx = Math.round(vw / 2);
-      // Green: top-center → down short → hard left → down to midY → right to word
+
+      // Green: starts at top-center of document
       var dA = 'M ' + cx + ',2 V 65 H ' + leftLane + ' V ' + midY + ' H ' + leftX;
-      // Amber: bottom-right corner → left short → up to midY → left to word
-      var dB = 'M ' + (vw-5) + ',' + (vh-5) + ' H ' + rightLane + ' V ' + midY + ' H ' + rightX;
+
+      // Amber: starts just above the footer (right edge, hidden until user scrolls down)
+      var footerDocY = footer
+        ? Math.round(footer.getBoundingClientRect().top + scrollY) - 60
+        : docH - 120;
+      var dB = 'M ' + (vw - 5) + ',' + footerDocY + ' H ' + rightLane + ' V ' + midY + ' H ' + rightX;
+
       svg.querySelectorAll('.route-a-path,.route-a-halo').forEach(function(el){ el.setAttribute('d', dA); });
       svg.querySelectorAll('.route-b-path,.route-b-halo').forEach(function(el){ el.setAttribute('d', dB); });
       svg.querySelectorAll('.dot-a,.dot-a-ring').forEach(function(el){
         el.setAttribute('cx', cx); el.setAttribute('cy', 5);
       });
       svg.querySelectorAll('.dot-b,.dot-b-ring').forEach(function(el){
-        el.setAttribute('cx', vw-5); el.setAttribute('cy', vh-5);
+        el.setAttribute('cx', vw - 5); el.setAttribute('cy', footerDocY);
       });
     }
 
@@ -1204,8 +1216,8 @@
       var svg = document.querySelector('.route-svg');
       if (!svg) return;
       [
-        ['.route-a-path', '.route-a-halo', 500],
-        ['.route-b-path', '.route-b-halo', 850]
+        ['.route-a-path', '.route-a-halo', 0],
+        ['.route-b-path', '.route-b-halo', 280]
       ].forEach(function(cfg) {
         var p = svg.querySelector(cfg[0]);
         var h = svg.querySelector(cfg[1]);
@@ -1230,8 +1242,10 @@
       });
     }
 
-    // Init routes on first load, re-position on resize
-    setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 120);
+    // _updateRoutes runs immediately (h1-line container is stable before inner animation).
+    // _playRoutes fires after the h1 slide-up animation completes (~1.4s).
+    setTimeout(_updateRoutes, 80);
+    setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 1450);
     var _rrt;
     window.addEventListener('resize', function(){
       clearTimeout(_rrt);
