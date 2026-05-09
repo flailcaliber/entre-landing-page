@@ -862,56 +862,21 @@
     }
 
     /* ─── Light mode navigation routes ─────────────────── */
+    /* Fixed so routes never scroll. Paths computed by JS using
+       getBoundingClientRect on <em>between</em> for exact alignment. */
     .route-svg {
-      position: absolute;
-      inset: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
       display: none;
-      overflow: visible;
+      z-index: 0;
     }
 
     :root[data-theme="light"] .route-svg { display: block; }
 
-    /* Paths start invisible (full dashoffset = path length), animate to drawn.
-       Green path: 57+435+308+147 = ~947px  Amber: 260+520+164 = ~944px → 1060 covers both */
-    .route-a-path, .route-b-path {
-      stroke-dasharray: 1060;
-      stroke-dashoffset: 1060;
-    }
-
-    :root[data-theme="light"] .route-a-path {
-      animation: draw-route 1.8s ease-out 0.5s forwards;
-    }
-    :root[data-theme="light"] .route-b-path {
-      animation: draw-route 1.8s ease-out 0.85s forwards;
-    }
-
-    @keyframes draw-route {
-      to { stroke-dashoffset: 0; }
-    }
-
-    /* Origin dot pulse — scales out before route starts drawing */
-    .pulse-a, .pulse-b {
-      transform-box: fill-box;
-      transform-origin: center;
-      opacity: 0;
-    }
-
-    :root[data-theme="light"] .pulse-a {
-      animation: pulse-origin 1.1s ease-out 0.2s 2;
-    }
-    :root[data-theme="light"] .pulse-b {
-      animation: pulse-origin 1.1s ease-out 0.5s 2;
-    }
-
-    @keyframes pulse-origin {
-      0%   { transform: scale(1);   opacity: 0.65; }
-      100% { transform: scale(3.2); opacity: 0; }
-    }
-
-    /* Hide on mobile — layout shifts make coordinates unreliable */
     @media (max-width: 768px) {
       .route-svg { display: none !important; }
     }
@@ -927,30 +892,25 @@
     <div class="blob blob-top"></div>
     <div class="blob blob-bottom"></div>
 
-    <!-- Light-mode navigation routes — NYC grid, arriving at "between" from both sides -->
-    <svg class="route-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet"
-         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-
-      <!-- Route A: sage green — top center → left of "between"
-           Down from center → sharp left above nav → south along left margin (x=285, clear of all h1 text ~x=365+) → east to word -->
+    <!-- Light-mode navigation routes — JS positions paths to actual "between" coordinates -->
+    <svg class="route-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Route A: sage green — top center → left of "between" -->
       <g class="route-a">
-        <circle cx="720" cy="5" r="5" fill="#5A7050"/>
-        <circle cx="720" cy="5" r="5" fill="none" stroke="#5A7050" stroke-width="1.5" class="pulse-a"/>
-        <path class="route-a-path"
-          d="M 720,5 V 62 H 285 V 370 H 432"
-          stroke="#5A7050" stroke-width="2.4" fill="none"
-          stroke-linecap="round" stroke-linejoin="miter" opacity="0.72"/>
+        <circle class="dot-a"      r="7" fill="#5A7050"/>
+        <circle class="dot-a-ring" r="7" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+        <path class="route-a-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="18"
+              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="route-a-path" d="" stroke="#5A7050" stroke-width="10"
+              fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
       </g>
-
-      <!-- Route B: warm amber — bottom right → right of "between"
-           Left along bottom margin → north along right column (x=1172, clear of h1 text ~x≤1080) → west to word -->
+      <!-- Route B: warm amber — bottom right → right of "between" -->
       <g class="route-b">
-        <circle cx="1432" cy="890" r="5" fill="#A86038"/>
-        <circle cx="1432" cy="890" r="5" fill="none" stroke="#A86038" stroke-width="1.5" class="pulse-b"/>
-        <path class="route-b-path"
-          d="M 1432,890 H 1172 V 370 H 1008"
-          stroke="#A86038" stroke-width="2.4" fill="none"
-          stroke-linecap="round" stroke-linejoin="miter" opacity="0.72"/>
+        <circle class="dot-b"      r="7" fill="#A86038"/>
+        <circle class="dot-b-ring" r="7" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5"/>
+        <path class="route-b-halo" d="" stroke="rgba(255,255,255,0.72)" stroke-width="18"
+              fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="route-b-path" d="" stroke="#A86038" stroke-width="10"
+              fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
       </g>
     </svg>
   </div>
@@ -1207,6 +1167,77 @@
     }
     animateGlow();
 
+    // ── Navigation routes ────────────────────────────────────
+    // Uses getBoundingClientRect on <em>between</em> so paths always
+    // align to the exact vertical center of the word regardless of viewport size.
+    function _updateRoutes() {
+      var svg = document.querySelector('.route-svg');
+      if (!svg) return;
+      var em = document.querySelector('h1 em');
+      if (!em) return;
+      var r        = em.getBoundingClientRect();
+      var vw       = window.innerWidth;
+      var vh       = window.innerHeight;
+      var midY     = Math.round(r.top + r.height * 0.5);
+      var leftX    = Math.round(r.left)  - 18;
+      var rightX   = Math.round(r.right) + 18;
+      // Column lanes: comfortably outside text block
+      var leftLane  = Math.max(Math.round(r.left)  - 160, 140);
+      var rightLane = Math.min(Math.round(r.right) + 160, vw - 125);
+      var cx = Math.round(vw / 2);
+      // Green: top-center → down short → hard left → down to midY → right to word
+      var dA = 'M ' + cx + ',2 V 65 H ' + leftLane + ' V ' + midY + ' H ' + leftX;
+      // Amber: bottom-right corner → left short → up to midY → left to word
+      var dB = 'M ' + (vw-5) + ',' + (vh-5) + ' H ' + rightLane + ' V ' + midY + ' H ' + rightX;
+      svg.querySelectorAll('.route-a-path,.route-a-halo').forEach(function(el){ el.setAttribute('d', dA); });
+      svg.querySelectorAll('.route-b-path,.route-b-halo').forEach(function(el){ el.setAttribute('d', dB); });
+      svg.querySelectorAll('.dot-a,.dot-a-ring').forEach(function(el){
+        el.setAttribute('cx', cx); el.setAttribute('cy', 5);
+      });
+      svg.querySelectorAll('.dot-b,.dot-b-ring').forEach(function(el){
+        el.setAttribute('cx', vw-5); el.setAttribute('cy', vh-5);
+      });
+    }
+
+    function _playRoutes() {
+      if (document.documentElement.getAttribute('data-theme') !== 'light') return;
+      var svg = document.querySelector('.route-svg');
+      if (!svg) return;
+      [
+        ['.route-a-path', '.route-a-halo', 500],
+        ['.route-b-path', '.route-b-halo', 850]
+      ].forEach(function(cfg) {
+        var p = svg.querySelector(cfg[0]);
+        var h = svg.querySelector(cfg[1]);
+        var delay = cfg[2];
+        if (!p) return;
+        var len = Math.ceil(p.getTotalLength()) + 5;
+        [p, h].forEach(function(el) {
+          if (!el) return;
+          el.style.strokeDasharray = len;
+          el.style.strokeDashoffset = len;
+          if (el.getAnimations) el.getAnimations().forEach(function(a){ a.cancel(); });
+        });
+        [p, h].forEach(function(el) {
+          if (!el) return;
+          setTimeout(function() {
+            el.animate(
+              [{ strokeDashoffset: String(len) }, { strokeDashoffset: '0' }],
+              { duration: 1800, easing: 'ease-out', fill: 'forwards' }
+            );
+          }, delay);
+        });
+      });
+    }
+
+    // Init routes on first load, re-position on resize
+    setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 120);
+    var _rrt;
+    window.addEventListener('resize', function(){
+      clearTimeout(_rrt);
+      _rrt = setTimeout(_updateRoutes, 200);
+    });
+
     // ── Theme toggle ─────────────────────────────────────────
     document.getElementById('themeToggle').addEventListener('click', function() {
       var html = document.documentElement;
@@ -1216,6 +1247,7 @@
       } else {
         html.setAttribute('data-theme', 'light');
         try { localStorage.setItem('entre-theme', 'light'); } catch(e) {}
+        setTimeout(function(){ _updateRoutes(); _playRoutes(); }, 50);
       }
     });
 
