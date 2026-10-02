@@ -2,7 +2,8 @@
  * Entre Waitlist Cleanup — Netlify Scheduled Function (daily, see netlify.toml)
  *
  * Privacy Policy retention rule: waitlist records are deleted 30 days after
- * someone unsubscribes — from our database and from Loops.
+ * someone unsubscribes, or 12 months after the app launches (Oct 14, 2026),
+ * whichever comes first — from our database and from Loops.
  *
  * Required Netlify env vars:
  *   SUPABASE_URL
@@ -14,6 +15,8 @@ const { createClient } = require('@supabase/supabase-js');
 
 const LOOPS_API = 'https://app.loops.so/api/v1';
 const RETENTION_DAYS = 30;
+// Launch + 12 months: from this date on, every waitlist record is deleted.
+const DELETE_ALL_FROM = new Date('2027-10-14T00:00:00-04:00');
 
 exports.handler = async () => {
   const sb = createClient(
@@ -24,10 +27,9 @@ exports.handler = async () => {
 
   const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: expired, error } = await sb
-    .from('waitlist')
-    .select('id, email')
-    .lt('unsubscribed_at', cutoff);
+  let query = sb.from('waitlist').select('id, email');
+  if (Date.now() < DELETE_ALL_FROM.getTime()) query = query.lt('unsubscribed_at', cutoff);
+  const { data: expired, error } = await query;
 
   if (error) {
     console.error('[waitlist-cleanup] lookup failed:', error.message);
