@@ -3,6 +3,9 @@
   functions = "netlify/functions"
   command = "echo 'no build'"
 
+[functions."waitlist-cleanup"]
+  schedule = "@daily"
+
 [build.environment]
   NODE_VERSION = "18"
 
