@@ -39,6 +39,16 @@
   status = 200
 
 [[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
   from = "/api/loops-webhook"
   to = "/.netlify/functions/loops-webhook"
   status = 200
