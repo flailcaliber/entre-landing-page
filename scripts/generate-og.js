@@ -1,96 +1,72 @@
 /**
- * Generates assets/og-image.png (1200×630) for social link previews.
- * Run once after any design change: node scripts/generate-og.js
- * Requires: npm install --save-dev sharp
+ * Generates the social link preview image (1200×630) from the live homepage
+ * design: renders index.html's hero in headless Edge/Chrome, then saves it
+ * with sharp.
+ *
+ * Run after any hero design change: node scripts/generate-og.js
+ *
+ * /assets/* is served with a one-year immutable cache, so a changed image
+ * needs a new filename: bump OG_NAME below and update the og:image /
+ * twitter:image tags in index.html to match.
  */
 
-const sharp  = require('sharp');
+const fs     = require('fs');
+const os     = require('os');
 const path   = require('path');
-const outPath = path.join(__dirname, '..', 'assets', 'og-image.png');
+const sharp  = require('sharp');
+const { execFileSync } = require('child_process');
 
-// ── SVG template ────────────────────────────────────────────
-// Fonts: Georgia (serif, Georgia-like stand-in for Cormorant) + system sans.
-// sharp uses libvips which renders SVG text with system fonts — both are universally present.
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <!-- Ambient blobs -->
-    <filter id="blur-a" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="80"/>
-    </filter>
-    <filter id="blur-b" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="90"/>
-    </filter>
-    <!-- Grain overlay -->
-    <filter id="grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/>
-      <feColorMatrix type="saturate" values="0"/>
-      <feBlend in="SourceGraphic" mode="overlay" result="blend"/>
-      <feComposite in="blend" in2="SourceGraphic"/>
-    </filter>
-  </defs>
+const OG_NAME = 'og-beta.png';
+const ROOT    = path.join(__dirname, '..');
+const outPath = path.join(ROOT, 'assets', OG_NAME);
 
-  <!-- Background -->
-  <rect width="1200" height="630" fill="#131220"/>
+const BROWSERS = [
+  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+  'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+  'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+];
+const browser = BROWSERS.find(p => fs.existsSync(p));
+if (!browser) { console.error('✗  No Edge or Chrome found'); process.exit(1); }
 
-  <!-- Sage blob (left) -->
-  <circle cx="160" cy="310" r="360" fill="#9ED29E" fill-opacity="0.13" filter="url(#blur-a)"/>
+// Render at 1600×840 and scale to 1200×630 so the desktop hero layout fits.
+// The install steps, waitlist link and scroll cue are hidden: a preview only
+// needs the headline, button and map.
+const OG_CSS = `
+  .install-help, .hero-alt, .scroll-cue { display: none !important; }
+  .hero { min-height: 840px !important; padding-top: 104px !important; padding-bottom: 40px !important; }
+  .hero h1 { font-size: 5.4rem !important; }
+`;
 
-  <!-- Purple blob (right) -->
-  <circle cx="1050" cy="260" r="400" fill="#7C3AED" fill-opacity="0.14" filter="url(#blur-b)"/>
+const tmpDir  = fs.mkdtempSync(path.join(os.tmpdir(), 'entre-og-'));
+const page    = path.join(tmpDir, 'og.html');
+const shot    = path.join(tmpDir, 'og-raw.png');
+const fileUrl = p => 'file:///' + p.replace(/\\/g, '/');
 
-  <!-- ── Logo mark (Concept 02: geometric e-pin) ──────────────
-       Original viewBox: 0 0 46 70  →  scale 2.28 → 105 × 160 px
-       Center x: 600 → translate x = 600 - 105/2 = 547.5
-       Start y: 78 px from top
-  -->
-  <g transform="translate(547.5, 78) scale(2.28)" fill="none">
-    <path d="M 37.6 12 A 18 18 0 1 0 37.6 30"
-          stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
-    <line x1="4"  y1="21" x2="35" y2="21"
-          stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
-    <line x1="22" y1="39" x2="22" y2="57"
-          stroke="#9ED29E" stroke-width="2.4" stroke-linecap="round"/>
-    <circle cx="22" cy="62" r="4.5" fill="#9ED29E"/>
-  </g>
+let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+html = html.replace('<head>', `<head><base href="${fileUrl(ROOT)}/">`)
+           .replace('</style>', OG_CSS + '</style>');
+fs.writeFileSync(page, html);
 
-  <!-- ── "entre" wordmark ─────────────────────────────────── -->
-  <!-- Georgia is visually close to Cormorant Garamond and is a universal system font -->
-  <text x="600" y="388"
-        font-family="Georgia, 'Times New Roman', serif"
-        font-size="114"
-        font-weight="400"
-        fill="#FFF8F0"
-        text-anchor="middle"
-        letter-spacing="3">entre</text>
+execFileSync(browser, [
+  '--headless=new', '--disable-gpu', '--hide-scrollbars',
+  `--user-data-dir=${path.join(tmpDir, 'profile')}`,
+  '--allow-file-access-from-files',
+  '--virtual-time-budget=8000',          // let the hero animations finish
+  '--force-device-scale-factor=1',
+  '--window-size=1600,840',
+  `--screenshot=${shot}`,
+  fileUrl(page),
+], { stdio: 'ignore' });
 
-  <!-- ── Tagline ───────────────────────────────────────────── -->
-  <text x="600" y="448"
-        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
-        font-size="27"
-        font-weight="300"
-        fill="rgba(255,248,240,0.48)"
-        text-anchor="middle"
-        letter-spacing="0.5">The restaurant between you two.</text>
-
-  <!-- ── Thin rule ─────────────────────────────────────────── -->
-  <line x1="540" y1="510" x2="660" y2="510"
-        stroke="rgba(255,248,240,0.1)" stroke-width="1"/>
-
-  <!-- ── URL ───────────────────────────────────────────────── -->
-  <text x="600" y="566"
-        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
-        font-size="19"
-        font-weight="300"
-        fill="rgba(255,248,240,0.22)"
-        text-anchor="middle"
-        letter-spacing="4">ENTRE.NYC</text>
-</svg>`;
-
-// ── Generate ─────────────────────────────────────────────────
-sharp(Buffer.from(svg))
-  .png({ quality: 95, compressionLevel: 8 })
-  .toFile(outPath, (err, info) => {
-    if (err) { console.error('✗  Error:', err.message); process.exit(1); }
-    console.log(`✓  og-image.png  ${info.width}×${info.height}  (${Math.round(info.size / 1024)} KB)`);
+sharp(shot)
+  .resize(1200, 630)
+  .png({ compressionLevel: 9 })
+  .toFile(outPath)
+  .then(info => {
+    console.log(`✓  ${OG_NAME}  ${info.width}×${info.height}  (${Math.round(info.size / 1024)} KB)`);
     console.log(`   → ${outPath}`);
-  });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  })
+  .catch(err => { console.error('✗  Error:', err.message); process.exit(1); });
