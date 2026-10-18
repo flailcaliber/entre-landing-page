@@ -37,7 +37,7 @@
 <div class="container">
 <span class="micro-label">Legal</span>
 <h1>Privacy Policy</h1>
-<p class="eff">Effective October 4, 2026</p>
+<p class="eff">Effective October 15, 2026</p>
 </div>
 </header>
 <div class="container legal-layout">
@@ -46,6 +46,7 @@
 <ol>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#information-we-collect">Information we collect</a></li>
+<li><a href="#invited-by-link">If someone invited you by link</a></li>
 <li><a href="#who-can-see-your-information-in-entre">Who can see your information in Entre</a></li>
 <li><a href="#how-we-use-information">How we use information</a></li>
 <li><a href="#how-we-share-information">How we share information</a></li>
@@ -67,6 +68,7 @@
 <li>We collect what we need to help you plan meals with people you already know: your account, profile, friends, meetups, and preferences you choose to share.</li>
 <li>Location is collected only when you tap "Use my current location," once, for one meetup. We never track you in the background.</li>
 <li>Your contacts are checked against Entre to find friends, then discarded. We never store your contact list.</li>
+<li>People you invite by link answer without an account. We keep what they share only for that meetup, and we email them only if they ask for the plan.</li>
 <li>We share data only with service providers that run the app, never with advertisers or data brokers.</li>
 <li>You can delete your account and data at any time from Settings.</li>
 </ul>
@@ -144,11 +146,20 @@
 </tbody>
 </table></div>
 <p><strong>Dietary restrictions.</strong> Restrictions such as halal, kosher, vegetarian, or a food allergy can reveal religious beliefs or health information. Sharing them is always optional. We use them only to suggest restaurants that work for your group, and we never use them for any other purpose or share them outside Entre except with the providers that host our service.</p>
-<p><strong>Contacts.</strong> If you allow contacts access, the app sends the phone numbers in your contacts to our server to check which belong to Entre users. The server returns the matches and stores nothing. Contact names never leave your phone. We never message your contacts.</p>
+<p><strong>Contacts.</strong> If you allow contacts access, the app sends the phone numbers in your contacts to our server to check which belong to Entre users. The server returns the matches and stores nothing. Contact names never leave your phone, unless you choose a contact to invite by link. Then only the name you confirm is saved with that meetup. We never message your contacts. When you invite someone, the text comes from your own phone.</p>
 <p><strong>Profile photos.</strong> When you choose a profile photo, you pick it in Apple's photo picker, so Entre never gets access to your photo library, only the one photo you choose. The app crops it to a square and shrinks it before uploading. Before it appears on your profile, we send it to Google Cloud Vision SafeSearch, which checks it for nudity and violence. Photos that fail the check are deleted right away and never shown. Google processes the photo only to perform this check. Your photo is not linked to your name when we send it.</p>
 <p><strong>Location.</strong> If you tap "Use my current location," the app takes a single location reading, converts it to an address on your phone, and saves that address as your starting point for that meetup. We do not collect location in the background and do not keep a location history.</p>
 <p><strong>Stored on your phone.</strong> Your login session, light or dark theme choice, and whether you have finished onboarding are stored on your device, not on our servers.</p>
 <p><strong>Website and waitlist (entre.nyc).</strong> If you join our waitlist, we collect your email, optional phone number, your answer to our signup question, your referral code, who referred you, how many people you have referred, the ad campaign that brought you (UTM tags), your city, and unsubscribe details. We count page views using a random visit identifier, the campaign source, and referral code. We do not store your name or IP address with page views. Your browser stores your theme choice and referral code. We do not use advertising pixels, analytics cookies, or session recording on our website.</p>
+<h2 id="invited-by-link">If someone invited you by link</h2>
+<p>Entre users can invite people who don't use the app. Those guests get a private link (entre.nyc/join/…) and answer in their browser, without an account. Here is what applies to guests.</p>
+<ul>
+<li><strong>What we collect:</strong> the name the person who invited you entered (you can change it), the starting point you choose, your optional cuisines, budget, dietary needs, and free times, whether you're in or can't make it, and your email address only if you ask us to email you the plan. We also record when your link is first opened, so the person who invited you knows you've seen it.</li>
+<li><strong>Who sees it:</strong> the people in that meetup see your name, starting point, and answers, the same as for app users. Anyone you forward your link to can see the meetup and answer as you.</li>
+<li><strong>What we never do:</strong> guests don't get an Entre account, can't be found in search or added as friends, and are never added to our waitlist or any marketing list. If you give us your email, we use it only for that lunch, and every email has a link to stop them.</li>
+<li><strong>How long we keep it:</strong> your starting point, answers, and email address are deleted 90 days after the meetup date, and your link stops working. Your name stays in the meetup history of the person who invited you until they delete their account.</li>
+<li><strong>Deleting it sooner:</strong> email <a href="mailto:sam@entre.nyc">sam@entre.nyc</a> with your link and we will delete your information.</li>
+</ul>
 <h2 id="who-can-see-your-information-in-entre">Who can see your information in Entre</h2>
 <p>Most of your information is visible only to you. Meetup details are shared with the people in that meetup so you can plan together.</p>
 <div class="tbl"><table>
@@ -181,6 +192,10 @@
 </tr>
 <tr>
 <td>Your work address, if no other starting point is given for a meetup</td>
+<td>Everyone in that meetup</td>
+</tr>
+<tr>
+<td>A guest's name, starting point, and answers (people invited by link)</td>
 <td>Everyone in that meetup</td>
 </tr>
 <tr>
@@ -229,7 +244,12 @@
 <tr>
 <td>Google (Places and Maps)</td>
 <td>Address autocomplete and restaurant search</td>
-<td>Addresses you type, meetup midpoint coordinates, and your device's IP address. Not linked to your name</td>
+<td>Addresses you type (in the app, or on a guest link through our server), meetup midpoint coordinates, and your device's IP address in the app. Not linked to your name</td>
+</tr>
+<tr>
+<td>Resend</td>
+<td>Delivers emails to guests who ask for the plan, and account emails such as sign-up confirmations and password resets</td>
+<td>The recipient's email address and the email's contents, such as the restaurant, time, and the inviter's first name</td>
 </tr>
 <tr>
 <td>Expo, Apple, and Google push services</td>
@@ -285,6 +305,14 @@
 <td>90 days after the meetup date, then deleted</td>
 </tr>
 <tr>
+<td>Guest email addresses and invite links</td>
+<td>90 days after the meetup date, then deleted</td>
+</tr>
+<tr>
+<td>Guest names</td>
+<td>Until the person who invited them deletes their account. Guests removed from a meetup are deleted within a day</td>
+</tr>
+<tr>
 <td>Other meetup details (participants, date, restaurant)</td>
 <td>Until you delete your account</td>
 </tr>
@@ -326,7 +354,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>When you delete your account,</strong> we delete your account, profile, profile photo, saved places, preferences, friend connections, survey answers, notifications, and push tokens within 30 days. Copies in backups are removed within 90 days. Meetups you created, or were the first person invited to, are deleted for everyone in them. In group meetups you were invited to, you are removed and the meetup continues for the others. We may keep limited information longer if the law requires it or to resolve a dispute or security issue.</p>
+<p><strong>When you delete your account,</strong> we delete your account, profile, profile photo, saved places, preferences, friend connections, survey answers, notifications, and push tokens within 30 days. Copies in backups are removed within 90 days. Meetups you created, or were the first person invited to, are deleted for everyone in them, including the information of anyone you invited by link. In group meetups you were invited to, you are removed and the meetup continues for the others. We may keep limited information longer if the law requires it or to resolve a dispute or security issue.</p>
 <h2 id="your-rights-and-choices">Your rights and choices</h2>
 <p>Every Entre user has these rights, wherever you live:</p>
 <ul>
@@ -336,7 +364,7 @@
 <li><strong>Withdraw consent:</strong> turn off notifications or location access in your phone's settings, remove dietary restrictions or saved places at any time, and unsubscribe from waitlist emails using the link in any email</li>
 <li><strong>No discrimination:</strong> we will not treat you differently for using these rights</li>
 </ul>
-<p>To make a request, email <a href="mailto:sam@entre.nyc">sam@entre.nyc</a> from the email address on your account. We will confirm your identity before acting and respond within 30 days. If you live in a state that gives you a right to appeal our decision, reply to our response with "Appeal" and we will review it within the time your state's law requires.</p>
+<p>To make a request, email <a href="mailto:sam@entre.nyc">sam@entre.nyc</a> from the email address on your account. If you were invited by link and don't have an account, include your link instead. We will confirm your identity before acting and respond within 30 days. If you live in a state that gives you a right to appeal our decision, reply to our response with "Appeal" and we will review it within the time your state's law requires.</p>
 <p>We do not sell or share personal information for targeted advertising, so there is nothing to opt out of. We also honor browser privacy signals such as Global Privacy Control.</p>
 <h2 id="security">Security</h2>
 <p>We use reasonable administrative, technical, and physical safeguards to protect your information. These include encryption in transit, hashed passwords, database access rules that limit each user to their own data, restricted administrator access, and keeping secret keys off user devices. No method of storing or transmitting data is completely secure, so we cannot guarantee absolute security. If a breach affects your personal information, we will notify you and any required authorities as the law requires.</p>

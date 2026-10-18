@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>You're invited to lunch · Entre</title>
+  <meta name="description" content="Add where you're coming from and what you're in the mood for. No app needed." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="theme-color" content="#FDFAF4" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Entre" />
+  <meta property="og:title" content="You're invited to lunch" />
+  <meta property="og:description" content="Add where you're coming from and what you're in the mood for. No app needed." />
+  <meta property="og:image" content="https://www.entre.nyc/assets/og-join.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.entre.nyc/assets/og-join.png" />
+  <link rel="icon" type="image/svg+xml" href="/assets/entre-mark.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Cormorant+Garamond:ital,wght@1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* The guest page: someone invited to lunch who doesn't have the app.
+       An invitation on the table — a place card up top, the survey set like a menu. */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FDFAF4;
+      --surface: #FFFFFF;
+      --surface-alt: #F4F0E8;
+      --border: #E2D9CC;
+      --border-light: #EDE6DB;
+      --ink: #131220;
+      --body: #4A4358;
+      --muted: #8A8098;
+      --placeholder: #C0B8CC;
+      --sage: #9ED29E;
+      --sage-deep: #4E9A4E;
+      --sage-tint: #E8F5E8;
+      --purple: #7C3AED;
+      --cream-text: #FFF8F0;
+      --red: #C93A3A;
+      --display: 'Bricolage Grotesque', 'DM Sans', system-ui, sans-serif;
+      --sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+    body {
+      min-height: 100vh; min-height: 100svh;
+      display: flex; flex-direction: column;
+      background: var(--bg); color: var(--ink);
+      font-family: var(--sans); font-size: 16px; line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Paper grain */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--sage); text-decoration-thickness: 2px; }
+    :focus-visible { outline: 3px solid var(--purple); outline-offset: 2px; border-radius: 6px; }
+    button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    .skip { position: absolute; left: -9999px; }
+    .skip:focus { left: 16px; top: 16px; z-index: 100; background: var(--surface); padding: 8px 12px; border-radius: 8px; }
+
+    .wrap { position: relative; z-index: 1; width: 100%; max-width: 520px; margin: 0 auto; padding: 0 16px; }
+    main.wrap { padding-bottom: 24px; }
+
+    /* ─── Top ─── */
+    .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 10px; padding-top: calc(18px + env(safe-area-inset-top)); }
+    .brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .brand img { width: 24px; height: 24px; }
+    .brand span { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 25px; line-height: 1; letter-spacing: -0.01em; }
+    .top .tag { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+    /* ─── Hero ─── */
+    .hero { padding-top: 22px; }
+    .eyebrow { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 24px; line-height: 1.2; color: var(--muted); }
+    .hello { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    h1 {
+      font-family: var(--display); font-weight: 800;
+      font-size: clamp(36px, 10.5vw, 50px); line-height: 1.02; letter-spacing: -0.035em;
+      margin-top: 6px; text-wrap: balance;
+    }
+    .lede { font-size: 17px; color: var(--body); margin-top: 14px; max-width: 36ch; }
+    .label { display: inline-block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--sage-deep); }
+
+    /* ─── Place card ─── */
+    .placecard {
+      margin-top: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+      padding: 14px 18px 18px; transform: rotate(-1.2deg);
+      box-shadow: 0 1px 0 var(--border-light), 0 22px 34px -30px rgba(19, 18, 32, .45);
+    }
+    .pc-top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 12px; border-bottom: 1.5px dashed var(--border); }
+    .pc-top .what { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .pc-top .when { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+    .seats { list-style: none; display: flex; gap: 14px; padding-top: 14px; flex-wrap: wrap; }
+    .seat { display: grid; justify-items: center; gap: 6px; width: 58px; }
+    .seat .who { font-size: 13px; font-weight: 500; color: var(--body); max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .av {
+      position: relative; width: 48px; height: 48px; border-radius: 50%;
+      display: grid; place-items: center; font-weight: 700; font-size: 16px; color: #fff;
+    }
+    .av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .av.you { background: transparent; border: 2px dashed var(--muted); color: var(--muted); font-size: 13px; }
+    .av .tick {
+      position: absolute; right: -3px; bottom: -3px; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--sage-deep); border: 2px solid var(--surface); display: grid; place-items: center;
+    }
+
+    /* ─── The survey, set like a menu ─── */
+    .course { margin-top: 28px; padding-top: 24px; border-top: 1.5px dashed var(--border); }
+    .q { display: flex; align-items: baseline; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1.2; letter-spacing: -0.02em; }
+    .num { flex: none; min-width: 28px; font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 23px; color: var(--sage-deep); }
+    .opt { font-family: var(--sans); font-weight: 500; font-size: 13px; letter-spacing: 0; color: var(--muted); }
+    .hint { margin: 6px 0 14px 38px; font-size: 14px; color: var(--muted); }
+
+    .field { position: relative; }
+    .input {
+      width: 100%; height: 56px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface);
+      padding: 0 44px 0 46px; font: 500 16px var(--sans); color: var(--ink); -webkit-appearance: none; appearance: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .input.plain { padding-left: 16px; }
+    .input::placeholder { color: var(--placeholder); }
+    .input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 4px rgba(158, 210, 158, .45); }
+    .field .lead { position: absolute; left: 16px; top: 18px; pointer-events: none; }
+    .field .ok { position: absolute; right: 14px; top: 16px; pointer-events: none; }
+    .suggest {
+      position: absolute; left: 0; right: 0; top: 62px; z-index: 20; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: 0 18px 40px -22px rgba(19, 18, 32, .4);
+    }
+    .suggest button {
+      display: block; width: 100%; min-height: 54px; padding: 10px 16px; text-align: left;
+      background: none; border: 0; border-bottom: 1px solid var(--border-light);
+    }
+    .suggest button[aria-selected="true"], .suggest button:hover { background: var(--sage-tint); }
+    .suggest .main { display: block; font-weight: 600; }
+    .suggest .sec { display: block; font-size: 14px; color: var(--muted); }
+    .suggest .google { padding: 8px 16px; font-size: 11px; color: var(--muted); text-align: right; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 15px;
+      border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface);
+      font-weight: 500; font-size: 15px; transition: transform .15s var(--ease), background-color .15s, border-color .15s;
+    }
+    .chip[aria-pressed="true"] { background: var(--sage); border-color: var(--sage); }
+    .chip:active, .slot:active, .seg button:active { transform: scale(.96); }
+
+    .budget { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .budget button {
+      display: grid; gap: 1px; justify-items: center; padding: 10px 2px; min-height: 64px;
+      border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface);
+    }
+    .budget .sym { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+    .budget .lbl { font-size: 12px; color: var(--muted); }
+    .budget [aria-checked="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
+    .budget [aria-checked="true"] .lbl { color: rgba(255, 248, 240, .7); }
+
+    .switch-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; padding: 12px 14px 12px 16px;
+    }
+    .switch-row strong { display: block; font-weight: 600; }
+    .switch-row span { display: block; font-size: 14px; color: var(--muted); }
+    .switch { flex: none; position: relative; width: 52px; height: 32px; border-radius: 999px; border: 0; background: var(--border); transition: background-color .2s; }
+    .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; transition: transform .25s var(--ease); box-shadow: 0 1px 3px rgba(19, 18, 32, .25); }
+    .switch[aria-checked="true"] { background: var(--sage-deep); }
+    .switch[aria-checked="true"]::after { transform: translateX(20px); }
+    .slots { display: grid; gap: 16px; margin-top: 16px; }
+    .slot-group h3 { margin-bottom: 8px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .slot {
+      height: 46px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface);
+      font-weight: 500; font-size: 15px; font-variant-numeric: tabular-nums; transition: transform .15s var(--ease);
+    }
+    .slot[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
+
+    .check { display: flex; align-items: center; gap: 12px; font-weight: 500; cursor: pointer; padding: 4px 0; }
+    .check input {
+      -webkit-appearance: none; appearance: none; flex: none; width: 26px; height: 26px; margin: 0;
+      border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); display: grid; place-items: center;
+    }
+    .check input:checked { background: var(--ink); border-color: var(--ink); }
+    .check input:checked::after { content: ''; width: 11px; height: 6px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: translateY(-2px) rotate(-45deg); }
+    .email-field { margin-top: 12px; }
+
+    .cta {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; min-height: 58px; margin-top: 32px; border: 0; border-radius: 999px;
+      background: var(--sage); color: var(--ink); font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.01em;
+      text-decoration: none; transition: transform .15s var(--ease), opacity .15s;
+    }
+    .cta:active { transform: scale(.98); }
+    .cta[aria-disabled="true"] { opacity: .5; }
+    .cta.ink { background: var(--ink); color: var(--cream-text); }
+    .spin { width: 18px; height: 18px; border-radius: 50%; border: 2.5px solid rgba(19, 18, 32, .2); border-top-color: var(--ink); animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fine { margin-top: 14px; text-align: center; font-size: 13px; color: var(--muted); }
+    .linkbtn {
+      background: none; border: 0; padding: 8px 2px; color: var(--ink); font-weight: 500;
+      text-decoration: underline; text-decoration-color: var(--sage); text-decoration-thickness: 2px; text-underline-offset: 3px;
+    }
+    .linkbtn.small { font-size: 15px; padding: 4px 2px; }
+    .center { text-align: center; }
+    .err { margin-top: 8px; font-size: 14px; font-weight: 500; color: var(--red); }
+
+    /* ─── Notes + the plan ─── */
+    .note { margin-top: 22px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; }
+    .note p + p { margin-top: 6px; }
+    .note .muted { color: var(--muted); font-size: 15px; }
+    .note .row-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .note .row-actions .input { height: 50px; padding-left: 14px; }
+    .mini {
+      flex: none; min-height: 50px; padding: 0 18px; border-radius: 14px; border: 0;
+      background: var(--ink); color: var(--cream-text); font-weight: 600; font-size: 15px;
+    }
+
+    .plan { margin-top: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; }
+    .plan .photo { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: var(--surface-alt); }
+    .plan .head { padding: 18px 18px 0; }
+    .plan h2 { font-family: var(--display); font-weight: 800; font-size: 29px; line-height: 1.05; letter-spacing: -0.03em; }
+    .plan .meta { margin-top: 6px; font-size: 15px; color: var(--muted); }
+    .perf { position: relative; margin: 18px 0; border-top: 2px dashed var(--border); }
+    .perf::before, .perf::after { content: ''; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); }
+    .perf::before { left: -12px; }
+    .perf::after { right: -12px; }
+    .rows { display: grid; gap: 14px; padding: 0 18px; }
+    .row { display: flex; gap: 12px; align-items: flex-start; }
+    .row svg { flex: none; margin-top: 2px; }
+    .row strong { display: block; font-weight: 600; }
+    .row span { display: block; font-size: 15px; color: var(--muted); }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 18px 18px 6px; }
+    .actions .btn { gap: 6px; padding: 0 8px; font-size: 14px; white-space: nowrap; }
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px;
+      border-radius: 16px; border: 1.5px solid var(--border); background: var(--surface);
+      font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none;
+    }
+    .btn.primary { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
+    .alt-links { display: flex; justify-content: space-between; padding: 6px 18px 16px; font-size: 14px; }
+    .alt-links a { color: var(--muted); }
+    .attribution { padding: 0 18px 14px; font-size: 11px; color: var(--muted); }
+
+    .rsvp { margin-top: 18px; padding: 16px; background: var(--surface-alt); border-radius: 20px; }
+    .rsvp .ask { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .seg button { min-height: 50px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--surface); font-weight: 600; font-size: 15px; transition: transform .15s var(--ease); }
+    .seg .yes[aria-pressed="true"] { background: var(--sage); border-color: var(--sage); }
+    .seg .no[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
+
+    .skeleton { display: grid; gap: 14px; padding-top: 40px; }
+    .skeleton i { display: block; height: 18px; border-radius: 8px; background: var(--surface-alt); animation: pulse 1.4s ease-in-out infinite; }
+    .skeleton i:nth-child(1) { width: 40%; }
+    .skeleton i:nth-child(2) { width: 85%; height: 44px; }
+    .skeleton i:nth-child(3) { width: 70%; }
+    .skeleton i:nth-child(4) { height: 120px; margin-top: 10px; }
+    @keyframes pulse { 50% { opacity: .55; } }
+
+    /* ─── Footer ─── */
+    .foot { position: relative; z-index: 1; margin-top: auto; padding: 40px 16px calc(28px + env(safe-area-inset-bottom)); text-align: center; font-size: 13px; color: var(--muted); }
+    .foot .own { display: inline-block; margin-bottom: 10px; font-size: 15px; font-weight: 500; color: var(--ink); }
+    .foot a { color: var(--muted); }
+
+    .toast {
+      position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 50;
+      max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 999px;
+      background: var(--ink); color: var(--cream-text); font-size: 14px; font-weight: 500;
+      transform: translate(-50%, 160%); visibility: hidden;
+      transition: transform .4s var(--ease), visibility 0s linear .4s;
+    }
+    .toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform .4s var(--ease); }
+
+    /* ─── One orchestrated entrance ─── */
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    @keyframes riseTilt { from { opacity: 0; transform: translateY(14px) rotate(-3.5deg); } to { opacity: 1; transform: rotate(-1.2deg); } }
+    /* backwards, not both: once it has played nothing lingers, so sections don't each become their own layer */
+    .rise { animation: rise .7s var(--ease) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
+    .lift { position: relative; z-index: 10; } /* the address list opens over the sections below */
+    .placecard.rise { animation-name: riseTilt; }
+    @media (prefers-reduced-motion: reduce) {
+      .rise, .placecard.rise { animation: none; }
+      *, *::before, *::after { transition: none !important; }
+    }
+    @media (min-width: 560px) {
+      .hero { padding-top: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/" aria-label="Entre home"><img src="/assets/entre-mark.svg" alt=""><span>Entre</span></a>
+      <span class="tag">Invitation</span>
+    </header>
+  </div>
+
+  <main id="app" class="wrap" aria-live="polite">
+    <div class="skeleton" aria-label="Loading"><i></i><i></i><i></i><i></i></div>
+  </main>
+
+  <footer class="foot">
+    <a class="own" href="/app">Plan your own lunches with Entre</a>
+    <div><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // The guest function (supabase/functions/guest in the app repo). The link
+    // token in the URL is the only key; it opens just this guest's seat.
+    const API = 'https://nknrqcqyzlnyciudfggj.supabase.co/functions/v1/guest';
+
+    const CUISINES = [
+      ['italian', 'Italian', '🍕'], ['japanese', 'Japanese', '🍣'], ['chinese', 'Chinese', '🥟'],
+      ['mexican', 'Mexican', '🌮'], ['american', 'American', '🍔'], ['thai', 'Thai', '🍜'],
+      ['indian', 'Indian', '🍛'], ['mediterranean', 'Mediterranean', '🫒'], ['korean', 'Korean', '🥩'],
+      ['healthy', 'Healthy', '🥗'], ['seafood', 'Seafood', '🦞'], ['pizza', 'Pizza', '🍕'],
+    ];
+    const DIETARY = [
+      ['vegetarian', 'Vegetarian', '🥦'], ['vegan', 'Vegan', '🌱'], ['gluten_free', 'Gluten-free', '🌾'],
+      ['halal', 'Halal', '☪️'], ['kosher', 'Kosher', '✡️'], ['dairy_free', 'Dairy-free', '🥛'], ['nut_free', 'Nut-free', '🥜'],
+    ];
+    const BUDGETS = [['$', 'Cheap'], ['$$', 'Mid-range'], ['$$$', 'Upscale'], ['$$$$', 'Splurge']];
+    const SLOT_GROUPS = [['Morning', 8, 11.5], ['Afternoon', 12, 16.5], ['Evening', 17, 21]];
+    const SEAT_COLORS = ['#BCA4E3', '#98C8D2', '#EB9C5C'];
+    const POLL_STATES = ['setup', 'waiting', 'picking', 'proposed', 'confirmed'];
+
+    const ICON = {
+      pin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+      clock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      cal: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+      go: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>',
+      tick: '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+      ok: '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#4E9A4E"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    };
+
+    const token = (location.pathname.match(/\/join\/([A-Za-z0-9]{12,64})/) || [])[1]
+      || new URLSearchParams(location.search).get('t') || '';
+    const app = document.getElementById('app');
+    let view = null;
+    let draft = null;
+    let pollTimer = null;
+    let busy = false;
+    const photoCache = {};
+
+    // ─── Tiny DOM helper: text is always text, never HTML ───
+    function h(tag, props, ...kids) {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(props || {})) {
+        if (v == null || v === false) continue;
+        if (k === 'class') n.className = v;
+        else if (k === 'icon') n.innerHTML = ICON[v];              // our own static SVGs only
+        else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+        else n.setAttribute(k, v === true ? '' : String(v));
+      }
+      for (const kid of kids.flat(Infinity)) {
+        if (kid == null || kid === false) continue;
+        n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+      }
+      return n;
+    }
+    const icon = (name) => h('span', { icon: name, style: 'display:inline-flex' });
+
+    async function call(action, body) {
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ action, token }, body || {})),
+        });
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        return { ok: res.ok, status: res.status, data: data || {} };
+      } catch (_) {
+        return { ok: false, status: 0, data: {} };
+      }
+    }
+
+    function toast(text) {
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.classList.add('show');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    const newSession = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+    const firstName = (name) => (String(name || '').trim().split(/\s+/)[0]) || 'there';
+    const initials = (name) => String(name || '?').trim().split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+
+    // ─── Dates ───
+    function localDay(ymd) {
+      const [y, m, d] = String(ymd || '').slice(0, 10).split('-').map(Number);
+      return y && m && d ? new Date(y, m - 1, d) : null;
+    }
+    function dayLabel(v, style) {
+      const opts = style === 'short'
+        ? { weekday: 'short', month: 'short', day: 'numeric' }
+        : { weekday: 'long', month: 'long', day: 'numeric' };
+      if (v.meetup.time) return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: v.meetup.time_zone }, opts)).format(new Date(v.meetup.time));
+      const d = localDay(v.meetup.date);
+      return d ? d.toLocaleDateString('en-US', opts) : null;
+    }
+    const timeLabel = (v) => v.meetup.time
+      ? new Intl.DateTimeFormat('en-US', { timeZone: v.meetup.time_zone, hour: 'numeric', minute: '2-digit' }).format(new Date(v.meetup.time))
+      : null;
+    const slotLabel = (s) => { const [hh, mm] = s.split(':').map(Number); return `${hh % 12 || 12}:${String(mm).padStart(2, '0')}`; };
+    function slotsBetween(from, to) {
+      const out = [];
+      for (let t = from; t <= to; t += 0.5) out.push(`${String(Math.floor(t)).padStart(2, '0')}:${t % 1 ? '30' : '00'}`);
+      return out;
+    }
+
+    // ─── Shared pieces ───
+    function avatar(person, idx) {
+      const bg = person.inviter ? 'var(--sage-deep)' : SEAT_COLORS[idx % SEAT_COLORS.length];
+      const av = person.you
+        ? h('div', { class: 'av you' }, initials(person.name))
+        : h('div', { class: 'av', style: `background:${bg}` },
+            person.avatar_url ? h('img', { src: person.avatar_url, alt: '', loading: 'lazy' }) : initials(person.first_name));
+      if (person.done) av.append(h('span', { class: 'tick', icon: 'tick' }));
+      return av;
+    }
+
+    function placeCard(v, showTicks) {
+      const seats = v.people.map((p) => ({ ...p, done: showTicks && p.answered }));
+      seats.push({ you: true, name: v.guest.name, done: showTicks && v.guest.submitted });
+      return h('div', { class: 'placecard rise', style: '--i:3' },
+        h('div', { class: 'pc-top' },
+          h('span', { class: 'what' }, 'The table'),
+          h('span', { class: 'when' }, dayLabel(v, 'short') || 'Date to come')),
+        h('ul', { class: 'seats', 'aria-label': "Who's coming" },
+          seats.map((p, i) => h('li', { class: 'seat' }, avatar(p, i), h('span', { class: 'who' }, p.you ? 'You' : p.first_name)))));
+    }
+
+    function hero({ eyebrow, title, lede, label }) {
+      return h('section', { class: 'hero' },
+        label ? h('span', { class: 'label rise', style: '--i:0' }, label) : null,
+        eyebrow ? h('div', { class: 'rise', style: '--i:0' }, eyebrow) : null,
+        h('h1', { class: 'rise', style: '--i:1' }, title),
+        lede ? h('p', { class: 'lede rise', style: '--i:2' }, lede) : null);
+    }
+
+    // A custom session name ("Q4 kickoff"), not the inviter's default "Lunch with …"
+    const customLabel = (v) => (v.meetup.label && !/^lunch with /i.test(v.meetup.label) ? v.meetup.label : null);
+
+    // ─── States ───
+    function show(next) {
+      view = next;
+      clearInterval(pollTimer);
+      app.replaceChildren();
+      const v = view;
+      const host = v.inviter ? firstName(v.inviter.name) : 'Your friend';
+      document.title = v.inviter ? `Lunch with ${host} · Entre` : 'Entre';
+
+      const declined = v.guest && v.guest.rsvp === 'declined' && ['survey', 'waiting', 'picking'].includes(v.state);
+      if (declined) renderDeclined(v, host);
+      else if (v.state === 'survey') renderSurvey(v, host);
+      else if (v.state === 'waiting' || v.state === 'picking') renderWaiting(v, host);
+      else if (v.state === 'proposed' || v.state === 'confirmed') renderPlan(v, host);
+      else renderSimple(v, host);
+
+      if (POLL_STATES.includes(v.state)) pollTimer = setInterval(refresh, 30000);
+    }
+
+    async function refresh() {
+      if (document.visibilityState !== 'visible' || busy || !view || !POLL_STATES.includes(view.state)) return;
+      const r = await call('view');
+      if (r.ok && r.data.state && JSON.stringify(r.data) !== JSON.stringify(view)) show(r.data);
+    }
+    document.addEventListener('visibilitychange', refresh);
+
+    function renderSimple(v, host) {
+      const copy = {
+        setup: [`${host} is still setting this up.`, 'Check back in a minute. This page updates on its own.'],
+        cancelled: [`${host} cancelled this lunch.`, 'Nothing else you need to do.'],
+        removed: [`${host} went ahead without you this time.`, 'Maybe next time.'],
+        past: ['This lunch already happened.', 'Want to plan your own? Entre finds a spot that works for everyone.'],
+        invalid: ["This link isn't working.", "It may have expired. Ask whoever sent it for a new one."],
+        offline: ["We can't reach Entre right now.", 'Check your connection and try again.'],
+      }[v.state] || ["This link isn't working.", 'Ask whoever sent it for a new one.'];
+      app.append(hero({ title: copy[0], lede: copy[1] }));
+      if (v.state === 'past') app.append(h('a', { class: 'cta rise', style: '--i:3', href: '/app' }, 'Get Entre'));
+      if (v.state === 'offline') app.append(h('button', { class: 'cta rise', style: '--i:3', onclick: init }, 'Try again'));
+    }
+
+    function renderDeclined(v, host) {
+      app.append(hero({ title: 'Got it.', lede: `We let ${host} know you can't make it.` }));
+      app.append(h('p', { class: 'center rise', style: '--i:3;margin-top:18px' },
+        h('button', { class: 'linkbtn', onclick: () => setRsvp(null) }, 'Actually, I can make it')));
+    }
+
+    function renderWaiting(v, host) {
+      const me = firstName(v.guest.name);
+      app.append(hero(v.state === 'picking'
+        ? { title: "Everyone's in.", lede: `${host} is picking a spot now. The plan shows up right here.` }
+        : { title: `You're all set, ${me}.`, lede: `${host} will pick a spot once everyone's in. The plan shows up right here.` }));
+      app.append(placeCard(v, true));
+      app.append(emailNote(v, 4));
+      app.append(h('p', { class: 'center rise', style: '--i:5;margin-top:10px' },
+        h('button', { class: 'linkbtn small', onclick: () => setRsvp('declined') }, "Can't make it anymore?")));
+    }
+
+    function emailNote(v, i) {
+      if (v.guest.email) {
+        return h('div', { class: 'note rise', style: `--i:${i}` },
+          h('p', null, `We'll email the plan to ${v.guest.email}.`),
+          h('p', { class: 'muted' }, 'Keep this link too. It always shows the latest.'),
+          h('button', { class: 'linkbtn small', onclick: () => setEmail(null) }, 'Stop emails'));
+      }
+      const input = h('input', { class: 'input plain', type: 'email', inputmode: 'email', autocomplete: 'email', placeholder: 'you@example.com', 'aria-label': 'Your email' });
+      const err = h('p', { class: 'err', hidden: true });
+      const send = async () => {
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.value.trim())) { err.textContent = "That email doesn't look right."; err.hidden = false; return; }
+        await setEmail(input.value.trim());
+      };
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+      return h('div', { class: 'note rise', style: `--i:${i}` },
+        h('p', null, h('strong', null, 'Want the plan by email?')),
+        h('p', { class: 'muted' }, 'With a calendar invite. Nothing else, ever.'),
+        h('div', { class: 'row-actions' }, input, h('button', { class: 'mini', onclick: send }, 'Email me')),
+        err);
+    }
+
+    function priceText(level) {
+      const n = Number(level);
+      return n >= 1 && n <= 4 ? '$'.repeat(n) : null;
+    }
+
+    function renderPlan(v, host) {
+      const p = v.pick;
+      if (!p) { renderWaiting(Object.assign({}, v, { state: 'picking' }), host); return; }
+      const confirmed = v.state === 'confirmed';
+      const time = timeLabel(v);
+      const day = dayLabel(v, 'long');
+      app.append(hero(confirmed
+        ? { title: "You're on.", lede: `${p.name}${day ? `, ${day}` : ''}${time ? ` at ${time}` : ''}.`, label: customLabel(v) }
+        : { title: `${p.by} suggested ${p.name}.`, lede: 'Waiting on the others to confirm. The final plan shows up right here.' }));
+
+      const where = [p.name, p.address].filter(Boolean).join(', ');
+      const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(where)}${p.place_id ? `&query_place_id=${encodeURIComponent(p.place_id)}` : ''}`;
+      const apple = `https://maps.apple.com/?q=${encodeURIComponent(p.name)}&address=${encodeURIComponent(p.address || '')}`;
+      const photo = h('img', { class: 'photo', alt: '', hidden: true });
+      if (p.has_photo) loadPhoto(photo);
+
+      const meta = [p.cuisine, priceText(p.price_level), p.rating ? `★ ${Number(p.rating).toFixed(1)}` : null].filter(Boolean).join('  ·  ');
+      const card = h('article', { class: 'plan rise', style: '--i:3' },
+        photo,
+        h('div', { class: 'head' }, h('h2', null, p.name), meta ? h('p', { class: 'meta' }, meta) : null),
+        h('div', { class: 'perf', 'aria-hidden': 'true' }),
+        h('div', { class: 'rows' },
+          h('div', { class: 'row' }, icon('clock'), h('div', null, h('strong', null, day || 'Day to come'), h('span', null, time || 'Time to come'))),
+          p.address ? h('div', { class: 'row' }, icon('pin'), h('div', null, h('strong', null, p.name), h('span', null, p.address))) : null),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: maps, target: '_blank', rel: 'noopener' }, icon('go'), 'Directions'),
+          confirmed
+            ? h('a', { class: 'btn primary', href: `${API}?ics=${token}` }, icon('cal'), 'Add to calendar')
+            : h('span', { class: 'btn', 'aria-disabled': 'true', style: 'opacity:.5' }, icon('cal'), 'Calendar once set')),
+        h('div', { class: 'alt-links' },
+          h('a', { href: apple, target: '_blank', rel: 'noopener' }, 'Apple Maps'),
+          confirmed && v.meetup.time ? h('a', { href: googleCalendar(v, p, host), target: '_blank', rel: 'noopener' }, 'Google Calendar') : null),
+        h('p', { class: 'attribution' }, 'Place info from Google Maps'));
+      app.append(card);
+
+      const rsvp = v.guest.rsvp;
+      app.append(h('section', { class: 'rsvp rise', style: '--i:4' },
+        h('p', { class: 'ask' }, rsvp === 'in' ? "You're in. See you there." : rsvp === 'declined' ? `We let ${host} know.` : 'Are you in?'),
+        h('div', { class: 'seg', role: 'group', 'aria-label': 'Are you in?' },
+          h('button', { class: 'yes', 'aria-pressed': String(rsvp === 'in'), onclick: () => setRsvp(rsvp === 'in' ? null : 'in') }, "I'm in"),
+          h('button', { class: 'no', 'aria-pressed': String(rsvp === 'declined'), onclick: () => setRsvp(rsvp === 'declined' ? null : 'declined') }, "Can't make it"))));
+      app.append(emailNote(v, 5));
+    }
+
+    function googleCalendar(v, p, host) {
+      const start = new Date(v.meetup.time);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const fmt = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + `&text=${encodeURIComponent(`${p.name} with ${host}`)}`
+        + `&dates=${fmt(start)}/${fmt(end)}`
+        + `&location=${encodeURIComponent([p.name, p.address].filter(Boolean).join(', '))}`
+        + `&details=${encodeURIComponent(`Planned with Entre: ${location.origin}${location.pathname}`)}`;
+    }
+
+    async function loadPhoto(img) {
+      if (!(token in photoCache)) {
+        const r = await call('photo');
+        photoCache[token] = r.ok ? r.data.url : null;
+      }
+      if (photoCache[token]) {
+        img.src = photoCache[token];
+        img.hidden = false;
+      }
+    }
+
+    async function setRsvp(value) {
+      busy = true;
+      const r = await call('rsvp', { rsvp: value });
+      busy = false;
+      if (r.data && r.data.state) show(r.data);
+      if (!r.ok) toast("That didn't go through. Try again?");
+      else if (value === 'in') toast('Great. See you there.');
+    }
+
+    async function setEmail(value) {
+      busy = true;
+      const r = await call('email', { email: value });
+      busy = false;
+      if (r.data && r.data.state) show(r.data);
+      if (!r.ok) toast(r.data.error === 'invalid_input' ? "That email doesn't look right." : "That didn't go through. Try again?");
+      else toast(value ? "Done. We'll email you." : 'Emails about this lunch are off.');
+    }
+
+    // ─── The survey ───
+    function renderSurvey(v, host) {
+      draft = draft || {
+        name: v.guest.name || '',
+        place: null,
+        session: newSession(),
+        cuisines: new Set(),
+        budget: '$$',
+        dietary: new Set(),
+        anyTime: true,
+        slots: new Set(),
+        wantsEmail: false,
+        email: '',
+      };
+      const day = dayLabel(v, 'long');
+
+      // "Hi Alex," with a way to fix the name
+      const hello = h('div', { class: 'hello' });
+      const drawHello = (editing) => {
+        hello.replaceChildren();
+        if (editing) {
+          const input = h('input', { class: 'input plain', value: draft.name, maxlength: '40', autocomplete: 'name', 'aria-label': 'Your name', style: 'max-width:280px;height:48px' });
+          input.addEventListener('input', () => { draft.name = input.value; });
+          hello.append(input);
+          setTimeout(() => input.focus(), 0);
+        } else {
+          hello.append(h('span', { class: 'eyebrow' }, `Hi ${firstName(draft.name)},`),
+            h('button', { class: 'linkbtn small', onclick: () => drawHello(true) }, `Not ${firstName(draft.name)}?`));
+        }
+      };
+      drawHello(false);
+
+      app.append(hero({
+        label: customLabel(v),
+        eyebrow: hello,
+        title: `${host} saved you a seat.`,
+        lede: `Lunch${day ? ` on ${day}` : ''}. Add where you'll be coming from, and Entre finds a spot that works for everyone. No app needed.`,
+      }));
+      app.append(placeCard(v, false));
+
+      const errs = {};
+      const errorSlot = (key) => (errs[key] = h('p', { class: 'err', hidden: true, role: 'alert' }));
+      const showErr = (key, text) => { errs[key].textContent = text; errs[key].hidden = false; };
+      const clearErr = (key) => { if (errs[key]) errs[key].hidden = true; };
+
+      const course = (n, question, opt, hint, ...body) => h('section', { class: 'course rise', style: `--i:${3 + n}`, 'aria-labelledby': `q${n}` },
+        h('h2', { class: 'q', id: `q${n}` }, h('span', { class: 'num' }, `0${n}`), h('span', null, question, opt ? ' ' : null, opt ? h('span', { class: 'opt' }, '(optional)') : null)),
+        hint ? h('p', { class: 'hint' }, hint) : h('div', { style: 'height:14px' }),
+        body);
+
+      // 01 Where are you coming from? (the one required answer)
+      const okMark = h('span', { class: 'ok', icon: 'ok', hidden: !draft.place });
+      const input = h('input', {
+        class: 'input', type: 'text', value: draft.place ? draft.place.label : '', placeholder: 'Your office, home, anywhere',
+        autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
+        role: 'combobox', 'aria-autocomplete': 'list', 'aria-expanded': 'false', 'aria-controls': 'suggestions', 'aria-labelledby': 'q1',
+      });
+      const list = h('div', { class: 'suggest', id: 'suggestions', role: 'listbox', hidden: true });
+      let items = [], active = -1, seq = 0, timer = null;
+      const closeList = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; };
+      const choose = (i) => {
+        const s = items[i];
+        if (!s) return;
+        draft.place = { id: s.place_id, label: s.secondary ? `${s.main}, ${s.secondary}` : s.main };
+        input.value = draft.place.label;
+        okMark.hidden = false;
+        clearErr('location');
+        closeList();
+        updateCta();
+      };
+      const drawList = () => {
+        list.replaceChildren();
+        if (!items.length) { closeList(); return; }
+        items.forEach((s, i) => {
+          list.append(h('button', {
+            type: 'button', role: 'option', id: `opt${i}`, 'aria-selected': String(i === active),
+            onmousedown: (e) => e.preventDefault(), // keep focus in the field, so it doesn't close first
+            onclick: () => choose(i),
+          }, h('span', { class: 'main' }, s.main), s.secondary ? h('span', { class: 'sec' }, s.secondary) : null));
+        });
+        list.append(h('div', { class: 'google' }, 'Powered by Google'));
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        if (active >= 0) input.setAttribute('aria-activedescendant', `opt${active}`); else input.removeAttribute('aria-activedescendant');
+      };
+      input.addEventListener('input', () => {
+        draft.place = null;
+        okMark.hidden = true;
+        clearErr('location');
+        updateCta();
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (q.length < 3) { items = []; closeList(); return; }
+        timer = setTimeout(async () => {
+          const mine = ++seq;
+          const r = await call('autocomplete', { input: q, session: draft.session });
+          if (mine !== seq) return;
+          if (!r.ok) {
+            showErr('location', r.status === 429 ? 'Too many searches. Give it a minute.' : 'Address search is taking a break. Try again in a minute.');
+            items = [];
+            closeList();
+            return;
+          }
+          items = r.data.suggestions || [];
+          active = -1;
+          drawList();
+        }, 300);
+      });
+      input.addEventListener('keydown', (e) => {
+        if (list.hidden) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(items.length - 1, active + 1); drawList(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(0, active - 1); drawList(); }
+        else if (e.key === 'Enter') { e.preventDefault(); choose(active >= 0 ? active : 0); }
+        else if (e.key === 'Escape') closeList();
+      });
+      input.addEventListener('blur', () => setTimeout(closeList, 120));
+
+      const where = course(1, "Where are you coming from?", false, 'Only shared with the people at this lunch.',
+        h('div', { class: 'field' }, h('span', { class: 'lead', icon: 'pin' }), input, okMark, list), errorSlot('location'));
+      where.classList.add('lift');
+      app.append(where);
+
+      // 02 Mood
+      const chipSet = (options, set) => h('div', { class: 'chips' }, options.map(([id, label, emoji]) => {
+        const b = h('button', { type: 'button', class: 'chip', 'aria-pressed': String(set.has(id)) }, h('span', { 'aria-hidden': 'true' }, emoji), label);
+        b.addEventListener('click', () => {
+          if (set.has(id)) set.delete(id); else set.add(id);
+          b.setAttribute('aria-pressed', String(set.has(id)));
+        });
+        return b;
+      }));
+      app.append(course(2, 'What are you in the mood for?', true, 'Pick as many as you like, or skip it.', chipSet(CUISINES, draft.cuisines)));
+
+      // 03 Budget
+      const budget = h('div', { class: 'budget', role: 'radiogroup', 'aria-labelledby': 'q3' });
+      const drawBudget = () => {
+        budget.replaceChildren(...BUDGETS.map(([sym, label]) => h('button', {
+          type: 'button', role: 'radio', 'aria-checked': String(draft.budget === sym),
+          onclick: () => { draft.budget = sym; drawBudget(); },
+        }, h('span', { class: 'sym' }, sym), h('span', { class: 'lbl' }, label))));
+      };
+      drawBudget();
+      app.append(course(3, 'Budget', false, null, budget));
+
+      // 04 Dietary
+      app.append(course(4, 'Anything we should know?', true, 'Only used to suggest places that work for you.', chipSet(DIETARY, draft.dietary)));
+
+      // 05 Times
+      const sw = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': String(draft.anyTime), 'aria-label': 'Any time works' });
+      const slots = h('div', { class: 'slots', hidden: draft.anyTime },
+        SLOT_GROUPS.map(([label, from, to]) => h('div', { class: 'slot-group' },
+          h('h3', null, label),
+          h('div', { class: 'slot-grid' }, slotsBetween(from, to).map((s) => {
+            const b = h('button', { type: 'button', class: 'slot', 'aria-pressed': String(draft.slots.has(s)), 'aria-label': `${slotLabel(s)} ${s < '12:00' ? 'AM' : 'PM'}` }, slotLabel(s));
+            b.addEventListener('click', () => {
+              if (draft.slots.has(s)) draft.slots.delete(s); else draft.slots.add(s);
+              b.setAttribute('aria-pressed', String(draft.slots.has(s)));
+            });
+            return b;
+          })))));
+      sw.addEventListener('click', () => {
+        draft.anyTime = !draft.anyTime;
+        sw.setAttribute('aria-checked', String(draft.anyTime));
+        slots.hidden = draft.anyTime;
+      });
+      app.append(course(5, `When are you free${day ? ` on ${day.split(',')[0]}` : ''}?`, false, null,
+        h('div', { class: 'switch-row' }, h('div', null, h('strong', null, 'Any time works'), h('span', null, 'Turn off to pick times')), sw),
+        slots));
+
+      // Email me the plan
+      const emailInput = h('input', { class: 'input plain', type: 'email', inputmode: 'email', autocomplete: 'email', placeholder: 'you@example.com', value: draft.email, 'aria-label': 'Your email' });
+      emailInput.addEventListener('input', () => { draft.email = emailInput.value; clearErr('email'); });
+      const emailWrap = h('div', { class: 'email-field', hidden: !draft.wantsEmail }, emailInput);
+      const emailBox = h('input', { type: 'checkbox', checked: draft.wantsEmail });
+      emailBox.addEventListener('change', () => {
+        draft.wantsEmail = emailBox.checked;
+        emailWrap.hidden = !draft.wantsEmail;
+        if (draft.wantsEmail) emailInput.focus();
+      });
+      app.append(h('section', { class: 'course rise', style: '--i:9' },
+        h('label', { class: 'check' }, emailBox, 'Email me the plan, with a calendar invite'),
+        emailWrap, errorSlot('email')));
+
+      // Send
+      const cta = h('button', { type: 'button', class: 'cta rise', style: '--i:10' }, 'Send my picks');
+      const updateCta = () => cta.setAttribute('aria-disabled', String(!draft.place));
+      updateCta();
+      cta.addEventListener('click', () => submit(cta, input, showErr));
+      app.append(cta, errorSlot('submit'));
+      app.append(h('p', { class: 'fine' },
+        'By sending, you agree to Entre’s ', h('a', { href: '/terms', target: '_blank' }, 'Terms'),
+        ' and ', h('a', { href: '/privacy', target: '_blank' }, 'Privacy Policy'), '.'));
+      app.append(h('p', { class: 'center' }, h('button', { class: 'linkbtn small', onclick: () => setRsvp('declined') }, "Can't make it?")));
+    }
+
+    async function submit(cta, placeInput, showErr) {
+      if (busy) return;
+      if (!draft.place) {
+        showErr('location', 'Choose your starting point from the list.');
+        placeInput.focus();
+        placeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (!draft.name.trim()) { showErr('submit', 'Add your name at the top.'); return; }
+      const email = draft.wantsEmail ? draft.email.trim() : '';
+      if (draft.wantsEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showErr('email', "That email doesn't look right."); return; }
+
+      busy = true;
+      cta.replaceChildren(h('span', { class: 'spin', 'aria-hidden': 'true' }), 'Sending');
+      const r = await call('submit', {
+        name: draft.name.trim(),
+        place_id: draft.place.id,
+        session: draft.session,
+        cuisines: [...draft.cuisines],
+        budget: draft.budget,
+        dietary: [...draft.dietary],
+        slots: draft.anyTime ? [] : [...draft.slots].sort(),
+        email: email || undefined,
+      });
+      busy = false;
+      cta.replaceChildren('Send my picks');
+
+      if (r.ok && r.data.state) {
+        draft = null;
+        show(r.data);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (r.data.email_error) toast("We couldn't save that email. You can add it below.");
+        return;
+      }
+      const code = r.data.error;
+      if (code === 'address_not_found') { draft.place = null; draft.session = newSession(); showErr('location', "We couldn't find that address. Try picking it again."); return; }
+      if (code === 'invalid_input' && r.data.field === 'name') { showErr('submit', "That name isn't allowed. Try another one."); return; }
+      if (code === 'invalid_input') { showErr('submit', "Something in there didn't look right. Check it and try again."); return; }
+      if (code === 'rate_limited') { showErr('submit', 'Too many tries. Give it a minute.'); return; }
+      if (r.data.state && r.data.state !== 'survey') { draft = null; show(r.data); return; }
+      showErr('submit', "That didn't go through. Try again?");
+    }
+
+    async function init() {
+      if (!token) { show({ state: 'invalid' }); return; }
+      const params = new URLSearchParams(location.search);
+      const r = await call('view');
+      if (r.status === 0) { show({ state: 'offline' }); return; }
+      show(r.data && r.data.state ? r.data : { state: 'invalid' });
+
+      // From an email: "Stop these emails"
+      if (params.get('stop') === '1' && view.guest && view.guest.email) await setEmail(null);
+      if (location.search) history.replaceState(null, '', location.pathname);
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>

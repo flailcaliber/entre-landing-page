@@ -29,12 +29,44 @@
     Access-Control-Allow-Origin = "*"
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Guest pages (entre.nyc/join/<token>): someone invited to a meetup without the app.
+# The token in the URL is their key, so: never cached, never indexed, never sent on as a referrer.
+[[headers]]
+  for = "/join/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src https://nknrqcqyzlnyciudfggj.supabase.co; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+
+[[headers]]
+  for = "/join.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+[[redirects]]
+  from = "/join/*"
+  to = "/join.html"
+  status = 200
+
+# "Get Entre" everywhere (guest page, guest emails). Point it at the App Store
+# listing once it's live; nothing else needs to change.
+[[redirects]]
+  from = "/app"
+  to = "https://testflight.apple.com/join/BA1QZhgP"
+  status = 302
 
 [[redirects]]
   from = "/waitlist"
