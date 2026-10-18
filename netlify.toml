@@ -56,10 +56,39 @@
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
 
+[[headers]]
+  for = "/cal/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+
+[[headers]]
+  for = "/unsub/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+
 [[redirects]]
   from = "/join/*"
   to = "/join.html"
   status = 200
+
+# Guest emails and the guest page link here, so every link stays on entre.nyc.
+# Proxied to the app's `guest` Edge Function: the calendar file, and one-click
+# "stop these emails" (List-Unsubscribe).
+[[redirects]]
+  from = "/cal/*"
+  to = "https://nknrqcqyzlnyciudfggj.supabase.co/functions/v1/guest/ics/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/unsub/*"
+  to = "https://nknrqcqyzlnyciudfggj.supabase.co/functions/v1/guest/unsubscribe/:splat"
+  status = 200
+  force = true
 
 # "Get Entre" everywhere (guest page, guest emails). Point it at the App Store
 # listing once it's live; nothing else needs to change.

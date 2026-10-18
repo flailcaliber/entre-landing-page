@@ -570,7 +570,7 @@
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: maps, target: '_blank', rel: 'noopener' }, icon('go'), 'Directions'),
           confirmed
-            ? h('a', { class: 'btn primary', href: `${API}?ics=${token}` }, icon('cal'), 'Add to calendar')
+            ? h('a', { class: 'btn primary', href: `/cal/${token}` }, icon('cal'), 'Add to calendar')
             : h('span', { class: 'btn', 'aria-disabled': 'true', style: 'opacity:.5' }, icon('cal'), 'Calendar once set')),
         h('div', { class: 'alt-links' },
           h('a', { href: apple, target: '_blank', rel: 'noopener' }, 'Apple Maps'),
