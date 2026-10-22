@@ -240,7 +240,7 @@
     .row svg { flex: none; margin-top: 2px; }
     .row strong { display: block; font-weight: 600; }
     .row span { display: block; font-size: 15px; color: var(--muted); }
-    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 18px 18px 6px; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 18px 18px 12px; }
     .actions .btn { gap: 6px; padding: 0 8px; font-size: 14px; white-space: nowrap; }
     .btn {
       display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 12px;
@@ -248,8 +248,6 @@
       font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none;
     }
     .btn.primary { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
-    .alt-links { display: flex; justify-content: space-between; padding: 6px 18px 16px; font-size: 14px; }
-    .alt-links a { color: var(--muted); }
     .attribution { padding: 0 18px 14px; font-size: 11px; color: var(--muted); }
 
     .rsvp { margin-top: 18px; padding: 16px; background: var(--surface-alt); border-radius: 20px; }
@@ -266,6 +264,35 @@
     .skeleton i:nth-child(3) { width: 70%; }
     .skeleton i:nth-child(4) { height: 120px; margin-top: 10px; }
     @keyframes pulse { 50% { opacity: .55; } }
+
+    /* ─── Choice sheet (Directions, Add to calendar): slides up like the app's menus ─── */
+    .sheet {
+      width: 100%; max-width: 520px; max-height: none; margin: auto auto 0;
+      padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+      border: 0; background: transparent; color: var(--ink); overflow: visible;
+    }
+    .sheet:focus { outline: none; }
+    .sheet::backdrop { background: rgba(19, 18, 32, .45); }
+    .sheet[open] > * { animation: sheetUp .38s var(--ease) backwards; }
+    .sheet[open] > .sheet-cancel { animation-delay: 40ms; }
+    @keyframes sheetUp { from { opacity: 0; transform: translateY(32px); } }
+    .sheet-card { background: var(--surface); border-radius: 20px; overflow: hidden; }
+    .sheet-title {
+      padding: 14px 18px 12px; border-bottom: 1px solid var(--border-light); text-align: center;
+      font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    }
+    .sheet-opt {
+      display: flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 18px;
+      border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 17px; color: var(--ink); text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sheet-opt:last-child { border-bottom: 0; }
+    .sheet-opt:active, .sheet-opt:hover { background: var(--sage-tint); }
+    .sheet-cancel {
+      display: block; width: 100%; min-height: 56px; margin-top: 8px; border: 0; border-radius: 20px;
+      background: var(--surface); font-weight: 500; font-size: 17px; color: var(--muted);
+    }
+    @media (min-width: 560px) { .sheet { margin: auto; padding-bottom: 12px; } }
 
     /* ─── Footer ─── */
     .foot { position: relative; z-index: 1; margin-top: auto; padding: 40px 16px calc(28px + env(safe-area-inset-bottom)); text-align: center; font-size: 13px; color: var(--muted); }
@@ -289,7 +316,7 @@
     .lift { position: relative; z-index: 10; } /* the address list opens over the sections below */
     .placecard.rise { animation-name: riseTilt; }
     @media (prefers-reduced-motion: reduce) {
-      .rise, .placecard.rise { animation: none; }
+      .rise, .placecard.rise, .sheet[open] > * { animation: none; }
       *, *::before, *::after { transition: none !important; }
     }
     @media (min-width: 560px) {
@@ -568,13 +595,14 @@
           h('div', { class: 'row' }, icon('clock'), h('div', null, h('strong', null, day || 'Day to come'), h('span', null, time || 'Time to come'))),
           p.address ? h('div', { class: 'row' }, icon('pin'), h('div', null, h('strong', null, p.name), h('span', null, p.address))) : null),
         h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: maps, target: '_blank', rel: 'noopener' }, icon('go'), 'Directions'),
+          h('button', { type: 'button', class: 'btn', 'aria-haspopup': 'dialog', onclick: () => sheet('Directions', appleFirst([['Google Maps', maps], ['Apple Maps', apple]])) },
+            icon('go'), 'Directions'),
           confirmed
-            ? h('a', { class: 'btn primary', href: `/cal/${token}` }, icon('cal'), 'Add to calendar')
+            ? h('button', { type: 'button', class: 'btn primary', 'aria-haspopup': 'dialog', onclick: () => sheet('Add to calendar', [
+                ['Apple Calendar', `/cal/${token}`, true],
+                ...(v.meetup.time ? [['Google Calendar', googleCalendar(v, p, host)], ['Outlook', outlookCalendar(v, p, host)]] : []),
+              ]) }, icon('cal'), 'Add to calendar')
             : h('span', { class: 'btn', 'aria-disabled': 'true', style: 'opacity:.5' }, icon('cal'), 'Calendar once set')),
-        h('div', { class: 'alt-links' },
-          h('a', { href: apple, target: '_blank', rel: 'noopener' }, 'Apple Maps'),
-          confirmed && v.meetup.time ? h('a', { href: googleCalendar(v, p, host), target: '_blank', rel: 'noopener' }, 'Google Calendar') : null),
         h('p', { class: 'attribution' }, 'Place info from Google Maps'));
       app.append(card);
 
@@ -596,6 +624,40 @@
         + `&dates=${fmt(start)}/${fmt(end)}`
         + `&location=${encodeURIComponent([p.name, p.address].filter(Boolean).join(', '))}`
         + `&details=${encodeURIComponent(`Planned with Entre: ${location.origin}${location.pathname}`)}`;
+    }
+
+    // Outlook on the web. A web page can't tell whether the Outlook app is installed
+    // (Safari shows an "invalid address" error when it isn't), so guests get the web
+    // version, which fills in the time reliably and saves to the same calendar.
+    function outlookCalendar(v, p, host) {
+      const start = new Date(v.meetup.time);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      return 'https://outlook.office.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent'
+        + `&subject=${encodeURIComponent(`${p.name} with ${host}`)}`
+        + `&startdt=${encodeURIComponent(start.toISOString())}&enddt=${encodeURIComponent(end.toISOString())}`
+        + `&location=${encodeURIComponent([p.name, p.address].filter(Boolean).join(', '))}`
+        + `&body=${encodeURIComponent(`Planned with Entre: ${location.origin}${location.pathname}`)}`;
+    }
+
+    // iPhones, iPads and Macs list Apple Maps first
+    const isApple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+    const appleFirst = (opts) => (isApple ? [...opts].reverse() : opts);
+
+    // A menu of links that slides up from the bottom. options: [label, href, sameTab?]
+    function sheet(title, options) {
+      const dlg = h('dialog', { class: 'sheet', 'aria-label': title, tabindex: '-1' },
+        h('div', { class: 'sheet-card' },
+          h('div', { class: 'sheet-title', 'aria-hidden': 'true' }, title),
+          options.map(([label, href, sameTab]) => h('a', Object.assign(
+            { class: 'sheet-opt', href, onclick: () => dlg.close() },
+            sameTab ? {} : { target: '_blank', rel: 'noopener' }), label))),
+        h('button', { type: 'button', class: 'sheet-cancel', onclick: () => dlg.close() }, 'Cancel'));
+      if (typeof dlg.showModal !== 'function') { window.open(options[0][1], options[0][2] ? '_self' : '_blank'); return; }
+      dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // the dimmed area around it
+      dlg.addEventListener('close', () => dlg.remove());
+      document.body.append(dlg);
+      dlg.showModal();
+      dlg.focus(); // the sheet, not its first option, so nothing opens looking pre-selected
     }
 
     async function loadPhoto(img) {
