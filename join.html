@@ -288,6 +288,20 @@
     }
     .sheet-opt:last-child { border-bottom: 0; }
     .sheet-opt:active, .sheet-opt:hover { background: var(--sage-tint); }
+    button.sheet-opt { width: 100%; border: 0; border-bottom: 1px solid var(--border-light); background: none; font: inherit; font-weight: 600; font-size: 17px; }
+    button.sheet-opt:last-child { border-bottom: 0; }
+    .sheet-opt.danger { color: var(--red); }
+    .sheet-note { padding: 10px 20px 14px; border-bottom: 1px solid var(--border-light); text-align: center; font-size: 14px; color: var(--muted); }
+    .sheet-body { max-height: min(56vh, 460px); overflow-y: auto; padding: 14px 16px 6px; }
+    .sheet-body .slots { margin-top: 0; }
+    .slot:disabled { opacity: .35; cursor: default; }
+    .slot .now { display: block; margin-top: -3px; font-size: 10px; font-weight: 500; color: var(--muted); }
+    .sheet-go {
+      display: flex; align-items: center; justify-content: center; width: calc(100% - 32px); min-height: 54px; margin: 10px 16px 16px;
+      border: 0; border-radius: 16px; background: var(--sage); color: var(--ink); font-family: var(--display); font-weight: 700; font-size: 17px;
+    }
+    .sheet-go.danger { background: var(--ink); color: var(--cream-text); }
+    .sheet-go[aria-disabled="true"] { opacity: .45; }
     .sheet-cancel {
       display: block; width: 100%; min-height: 56px; margin-top: 8px; border: 0; border-radius: 20px;
       background: var(--surface); font-weight: 500; font-size: 17px; color: var(--muted);
@@ -514,9 +528,17 @@
     document.addEventListener('visibilitychange', refresh);
 
     function renderSimple(v, host) {
+      // Called off because someone can't make it (them, or someone else), or cancelled
+      const c = v.cancel || {};
+      const cancelled = c.by_you
+        ? ['Lunch is off.', `We let ${host} know you can't make it.`]
+        : c.reason === 'cant_make_it'
+          ? ['Lunch is off.', `${c.by || host} can't make it. Maybe another day.`]
+          : [`${host} cancelled this lunch.`, 'Nothing else you need to do.'];
       const copy = {
         setup: [`${host} is still setting this up.`, 'Check back in a minute. This page updates on its own.'],
-        cancelled: [`${host} cancelled this lunch.`, 'Nothing else you need to do.'],
+        cancelled,
+        out: ['Got it.', `We let ${host} know you can't make it. Lunch is still on for the others.`],
         removed: [`${host} went ahead without you this time.`, 'Maybe next time.'],
         past: ['This lunch already happened.', 'Want to plan your own? Entre finds a spot that works for everyone.'],
         invalid: ["This link isn't working.", "It may have expired. Ask whoever sent it for a new one."],
@@ -611,8 +633,136 @@
         h('p', { class: 'ask' }, rsvp === 'in' ? "You're in. See you there." : rsvp === 'declined' ? `We let ${host} know.` : 'Are you in?'),
         h('div', { class: 'seg', role: 'group', 'aria-label': 'Are you in?' },
           h('button', { class: 'yes', 'aria-pressed': String(rsvp === 'in'), onclick: () => setRsvp(rsvp === 'in' ? null : 'in') }, "I'm in"),
-          h('button', { class: 'no', 'aria-pressed': String(rsvp === 'declined'), onclick: () => setRsvp(rsvp === 'declined' ? null : 'declined') }, "Can't make it"))));
-      app.append(emailNote(v, 5));
+          // Not a dead end: another time, a different spot, or out (migration 039)
+          h('button', { class: 'no', 'aria-haspopup': 'dialog', onclick: () => cantMakeIt(v, host) }, "Can't make it"))));
+      const note = requestNote(v, host);
+      if (note) app.append(note);
+      app.append(emailNote(v, 6));
+    }
+
+    // ─── "Can't make it?" ────────────────────────────────────────────────────
+    function cantMakeIt(v, host) {
+      const lastOne = v.people.filter((p) => !p.inviter).length === 0;
+      sheet("Can't make it?", [
+        ...(v.meetup.time && v.meetup.date ? [['Suggest another time', () => timeSheet(v, host)]] : []),
+        ['Ask for a different spot', () => confirmSheet({
+          title: 'Ask for a different spot?',
+          text: `${host} picks a new one. Until then, the plan stays as is.`,
+          go: `Ask ${host}`,
+          onGo: () => requestChange({ kind: 'spot' }, `We asked ${host} for a different spot.`),
+        })],
+        ["I can't make it", () => confirmSheet({
+          title: lastOne ? 'Call off lunch?' : "Can't make it?",
+          text: lastOne
+            ? `We'll let ${host} know you can't make it, and the lunch is off.`
+            : "We'll let everyone know. Lunch stays on for the rest.",
+          go: "I can't make it",
+          danger: true,
+          onGo: goOut,
+        }), false, true],
+      ], `Let ${host} know what works instead.`);
+    }
+
+    // The lunch's day, a different half hour. Times are where the lunch is.
+    function timeSheet(v, host) {
+      const tz = v.meetup.time_zone;
+      const hhmm = (d) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
+      const current = hhmm(new Date(v.meetup.time));
+      const ymd = String(v.meetup.date).slice(0, 10);
+      let chosen = null;
+      const go = h('button', { type: 'button', class: 'sheet-go', 'aria-disabled': 'true' }, 'Pick a time');
+      const grid = h('div', { class: 'slots' }, SLOT_GROUPS.map(([label, from, to]) => h('div', { class: 'slot-group' },
+        h('h3', null, label),
+        h('div', { class: 'slot-grid' }, slotsBetween(from, to).map((s) => {
+          const [hh, mm] = s.split(':').map(Number);
+          const off = s === current || zonedInstant(ymd, hh, mm, tz) <= Date.now();
+          const b = h('button', {
+            type: 'button', class: 'slot', 'aria-pressed': 'false', disabled: off,
+            'aria-label': `${slotLabel(s)} ${hh < 12 ? 'AM' : 'PM'}${s === current ? ', the current time' : ''}`,
+          }, slotLabel(s), s === current ? h('span', { class: 'now' }, 'Current') : null);
+          b.addEventListener('click', () => {
+            chosen = s;
+            grid.querySelectorAll('.slot').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+            go.setAttribute('aria-disabled', 'false');
+            go.textContent = `Ask for ${slotLabel(s)} ${hh < 12 ? 'AM' : 'PM'}`;
+          });
+          return b;
+        })))));
+      const dlg = dialogSheet('Suggest another time', `Same day, same spot. ${host} decides.`, [h('div', { class: 'sheet-body' }, grid), go]);
+      go.addEventListener('click', async () => {
+        if (!chosen) return;
+        dlg.close();
+        const [hh] = chosen.split(':').map(Number);
+        await requestChange({ kind: 'time', slot: chosen }, `We asked ${host} for ${slotLabel(chosen)} ${hh < 12 ? 'AM' : 'PM'}.`);
+      });
+    }
+
+    // "13:30 on 2026-10-24" where the lunch is → a real moment in time
+    function zonedInstant(ymd, hh, mm, tz) {
+      const [y, m, d] = ymd.split('-').map(Number);
+      const guess = Date.UTC(y, m - 1, d, hh, mm);
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+      }).formatToParts(new Date(guess));
+      const get = (t) => Number(parts.find((p) => p.type === t).value);
+      const wall = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'));
+      return guess - (wall - guess);
+    }
+
+    function confirmSheet({ title, text, go, danger, onGo }) {
+      const btn = h('button', { type: 'button', class: `sheet-go${danger ? ' danger' : ''}` }, go);
+      const dlg = dialogSheet(title, text, [btn]);
+      btn.addEventListener('click', () => { dlg.close(); onGo(); });
+    }
+
+    function requestNote(v, host) {
+      const r = v.request;
+      if (!r) return null;
+      const at = r.time
+        ? new Intl.DateTimeFormat('en-US', { timeZone: v.meetup.time_zone, hour: 'numeric', minute: '2-digit' }).format(new Date(r.time))
+        : null;
+      if (r.status === 'pending') {
+        return h('div', { class: 'note rise', style: '--i:5' },
+          h('p', null, r.kind === 'time' ? `You asked ${host} to move lunch to ${at}.` : `You asked ${host} for a different spot.`),
+          h('p', { class: 'muted' }, 'This page updates when they decide.'),
+          h('button', { class: 'linkbtn small', onclick: withdrawRequest }, 'Never mind'));
+      }
+      if (r.status === 'declined') {
+        return h('div', { class: 'note rise', style: '--i:5' },
+          h('p', null, `${host} kept the plan.`),
+          h('p', { class: 'muted' }, "Still can't make it? Tap Can't make it above."));
+      }
+      return null; // accepted: the plan above already shows the change
+    }
+
+    const changeError = (r) => r.data.error === 'rate_limited' ? "That's a lot of changes for one lunch. Try again tomorrow."
+      : r.data.error === 'invalid_input' ? 'That time has passed. Pick another one.'
+      : r.data.error === 'not_open' ? 'This lunch just changed. Take another look.'
+      : "That didn't go through. Try again?";
+
+    async function requestChange(body, done) {
+      busy = true;
+      const r = await call('change', body);
+      busy = false;
+      if (r.data && r.data.state) show(r.data);
+      toast(r.ok ? done : changeError(r));
+    }
+
+    async function withdrawRequest() {
+      busy = true;
+      const r = await call('withdraw');
+      busy = false;
+      if (r.data && r.data.state) show(r.data);
+      toast(r.ok ? 'Okay. The plan stays as is.' : changeError(r));
+    }
+
+    async function goOut() {
+      busy = true;
+      const r = await call('out');
+      busy = false;
+      if (r.data && r.data.state) show(r.data);
+      if (!r.ok) toast(changeError(r));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function googleCalendar(v, p, host) {
@@ -643,21 +793,32 @@
     const isApple = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
     const appleFirst = (opts) => (isApple ? [...opts].reverse() : opts);
 
-    // A menu of links that slides up from the bottom. options: [label, href, sameTab?]
-    function sheet(title, options) {
+    // A menu that slides up from the bottom. options: [label, href or action, sameTab?, danger?]
+    function sheet(title, options, note) {
+      const dlg = dialogSheet(title, note, options.map(([label, target, sameTab, danger]) => typeof target === 'function'
+        ? h('button', { type: 'button', class: `sheet-opt${danger ? ' danger' : ''}`, onclick: () => { dlg.close(); target(); } }, label)
+        : h('a', Object.assign(
+            { class: 'sheet-opt', href: target, onclick: () => dlg.close() },
+            sameTab ? {} : { target: '_blank', rel: 'noopener' }), label)));
+      if (!dlg && typeof options[0][1] === 'string') window.open(options[0][1], options[0][2] ? '_self' : '_blank');
+    }
+
+    // The bottom sheet itself: a card (title, optional note, content) and Cancel.
+    // Returns the open <dialog>, or null where the browser has no dialogs.
+    function dialogSheet(title, note, content) {
       const dlg = h('dialog', { class: 'sheet', 'aria-label': title, tabindex: '-1' },
         h('div', { class: 'sheet-card' },
           h('div', { class: 'sheet-title', 'aria-hidden': 'true' }, title),
-          options.map(([label, href, sameTab]) => h('a', Object.assign(
-            { class: 'sheet-opt', href, onclick: () => dlg.close() },
-            sameTab ? {} : { target: '_blank', rel: 'noopener' }), label))),
+          note ? h('p', { class: 'sheet-note' }, note) : null,
+          content),
         h('button', { type: 'button', class: 'sheet-cancel', onclick: () => dlg.close() }, 'Cancel'));
-      if (typeof dlg.showModal !== 'function') { window.open(options[0][1], options[0][2] ? '_self' : '_blank'); return; }
+      if (typeof dlg.showModal !== 'function') return null;
       dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // the dimmed area around it
       dlg.addEventListener('close', () => dlg.remove());
       document.body.append(dlg);
       dlg.showModal();
       dlg.focus(); // the sheet, not its first option, so nothing opens looking pre-selected
+      return dlg;
     }
 
     async function loadPhoto(img) {
