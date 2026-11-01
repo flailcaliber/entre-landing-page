@@ -77,7 +77,7 @@
 
     a { color: inherit; }
 
-    section { scroll-margin-top: calc(var(--nav-h) + 24px); }
+    section { scroll-margin-top: calc(var(--nav-h) + 24px + env(safe-area-inset-top)); }
 
     .container {
       width: 100%;
@@ -231,6 +231,41 @@
       100% { box-shadow: 0 0 0 0 rgba(158, 210, 158, 0); }
     }
 
+    /* ─── Top edge fade (phones, tablets) ───────────────── */
+    /* The page dissolves into the cream as it scrolls under the top of the
+       screen, like iOS's scroll edge effect: solid under the status bar,
+       then a fade that grows over the first 32px of scroll. Over the page,
+       under the nav and the install dock. The solid strip is full width,
+       at least 12px tall and takes taps, so Safari paints its status bar
+       from it instead of showing the page through the clock. */
+    .edge-fade {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 45;
+      height: 12px;
+      height: max(12px, env(safe-area-inset-top));
+      background: var(--bg);
+    }
+
+    .edge-fade::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 32px;
+      background: linear-gradient(var(--bg), rgba(253, 250, 244, 0));
+      transform: scaleY(var(--edge-fade, 0));
+      transform-origin: top;
+      pointer-events: none;
+    }
+
+    @media (min-width: 1024px) {
+      .edge-fade { display: none; }
+    }
+
     /* ─── Hero / beta ───────────────────────────────────── */
     .hero {
       position: relative;
@@ -238,7 +273,7 @@
       min-height: 100svh;
       display: flex;
       align-items: center;
-      padding: calc(var(--nav-h) + 72px) 0 72px;
+      padding: calc(var(--nav-h) + 72px + env(safe-area-inset-top)) 0 72px;
     }
 
     .hero-grid {
@@ -711,7 +746,7 @@
     .what {
       padding-top: 56px;
       border-top: 1px solid var(--border-light);
-      scroll-margin-top: calc(var(--nav-h) + 14px);
+      scroll-margin-top: calc(var(--nav-h) + 14px + env(safe-area-inset-top));
     }
 
     .what-grid {
@@ -1244,7 +1279,7 @@
       .nav-cta { display: none; }
       .nav-link { padding: 7px 12px; font-size: 0.84rem; }
       .dock { display: flex; }
-      .hero { padding-top: calc(var(--nav-h) + 56px); padding-bottom: 56px; }
+      .hero { padding-top: calc(var(--nav-h) + 56px + env(safe-area-inset-top)); padding-bottom: 56px; }
       .install-btn { width: 100%; justify-content: space-between; height: 64px; font-size: 1.2rem; }
       .section { padding: 104px 0; }
       .what { padding-top: 44px; }
@@ -1283,6 +1318,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Phones: the page fades out under the top of the screen as it scrolls -->
+  <div class="edge-fade" id="edgeFade" aria-hidden="true"></div>
 
   <!-- Nav -->
   <nav class="nav" id="nav" aria-label="Primary">
@@ -1751,8 +1789,15 @@
       dock.tabIndex = show ? 0 : -1;
     }
 
+    // Top edge fade: grows over the first 32px of scroll
+    const edgeFade = document.getElementById('edgeFade');
+    function updateEdge() {
+      edgeFade.style.setProperty('--edge-fade', Math.min(Math.max(window.scrollY, 0), 32) / 32);
+    }
+
     function updateNav() {
       updateDock();
+      updateEdge();
       nav.classList.toggle('scrolled', window.scrollY > 12);
       const probe = window.innerHeight * 0.4;
       let current = sections[0].id;
