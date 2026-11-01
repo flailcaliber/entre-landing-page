@@ -20,7 +20,7 @@
       min-height: 100svh;
       display: flex;
       align-items: center;
-      padding: calc(var(--nav-h) + 72px) 0 72px;
+      padding: calc(var(--nav-h) + 72px + env(safe-area-inset-top)) 0 72px;
     }
 
     .wl-card {
@@ -289,7 +289,7 @@
     }
 
     @media (max-width: 720px) {
-      .page { align-items: flex-start; padding-top: calc(var(--nav-h) + 48px); padding-bottom: 48px; }
+      .page { align-items: flex-start; padding-top: calc(var(--nav-h) + 48px + env(safe-area-inset-top)); padding-bottom: 48px; }
       .wl-card { padding: 32px 20px 20px; border-radius: 28px; }
       .panel { padding: 22px 18px; border-radius: 20px; }
       .beta-note { margin-top: 22px; }
@@ -302,6 +302,8 @@
   </style>
 </head>
 <body>
+  <!-- Phones: the page fades out under the top of the screen as it scrolls -->
+  <div class="edge-fade" id="edgeFade" aria-hidden="true"></div>
 
   <nav class="nav" aria-label="Primary">
     <a class="wordmark" href="/" aria-label="Entre home">
@@ -550,5 +552,6 @@
       document.getElementById('formError').classList.remove('visible');
     }
   </script>
+  <script src="/edge-fade.js" defer></script>
 </body>
 </html>

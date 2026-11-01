@@ -123,6 +123,41 @@ a:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; border-
 .nav-cta:hover { transform: translateY(-1px); background: #26243d; }
 .nav-cta .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
 
+/* ─── Top edge fade (phones, tablets) ─── */
+/* The page dissolves into the cream as it scrolls under the top of the
+   screen, like iOS's scroll edge effect: solid under the status bar, then
+   a fade that grows over the first 32px of scroll (edge-fade.js). Over the
+   page, under the nav. The solid strip is full width, at least 12px tall
+   and takes taps, so Safari paints its status bar from it instead of
+   showing the page through the clock. Same as the homepage. */
+.edge-fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  height: 12px;
+  height: max(12px, env(safe-area-inset-top));
+  background: var(--bg);
+}
+
+.edge-fade::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: linear-gradient(var(--bg), rgba(253, 250, 244, 0));
+  transform: scaleY(var(--edge-fade, 0));
+  transform-origin: top;
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .edge-fade { display: none; }
+}
+
 /* ─── Page header ─── */
 .legal-hero {
   padding: calc(var(--nav-h) + 88px) 0 48px;

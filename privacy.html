@@ -15,6 +15,8 @@
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
+<!-- Phones: the page fades out under the top of the screen as it scrolls -->
+<div class="edge-fade" id="edgeFade" aria-hidden="true"></div>
 <nav class="nav" aria-label="Primary">
   <a class="wordmark" href="/" aria-label="Entre home">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 70" fill="none" height="28" aria-hidden="true">
@@ -37,7 +39,7 @@
 <div class="container">
 <span class="micro-label">Legal</span>
 <h1>Privacy Policy</h1>
-<p class="eff">Effective October 20, 2026</p>
+<p class="eff">Effective November 1, 2026</p>
 </div>
 </header>
 <div class="container legal-layout">
@@ -62,13 +64,14 @@
 <article class="legal">
 <h2 id="overview">Overview</h2>
 <p>Entre never sells your personal information and never uses it for advertising. This policy explains what we collect, why, who can see it, and how to delete it.</p>
-<p>This policy covers the Entre mobile app and our website, entre.nyc. "Entre," "we," and "us" mean Entre Technologies, Inc. By using Entre, you agree to the practices described here and in our <a href="/terms">Terms of Service</a>.</p>
+<p>This policy covers the Entre mobile app, the Entre web app at app.entre.nyc, and our website, entre.nyc. "Entre," "we," and "us" mean Entre Technologies, Inc. By using Entre, you agree to the practices described here and in our <a href="/terms">Terms of Service</a>.</p>
 <p>The short version:</p>
 <ul>
 <li>We collect what we need to help you plan meals with people you already know: your account, profile, friends, meetups, and preferences you choose to share.</li>
 <li>Location is collected only when you tap "Use my current location," once, for one meetup. We never track you in the background.</li>
 <li>Your contacts are checked against Entre to find friends, then discarded. We never store your contact list.</li>
 <li>People you invite by link answer without an account. We keep what they share only for that meetup, and we email them only if they ask for the plan.</li>
+<li>If a notification can't reach you on a phone, we email it to you instead. You can turn that off in Settings.</li>
 <li>We share data only with service providers that run the app, never with advertisers or data brokers.</li>
 <li>You can delete your account and data at any time from Settings.</li>
 </ul>
@@ -130,8 +133,13 @@
 </tr>
 <tr>
 <td>Notifications</td>
-<td>Sender, recipient, type, message text, related meetup, and read status</td>
+<td>Sender, recipient, type, message text, related meetup, read status, and when we emailed it, if we did</td>
 <td>Created as you use the app</td>
+</tr>
+<tr>
+<td>Email notification setting</td>
+<td>Whether email notifications are on, and a random code that lets the link in our emails turn them off without signing in</td>
+<td>On unless you turn it off</td>
 </tr>
 <tr>
 <td>Blocks and reports</td>
@@ -140,17 +148,18 @@
 </tr>
 <tr>
 <td>Push token</td>
-<td>A device identifier that lets us send notifications to your phone, and whether it is iOS or Android. Deleted when you sign out</td>
+<td>A device identifier that lets us send notifications to your phone, and whether it is iOS or Android. Deleted when you sign out of the app on that phone. The web app doesn't create one</td>
 <td>Only if you allow notifications</td>
 </tr>
 </tbody>
 </table></div>
 <p><strong>Dietary restrictions.</strong> Restrictions such as halal, kosher, vegetarian, or a food allergy can reveal religious beliefs or health information. Sharing them is always optional. We use them only to suggest restaurants that work for your group, and we never use them for any other purpose or share them outside Entre except with the providers that host our service.</p>
-<p><strong>Contacts.</strong> If you allow contacts access, the app sends the phone numbers in your contacts to our server to check which belong to Entre users. The server returns the matches and stores nothing. Contact names never leave your phone, unless you choose a contact to invite by link. Then only the name you confirm is saved with that meetup. We never message your contacts. When you invite someone, the text comes from your own phone.</p>
-<p><strong>Profile photos.</strong> When you choose a profile photo, you pick it in Apple's photo picker, so Entre never gets access to your photo library, only the one photo you choose. The app crops it to a square and shrinks it before uploading. Before it appears on your profile, we send it to Google Cloud Vision SafeSearch, which checks it for nudity and violence. Photos that fail the check are deleted right away and never shown. Google processes the photo only to perform this check. Your photo is not linked to your name when we send it.</p>
-<p><strong>Location.</strong> If you tap "Use my current location," the app takes a single location reading, converts it to an address on your phone, and saves that address as your starting point for that meetup. We do not collect location in the background and do not keep a location history.</p>
+<p><strong>Contacts.</strong> In the iPhone app, if you allow contacts access, the app sends the phone numbers in your contacts to our server to check which belong to Entre users. The server returns the matches and stores nothing. Contact names never leave your phone, unless you choose a contact to invite by link. Then only the name you confirm is saved with that meetup. We never message your contacts. When you invite someone, the text or email comes from your own phone or email account. The web app never accesses your contacts.</p>
+<p><strong>Profile photos.</strong> When you choose a profile photo, you pick it in Apple's photo picker, or in your browser's file picker in the web app, so Entre never gets access to your photo library or files, only the one photo you choose. Entre crops it to a square and shrinks it on your device before uploading. Before it appears on your profile, we send it to Google Cloud Vision SafeSearch, which checks it for nudity and violence. Photos that fail the check are deleted right away and never shown. Google processes the photo only to perform this check. Your photo is not linked to your name when we send it.</p>
+<p><strong>Location.</strong> If you tap "Use my current location," the app takes a single location reading, converts it to an address on your phone, and saves that address as your starting point for that meetup. In the web app, your browser asks your permission first, then gives us a single reading, which we save as your starting point for that meetup. We do not collect location in the background and do not keep a location history.</p>
 <p><strong>Calendars.</strong> Entre never asks for access to your calendar and cannot read it. When you tap Add to calendar, we pass the lunch details (the restaurant, its address, and the time) to the calendar you choose: Apple Calendar through a calendar file from our server, or Google Calendar or Outlook through their own app or website. That calendar provider then saves the event under its own privacy policy. Calendar links on guest pages and in guest emails work the same way.</p>
-<p><strong>Stored on your phone.</strong> Your login session, light or dark theme choice, and whether you have finished onboarding are stored on your device, not on our servers. When you invite someone by link, the phone number or email you enter for them is also kept only on your phone, so you can text or email them their link and the plan from your own Messages or mail app. It is deleted after 180 days.</p>
+<p><strong>Stored on your device.</strong> Your login session, light or dark theme choice, and whether you have finished onboarding are stored on your phone, or in your browser when you use the web app, not on our servers. When you invite someone by link, the phone number or email you enter for them is also kept only on your device, so you can text or email them their link and the plan from your own Messages or mail app. It is deleted after 180 days. The web app keeps these in your browser's storage, not in cookies, and it has no advertising pixels, analytics, or session recording.</p>
+<p><strong>Email notifications.</strong> If a notification can't reach you on a phone, for example because you use only the web app or have notifications turned off, we email it to the address on your account. This covers invites, reminders, restaurant picks, plan changes, cancellations, and friend requests, and the email shows the same details as the notification, such as names, the restaurant, and the time. We skip repeats and send at most 20 a day. You can turn these emails off in Settings, or with the link at the bottom of any of them.</p>
 <p><strong>Website and waitlist (entre.nyc).</strong> If you join our waitlist, we collect your email, optional phone number, your answer to our signup question, your referral code, who referred you, how many people you have referred, the ad campaign that brought you (UTM tags), your city, and unsubscribe details. We count page views using a random visit identifier, the campaign source, and referral code. We do not store your name or IP address with page views. Your browser stores your theme choice and referral code. We do not use advertising pixels, analytics cookies, or session recording on our website.</p>
 <h2 id="invited-by-link">If someone invited you by link</h2>
 <p>Entre users can invite people who don't use the app. Those guests get a private link (entre.nyc/join/…) and answer in their browser, without an account. Here is what applies to guests.</p>
@@ -205,7 +214,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>Before you add a starting address or dietary need to a meetup, keep in mind the other people in that meetup will see it. Notification previews on your lock screen may show friends' names and restaurant names.</p>
+<p>Before you add a starting address or dietary need to a meetup, keep in mind the other people in that meetup will see it. Notification previews on your lock screen, and notification emails, may show friends' names and restaurant names.</p>
 <p>A small number of Entre team members with administrator access can view account data when needed to provide support, keep the service secure, or comply with the law.</p>
 <h2 id="how-we-use-information">How we use information</h2>
 <p>We use your information only to run Entre and keep it safe. Specifically, we use it to:</p>
@@ -213,7 +222,7 @@
 <li>Create and secure your account, sign you in, and reset your password</li>
 <li>Help friends find you by name, username, or phone number</li>
 <li>Plan meetups: calculate a fair midpoint, suggest restaurants that fit your group's cuisines, budget, dietary needs, and schedules, and show directions</li>
-<li>Send you notifications and account emails you need, such as invites, confirmations, and password resets</li>
+<li>Send you notifications and account emails you need, such as invites, confirmations, and password resets, including by email when a notification can't reach your phone</li>
 <li>Run the waitlist and referral program, and send waitlist emails you can unsubscribe from at any time</li>
 <li>Understand which of our marketing campaigns bring people to entre.nyc, using campaign tags rather than tracking tools</li>
 <li>Detect and prevent fraud, abuse, spam, bots, and security incidents</li>
@@ -244,13 +253,13 @@
 </tr>
 <tr>
 <td>Google (Places and Maps)</td>
-<td>Address autocomplete and restaurant search</td>
-<td>Addresses you type (in the app, or on a guest link through our server), meetup midpoint coordinates, and your device's IP address in the app. Not linked to your name</td>
+<td>Address autocomplete, restaurant search, maps, and directions</td>
+<td>Addresses you type (in the app or web app, or on a guest link through our server), meetup midpoint coordinates, the starting point and restaurant when you view directions, the map area you view, and your device's IP address in the app or web app. Not linked to your name</td>
 </tr>
 <tr>
 <td>Resend</td>
-<td>Delivers emails to guests who ask for the plan, and account emails such as sign-up confirmations and password resets</td>
-<td>The recipient's email address and the email's contents, such as the restaurant, time, and the inviter's first name</td>
+<td>Delivers emails to guests who ask for the plan, email notifications to account holders, and account emails such as sign-up confirmations and password resets</td>
+<td>The recipient's email address and the email's contents, such as names, the restaurant, and the time</td>
 </tr>
 <tr>
 <td>Expo, Apple, and Google push services</td>
@@ -269,11 +278,11 @@
 </tr>
 <tr>
 <td>Netlify</td>
-<td>Hosts entre.nyc</td>
+<td>Hosts entre.nyc and the web app (app.entre.nyc)</td>
 <td>Standard server logs, including visitor IP addresses</td>
 </tr>
 <tr>
-<td>Apple Maps or Google Maps apps</td>
+<td>Apple Maps or Google Maps</td>
 <td>Directions</td>
 <td>The restaurant address, only when you tap Directions</td>
 </tr>
@@ -291,7 +300,7 @@
 <li><strong>In a business transfer</strong>, if Entre is merged, acquired, or sells its assets. The new owner must honor this policy, and we will notify you before your information becomes subject to a different policy.</li>
 <li><strong>With your direction</strong>, such as when you share a meetup with friends.</li>
 </ul>
-<p><strong>What we never do.</strong> We never sell your personal information. We never share it with advertisers or data brokers. We do not use advertising pixels, cross-app tracking, or third-party analytics in the app. If we ever change this, we will update this policy first and ask for your consent where the law requires it.</p>
+<p><strong>What we never do.</strong> We never sell your personal information. We never share it with advertisers or data brokers. We do not use advertising pixels, cross-app tracking, or third-party analytics in the app or web app. If we ever change this, we will update this policy first and ask for your consent where the law requires it.</p>
 <h2 id="how-long-we-keep-information">How long we keep information</h2>
 <p>We keep information only as long as we need it to run Entre, then delete it on the schedule below.</p>
 <div class="tbl"><table>
@@ -327,6 +336,10 @@
 <td>90 days after they are sent</td>
 </tr>
 <tr>
+<td>Email notification setting</td>
+<td>Until you delete your account</td>
+</tr>
+<tr>
 <td>Profile photo</td>
 <td>Until you change or remove it, or delete your account. Earlier photos are deleted when you choose a new one, and photos that fail the safety check are deleted immediately</td>
 </tr>
@@ -344,7 +357,7 @@
 </tr>
 <tr>
 <td>Push tokens</td>
-<td>Until you sign out or delete your account</td>
+<td>Until you sign out of the app on that phone, or delete your account</td>
 </tr>
 <tr>
 <td>Sign-in records</td>
@@ -367,7 +380,7 @@
 <li><strong>Access:</strong> ask for a copy of the personal information we hold about you</li>
 <li><strong>Correction:</strong> update your profile and preferences in the app, or ask us to fix anything else</li>
 <li><strong>Deletion:</strong> delete your account in Settings, or ask us to delete specific information</li>
-<li><strong>Withdraw consent:</strong> turn off notifications or location access in your phone's settings, remove dietary restrictions or saved places at any time, and unsubscribe from waitlist emails using the link in any email</li>
+<li><strong>Withdraw consent:</strong> turn off notifications or location access in your phone's or browser's settings, turn off email notifications in Settings or with the link in any of them, remove dietary restrictions or saved places at any time, and unsubscribe from waitlist emails using the link in any email</li>
 <li><strong>No discrimination:</strong> we will not treat you differently for using these rights</li>
 </ul>
 <p>To make a request, email <a href="mailto:sam@entre.nyc">sam@entre.nyc</a> from the email address on your account. If you were invited by link and don't have an account, include your link instead. We will confirm your identity before acting and respond within 30 days. If you live in a state that gives you a right to appeal our decision, reply to our response with "Appeal" and we will review it within the time your state's law requires.</p>
@@ -401,5 +414,6 @@
 </div>
 </div>
 </footer>
+<script src="/edge-fade.js" defer></script>
 </body>
 </html>

@@ -320,6 +320,24 @@
       transform: translate(-50%, 160%); visibility: hidden;
       transition: transform .4s var(--ease), visibility 0s linear .4s;
     }
+    /* ─── Top edge fade (phones, tablets) ─── */
+    /* Same as the homepage and legal.css: solid cream under the status bar
+       (Safari paints its status bar from it), then a fade that grows over
+       the first 32px of scroll (edge-fade.js). Over the page, under the
+       toast; the sheets open in the top layer, above it. */
+    .edge-fade {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 45;
+      height: 12px; height: max(12px, env(safe-area-inset-top));
+      background: var(--bg);
+    }
+    .edge-fade::after {
+      content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 32px;
+      background: linear-gradient(var(--bg), rgba(253, 250, 244, 0));
+      transform: scaleY(var(--edge-fade, 0)); transform-origin: top;
+      pointer-events: none;
+    }
+    @media (min-width: 1024px) { .edge-fade { display: none; } }
+
     .toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform .4s var(--ease); }
 
     /* ─── One orchestrated entrance ─── */
@@ -340,6 +358,8 @@
 </head>
 <body>
   <a class="skip" href="#app">Skip to content</a>
+  <!-- Phones: the page fades out under the top of the screen as it scrolls -->
+  <div class="edge-fade" id="edgeFade" aria-hidden="true"></div>
 
   <div class="wrap">
     <header class="top">
@@ -1103,5 +1123,6 @@
     init();
   })();
   </script>
+  <script src="/edge-fade.js" defer></script>
 </body>
 </html>
