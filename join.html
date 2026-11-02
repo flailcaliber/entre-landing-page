@@ -487,6 +487,17 @@
       for (let t = from; t <= to; t += 0.5) out.push(`${String(Math.floor(t)).padStart(2, '0')}:${t % 1 ? '30' : '00'}`);
       return out;
     }
+    // On the lunch's day, only the times still ahead, where the lunch is (the
+    // app does the same, lib/sessionTime.ts). Other days: all of them.
+    function slotsAhead(v, from, to) {
+      const ymd = String(v.meetup.date || '').slice(0, 10);
+      const all = slotsBetween(from, to);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return all;
+      return all.filter((s) => {
+        const [hh, mm] = s.split(':').map(Number);
+        return zonedInstant(ymd, hh, mm, v.meetup.time_zone) > Date.now();
+      });
+    }
 
     // ─── Shared pieces ───
     function avatar(person, idx) {
@@ -548,13 +559,16 @@
     document.addEventListener('visibilitychange', refresh);
 
     function renderSimple(v, host) {
-      // Called off because someone can't make it (them, or someone else), or cancelled
+      // Called off because someone can't make it (them, or someone else), cancelled,
+      // or its day ended before it was booked (closed by Entre, migration 043)
       const c = v.cancel || {};
-      const cancelled = c.by_you
-        ? ['Lunch is off.', `We let ${host} know you can't make it.`]
-        : c.reason === 'cant_make_it'
-          ? ['Lunch is off.', `${c.by || host} can't make it. Maybe another day.`]
-          : [`${host} cancelled this lunch.`, 'Nothing else you need to do.'];
+      const cancelled = c.reason === 'date_passed'
+        ? ['Time ran out on this one.', "It wasn't booked in time, so it closed. Nothing else you need to do."]
+        : c.by_you
+          ? ['Lunch is off.', `We let ${host} know you can't make it.`]
+          : c.reason === 'cant_make_it'
+            ? ['Lunch is off.', `${c.by || host} can't make it. Maybe another day.`]
+            : [`${host} cancelled this lunch.`, 'Nothing else you need to do.'];
       const copy = {
         setup: [`${host} is still setting this up.`, 'Check back in a minute. This page updates on its own.'],
         cancelled,
@@ -688,14 +702,16 @@
       const tz = v.meetup.time_zone;
       const hhmm = (d) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
       const current = hhmm(new Date(v.meetup.time));
-      const ymd = String(v.meetup.date).slice(0, 10);
       let chosen = null;
       const go = h('button', { type: 'button', class: 'sheet-go', 'aria-disabled': 'true' }, 'Pick a time');
-      const grid = h('div', { class: 'slots' }, SLOT_GROUPS.map(([label, from, to]) => h('div', { class: 'slot-group' },
+      // Times that have passed aren't shown; the current time shows, but can't be picked
+      const groups = SLOT_GROUPS.map(([label, from, to]) => [label, slotsAhead(v, from, to)]).filter(([, list]) => list.length);
+      const noneLeft = !groups.some(([, list]) => list.some((s) => s !== current));
+      const grid = h('div', { class: 'slots' }, noneLeft ? h('p', { class: 'sheet-note' }, 'No other times are left that day.') : null, groups.map(([label, list]) => h('div', { class: 'slot-group' },
         h('h3', null, label),
-        h('div', { class: 'slot-grid' }, slotsBetween(from, to).map((s) => {
-          const [hh, mm] = s.split(':').map(Number);
-          const off = s === current || zonedInstant(ymd, hh, mm, tz) <= Date.now();
+        h('div', { class: 'slot-grid' }, list.map((s) => {
+          const [hh] = s.split(':').map(Number);
+          const off = s === current;
           const b = h('button', {
             type: 'button', class: 'slot', 'aria-pressed': 'false', disabled: off,
             'aria-label': `${slotLabel(s)} ${hh < 12 ? 'AM' : 'PM'}${s === current ? ', the current time' : ''}`,
@@ -872,13 +888,15 @@
 
     // ─── The survey ───
     function renderSurvey(v, host) {
+      // Moved to another day (migration 044): their answers from before, all but the times
+      const saved = v.saved || null;
       draft = draft || {
         name: v.guest.name || '',
-        place: null,
+        place: saved && saved.address ? { id: null, saved: true, label: saved.address } : null,
         session: newSession(),
-        cuisines: new Set(),
-        budget: '$$',
-        dietary: new Set(),
+        cuisines: new Set(saved ? saved.cuisines || [] : []),
+        budget: (saved && saved.budget) || '$$',
+        dietary: new Set(saved ? saved.dietary || [] : []),
         anyTime: true,
         slots: new Set(),
         wantsEmail: false,
@@ -905,8 +923,10 @@
       app.append(hero({
         label: customLabel(v),
         eyebrow: hello,
-        title: `${host} saved you a seat.`,
-        lede: `Lunch${day ? ` on ${day}` : ''}. Add where you'll be coming from, and Entre finds a spot that works for everyone. No app needed.`,
+        title: saved ? `${host} moved lunch.` : `${host} saved you a seat.`,
+        lede: saved
+          ? `It's now on ${day || 'another day'}. Your answers are filled in, so just check when you're free.`
+          : `Lunch${day ? ` on ${day}` : ''}. Add where you'll be coming from, and Entre finds a spot that works for everyone. No app needed.`,
       }));
       app.append(placeCard(v, false));
 
@@ -1017,12 +1037,13 @@
       // 04 Dietary
       app.append(course(4, 'Anything we should know?', true, 'Only used to suggest places that work for you.', chipSet(DIETARY, draft.dietary)));
 
-      // 05 Times
+      // 05 Times. On the lunch's day, the ones that have passed aren't offered.
       const sw = h('button', { type: 'button', class: 'switch', role: 'switch', 'aria-checked': String(draft.anyTime), 'aria-label': 'Any time works' });
+      const timeGroups = SLOT_GROUPS.map(([label, from, to]) => [label, slotsAhead(v, from, to)]).filter(([, list]) => list.length);
       const slots = h('div', { class: 'slots', hidden: draft.anyTime },
-        SLOT_GROUPS.map(([label, from, to]) => h('div', { class: 'slot-group' },
+        timeGroups.map(([label, list]) => h('div', { class: 'slot-group' },
           h('h3', null, label),
-          h('div', { class: 'slot-grid' }, slotsBetween(from, to).map((s) => {
+          h('div', { class: 'slot-grid' }, list.map((s) => {
             const b = h('button', { type: 'button', class: 'slot', 'aria-pressed': String(draft.slots.has(s)), 'aria-label': `${slotLabel(s)} ${s < '12:00' ? 'AM' : 'PM'}` }, slotLabel(s));
             b.addEventListener('click', () => {
               if (draft.slots.has(s)) draft.slots.delete(s); else draft.slots.add(s);
@@ -1035,9 +1056,9 @@
         sw.setAttribute('aria-checked', String(draft.anyTime));
         slots.hidden = draft.anyTime;
       });
-      app.append(course(5, `When are you free${day ? ` on ${day.split(',')[0]}` : ''}?`, false, null,
-        h('div', { class: 'switch-row' }, h('div', null, h('strong', null, 'Any time works'), h('span', null, 'Turn off to pick times')), sw),
-        slots));
+      app.append(course(5, `When are you free${day ? ` on ${day.split(',')[0]}` : ''}?`, false, timeGroups.length ? null : 'No times are left today.',
+        timeGroups.length ? h('div', { class: 'switch-row' }, h('div', null, h('strong', null, 'Any time works'), h('span', null, 'Turn off to pick times')), sw) : null,
+        timeGroups.length ? slots : null));
 
       // Email me the plan
       const emailInput = h('input', { class: 'input plain', type: 'email', inputmode: 'email', autocomplete: 'email', placeholder: 'you@example.com', value: draft.email, 'aria-label': 'Your email' });
@@ -1079,16 +1100,16 @@
 
       busy = true;
       cta.replaceChildren(h('span', { class: 'spin', 'aria-hidden': 'true' }), 'Sending');
-      const r = await call('submit', {
+      const r = await call('submit', Object.assign({
         name: draft.name.trim(),
-        place_id: draft.place.id,
         session: draft.session,
         cuisines: [...draft.cuisines],
         budget: draft.budget,
         dietary: [...draft.dietary],
         slots: draft.anyTime ? [] : [...draft.slots].sort(),
         email: email || undefined,
-      });
+      // The place they gave before the lunch moved stays theirs on the server (044)
+      }, draft.place.saved ? { keep_location: true } : { place_id: draft.place.id }));
       busy = false;
       cta.replaceChildren('Send my picks');
 
@@ -1101,6 +1122,13 @@
       }
       const code = r.data.error;
       if (code === 'address_not_found') { draft.place = null; draft.session = newSession(); showErr('location', "We couldn't find that address. Try picking it again."); return; }
+      if (code === 'invalid_input' && r.data.field === 'location') {
+        draft.place = null;
+        placeInput.value = '';
+        placeInput.focus();
+        showErr('location', 'Choose your starting point from the list.');
+        return;
+      }
       if (code === 'invalid_input' && r.data.field === 'name') { showErr('submit', "That name isn't allowed. Try another one."); return; }
       if (code === 'invalid_input') { showErr('submit', "Something in there didn't look right. Check it and try again."); return; }
       if (code === 'rate_limited') { showErr('submit', 'Too many tries. Give it a minute.'); return; }
