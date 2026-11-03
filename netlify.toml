@@ -70,6 +70,23 @@
     X-Robots-Tag = "noindex, nofollow"
     Referrer-Policy = "no-referrer"
 
+# Signed in on the web app: the homepage goes straight to their Dashboard.
+# app.entre.nyc sets the entre_signed_in cookie on .entre.nyc while someone is
+# signed in and removes it on sign-out (lib/signedInCookie.ts in the app repo).
+# The rule checks only that the cookie is there. force: index.html sits at "/".
+# entre.nyc/about always shows the homepage.
+[[redirects]]
+  from = "/"
+  to = "https://app.entre.nyc/"
+  status = 302
+  force = true
+  conditions = {Cookie = ["entre_signed_in"]}
+
+[[redirects]]
+  from = "/about"
+  to = "/index.html"
+  status = 200
+
 [[redirects]]
   from = "/join/*"
   to = "/join.html"

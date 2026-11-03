@@ -412,8 +412,7 @@
     .nav-cta:focus-visible,
     .nav-login:focus-visible,
     .nav-link:focus-visible,
-    .beta-pill:focus-visible,
-    .submit-btn:focus-visible {
+    .beta-pill:focus-visible {
       outline: 3px solid var(--purple);
       outline-offset: 3px;
     }
@@ -767,6 +766,8 @@
     /* ─── What we are ───────────────────────────────────── */
     .what {
       padding-top: 56px;
+      /* The last section now (the waitlist is gone): the footer brings its own space */
+      padding-bottom: 64px;
       border-top: 1px solid var(--border-light);
       scroll-margin-top: calc(var(--nav-h) + 14px + env(safe-area-inset-top));
     }
@@ -942,283 +943,6 @@
     .step:nth-child(3) { transition-delay: 0.12s; }
     .step:nth-child(4) { transition-delay: 0.18s; }
 
-    /* ─── Waitlist ──────────────────────────────────────── */
-    .waitlist { padding-top: 40px; }
-
-    .waitlist-card {
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 56px;
-      align-items: center;
-      background: var(--surface-alt);
-      border: 1px solid var(--border-light);
-      border-radius: 36px;
-      padding: 64px;
-      overflow: hidden;
-    }
-
-    .waitlist-copy h2 { margin-bottom: 20px; }
-
-    .waitlist-copy p {
-      font-size: 1.08rem;
-      color: var(--body);
-      max-width: 30em;
-    }
-
-    .count {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 22px;
-      padding: 8px 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      font-variant-numeric: tabular-nums;
-      display: none;
-    }
-
-    .count.visible { display: inline-flex; animation: rise 0.5s var(--ease) both; }
-
-    .count .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--sage);
-    }
-
-    .status-link {
-      display: block;
-      margin-top: 14px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .status-link a {
-      color: var(--ink);
-      font-weight: 500;
-      text-underline-offset: 3px;
-      text-decoration-color: var(--sage);
-      text-decoration-thickness: 2px;
-    }
-
-    .form-wrap {
-      position: relative;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      padding: 32px;
-      box-shadow: 0 18px 50px rgba(19, 18, 32, 0.06);
-    }
-
-    #waitlistForm {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--ink);
-      margin-bottom: 6px;
-    }
-
-    .field label span { color: var(--muted); font-weight: 400; }
-
-    .email-input {
-      width: 100%;
-      height: 52px;
-      padding: 0 18px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      font-family: var(--sans);
-      font-size: 1rem;
-      color: var(--ink);
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-    .email-input::placeholder { color: var(--placeholder); }
-
-    .email-input:focus {
-      background: var(--surface);
-      border-color: var(--ink);
-      box-shadow: 0 0 0 4px var(--sage-tint);
-    }
-
-    .submit-btn {
-      width: 100%;
-      height: 54px;
-      margin-top: 6px;
-      border: none;
-      border-radius: 14px;
-      background: var(--ink);
-      color: var(--cream-text);
-      font-family: var(--sans);
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.15s ease;
-    }
-
-    .submit-btn:hover { background: #26243d; transform: translateY(-1px); }
-    .submit-btn:active { transform: translateY(0); }
-    .submit-btn.loading { pointer-events: none; opacity: 0.7; }
-
-    .form-note {
-      margin-top: 14px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .form-error {
-      display: none;
-      margin-top: 10px;
-      font-size: 0.86rem;
-      color: #B84A1A;
-      text-align: center;
-    }
-
-    .form-error.visible { display: block; }
-
-    .success-msg {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      text-align: center;
-    }
-
-    .success-msg.visible { display: flex; animation: rise 0.6s var(--ease) both; }
-
-    .success-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--sage);
-      display: grid;
-      place-items: center;
-      margin-bottom: 8px;
-    }
-
-    .success-title {
-      font-family: var(--display);
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .success-sub { font-size: 0.95rem; color: var(--body); }
-
-    .referral-block {
-      width: 100%;
-      margin-top: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      text-align: left;
-    }
-
-    .referral-position {
-      background: var(--sage-tint);
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-size: 0.92rem;
-      color: var(--body);
-      text-align: center;
-    }
-
-    .referral-position strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-
-    .referral-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .referral-link-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 8px 8px 14px;
-    }
-
-    .referral-link-text {
-      flex: 1;
-      font-size: 0.9rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .copy-btn {
-      flex-shrink: 0;
-      padding: 8px 14px;
-      background: var(--sage);
-      color: var(--ink);
-      border: none;
-      border-radius: 9px;
-      font-family: var(--sans);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
-
-    .copy-btn:hover { background: var(--sage-hover); }
-    .copy-btn.copied { background: var(--sage-tint); }
-
-    .share-row { display: flex; gap: 8px; }
-
-    .share-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 0.86rem;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-      transition: border-color 0.15s ease, background 0.15s ease;
-    }
-
-    .share-btn:hover { border-color: var(--ink); }
-
-    .referral-nudge {
-      font-size: 0.84rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .waitlist-doodle {
-      position: absolute;
-      right: 40px;
-      top: 36px;
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
     /* ─── Footer ────────────────────────────────────────── */
     footer {
       padding: 72px 0 calc(48px + env(safe-area-inset-bottom));
@@ -1291,7 +1015,6 @@
       .art { justify-self: center; max-width: 480px; }
       .what-grid { grid-template-columns: 1fr; }
       .steps { grid-template-columns: repeat(2, 1fr); }
-      .waitlist-card { grid-template-columns: 1fr; gap: 36px; padding: 48px 40px; }
       .scroll-cue { display: none; }
     }
 
@@ -1306,15 +1029,11 @@
       .cta-row { gap: 12px; }
       .install-btn { width: 100%; justify-content: space-between; height: 64px; font-size: 1.2rem; }
       .section { padding: 104px 0; }
-      .what { padding-top: 44px; }
+      .what { padding-top: 44px; padding-bottom: 48px; }
       .section-head { margin-bottom: 36px; }
       .moment { padding: 32px 26px 28px; border-radius: 24px; min-height: 420px; }
       .moment-foot { max-width: 64%; }
       .steps { grid-template-columns: 1fr; gap: 12px; margin-top: 40px; }
-      .waitlist { padding-top: 16px; padding-bottom: 32px; }
-      .waitlist-card { padding: 36px 20px 20px; border-radius: 28px; }
-      .waitlist-doodle { display: none; }
-      .form-wrap { padding: 22px 18px; border-radius: 20px; }
       footer { padding-top: 56px; }
       .steps-mini { flex-direction: column; align-items: flex-start; gap: 10px; }
       .steps-mini .sep { display: none; }
@@ -1326,22 +1045,6 @@
       .wordmark-text { display: none; }
       .nav-link { padding: 7px 10px; }
       .hero h1 { font-size: clamp(2.6rem, 12.5vw, 3.2rem); }
-    }
-
-    /* Phones: the nav's "entre" makes way for Log in (the mark stays) */
-    @media (max-width: 460px) {
-      .nav .wordmark-text { display: none; }
-    }
-
-    @media (max-width: 380px) {
-      .nav { gap: 8px; }
-      .nav-link { padding: 7px 8px; }
-      .nav-login { padding: 0 8px; }
-    }
-
-    /* The smallest phones: the logo already goes to the top */
-    @media (max-width: 350px) {
-      .nav-link[data-section="beta"] { display: none; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1378,7 +1081,6 @@
       <span class="nav-indicator" id="navIndicator" aria-hidden="true"></span>
       <a class="nav-link" href="#beta" data-section="beta">Beta</a>
       <a class="nav-link" href="#what" data-section="what">What we are</a>
-      <a class="nav-link" href="#waitlist" data-section="waitlist">Waitlist</a>
     </div>
 
     <div class="nav-auth">
@@ -1652,99 +1354,6 @@
       </div>
     </section>
 
-    <!-- ── Waitlist ──────────────────────────────────────── -->
-    <section class="section waitlist" id="waitlist" aria-labelledby="waitlist-title">
-      <div class="container">
-        <div class="waitlist-card reveal">
-
-          <div class="waitlist-copy">
-            <span class="micro-label">Waitlist</span>
-            <h2 id="waitlist-title">Not on iPhone? Get the launch note.</h2>
-            <p>Join the waitlist and we'll email you when Entre opens to everyone. Share your invite link and you move up the queue one spot for every friend who joins.</p>
-            <span class="status-link">Already signed up? <a href="/waitlist">Check your spot</a></span>
-            <span class="count" id="pill" aria-live="polite">
-              <span class="dot" aria-hidden="true"></span>
-              <span id="pillText"></span>
-            </span>
-          </div>
-
-          <div class="form-wrap">
-            <form id="waitlistForm">
-              <div class="field">
-                <label for="emailInput">Email</label>
-                <input class="email-input" id="emailInput" type="email" placeholder="you@email.com" autocomplete="email" required />
-              </div>
-              <div class="field">
-                <label for="phoneInput">Phone <span>(optional)</span></label>
-                <input class="email-input" id="phoneInput" type="tel" placeholder="(212) 555-0123" maxlength="20" autocomplete="tel" />
-              </div>
-              <div class="field">
-                <label for="pmfInput">Biggest NYC lunch challenge? <span>(optional)</span></label>
-                <input class="email-input" id="pmfInput" type="text" placeholder="Nobody ever picks a place" maxlength="280" autocomplete="off" />
-              </div>
-              <!-- Honeypot: hidden from real users, bots fill it automatically -->
-              <input
-                id="_hp"
-                name="_hp"
-                type="text"
-                tabindex="-1"
-                autocomplete="off"
-                aria-hidden="true"
-                style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
-              />
-              <button class="submit-btn" type="submit" id="submitBtn">Join the waitlist</button>
-            </form>
-
-            <!-- Error state -->
-            <p class="form-error" id="formError"></p>
-
-            <!-- Success state (replaces form) -->
-            <div class="success-msg" id="successMsg">
-              <div class="success-icon">
-                <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
-                  <path d="M3 9.5L7 13.5L15 5" stroke="#131220" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <p class="success-title">You're on the list.</p>
-              <p class="success-sub" id="successSub">We'll reach out before we launch. Sit tight.</p>
-
-              <!-- Referral block, populated by JS after signup -->
-              <div class="referral-block" id="referralBlock" style="display:none;">
-                <div class="referral-position" id="positionBadge">
-                  You're <strong>#<span id="positionNum">0</span></strong> on the waitlist.
-                  Early access opens from the top first.
-                </div>
-
-                <div>
-                  <p class="referral-label">Move up. Share your invite link</p>
-                  <div class="referral-link-row">
-                    <span class="referral-link-text" id="refLinkText">entre.nyc/?ref=…</span>
-                    <button class="copy-btn" id="copyBtn" type="button">Copy</button>
-                  </div>
-                </div>
-
-                <div class="share-row">
-                  <a class="share-btn" id="twitterShareBtn" href="#" target="_blank" rel="noopener">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    Share on X
-                  </a>
-                  <button class="share-btn" id="nativeShareBtn" type="button" style="display:none;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                    Share
-                  </button>
-                </div>
-
-                <p class="referral-nudge">Each friend who joins with your link moves you up one spot. No limit.</p>
-              </div>
-            </div>
-
-            <p class="form-note" id="formNote">No spam, ever. Unsubscribe anytime.</p>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <!-- Footer -->
@@ -1760,7 +1369,6 @@
         <a class="footer-link" href="https://testflight.apple.com/join/BA1QZhgP" target="_blank" rel="noopener">Install the beta</a>
         <a class="footer-link" href="https://app.entre.nyc/signup">Use it on the web</a>
         <a class="footer-link" href="https://app.entre.nyc/login">Log in</a>
-        <a class="footer-link" href="/waitlist">Waitlist status</a>
         <a class="footer-link" href="mailto:sam@entre.nyc">Contact</a>
         <a class="footer-link" href="/privacy">Privacy</a>
         <a class="footer-link" href="/terms">Terms</a>
@@ -1821,18 +1429,17 @@
     function moveIndicator(link) {
       indicator.style.width     = link.offsetWidth + 'px';
       indicator.style.transform = 'translateX(' + link.offsetLeft + 'px)';
-      // None while its tab is hidden (Beta, on the smallest phones)
-      indicator.style.opacity   = link.offsetWidth ? '1' : '0';
+      indicator.style.opacity   = '1';
     }
 
     let activeId = null;
     // Mobile dock: shows once the hero's main button scrolls away, and gets
-    // out of the way again once the waitlist form comes up. On Android it
-    // offers the web app, since the iPhone beta can't install there.
+    // out of the way again once the footer comes up. On Android it offers the
+    // web app, since the iPhone beta can't install there.
     const isAndroid  = document.documentElement.classList.contains('android');
     const dock       = document.getElementById('dock');
     const heroCta    = document.getElementById(isAndroid ? 'heroWeb' : 'heroCta');
-    const waitlistEl = document.getElementById('waitlist');
+    const footerEl   = document.querySelector('footer');
     let dockShown = false;
     if (isAndroid) {
       dock.href = 'https://app.entre.nyc/signup';
@@ -1843,7 +1450,7 @@
 
     function updateDock() {
       const show = heroCta.getBoundingClientRect().bottom < 0 &&
-                   waitlistEl.getBoundingClientRect().top > window.innerHeight * 0.8;
+                   footerEl.getBoundingClientRect().top > window.innerHeight * 0.8;
       if (show === dockShown) return;
       dockShown = show;
       dock.classList.toggle('show', show);
@@ -1969,152 +1576,6 @@
       reveals.forEach(el => el.classList.add('in'));
     }
 
-    // ── Referral code generator ──────────────────────────────
-    function generateCode() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    }
-
-    // ── Waitlist count ───────────────────────────────────────
-    (async () => {
-      const pill = document.getElementById('pill');
-      try {
-        const res  = await fetch('/.netlify/functions/lookup?action=count');
-        const data = await res.json();
-        if (data.count) {
-          document.getElementById('pillText').textContent =
-            data.count.toLocaleString() + ' people on the waitlist';
-          pill.classList.add('visible');
-        }
-      } catch (_) {}
-    })();
-
-    // ── Waitlist form ────────────────────────────────────────
-    const form       = document.getElementById('waitlistForm');
-    const btn        = document.getElementById('submitBtn');
-    const input      = document.getElementById('emailInput');
-    const phoneInput = document.getElementById('phoneInput');
-    const pmfInput   = document.getElementById('pmfInput');
-    const hpInput    = document.getElementById('_hp');
-    const successMsg = document.getElementById('successMsg');
-    const formNote   = document.getElementById('formNote');
-    const formError  = document.getElementById('formError');
-
-    function showError(msg) {
-      formError.textContent = msg;
-      formError.classList.add('visible');
-      btn.textContent = 'Try again';
-      btn.classList.remove('loading');
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = input.value.trim().toLowerCase();
-      if (!email) return;
-
-      btn.textContent = 'Saving…';
-      btn.classList.add('loading');
-      formError.classList.remove('visible');
-
-      let res, data;
-      try {
-        res = await fetch('/.netlify/functions/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            phone:            phoneInput.value.trim() || null,
-            referred_by_code: _refCode || null,
-            source:           _refCode ? 'referral' : 'organic',
-            utm_source:       _utm.source,
-            utm_medium:       _utm.medium,
-            utm_campaign:     _utm.campaign,
-            utm_content:      _utm.content,
-            utm_term:         _utm.term,
-            pmf_response:     pmfInput.value.trim() || null,
-            _hp:              hpInput.value || undefined,
-          }),
-        });
-        data = await res.json();
-      } catch (err) {
-        showError("That didn't go through. Try again?");
-        console.error('[entre] signup error:', err);
-        return;
-      }
-
-      if (res.status === 409) {
-        // Already on the list, no referral data available
-        form.style.display = 'none';
-        formNote.style.display = 'none';
-        document.getElementById('successSub').textContent = 'You\'re already on the list. We\'ll be in touch.';
-        successMsg.classList.add('visible');
-        return;
-      }
-
-      if (!res.ok) {
-        showError("That didn't go through. Try again?");
-        console.error('[entre] signup error:', data);
-        return;
-      }
-
-      // Success: show referral block
-      form.style.display = 'none';
-      formNote.style.display = 'none';
-      document.getElementById('successSub').textContent = 'Check your email for your invite link. Sit tight.';
-
-      const referralCode = data.referral_code;
-      const position     = data.position;
-
-      if (referralCode) {
-        const referralLink = `https://www.entre.nyc/?ref=${referralCode}`;
-
-        if (position) {
-          document.getElementById('positionNum').textContent = position.toLocaleString();
-        } else {
-          document.getElementById('positionBadge').style.display = 'none';
-        }
-
-        document.getElementById('refLinkText').textContent = `entre.nyc/?ref=${referralCode}`;
-
-        function markCopied() {
-          const b = document.getElementById('copyBtn');
-          b.textContent = 'Copied';
-          b.classList.add('copied');
-          setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 2000);
-        }
-
-        document.getElementById('copyBtn').addEventListener('click', () => {
-          navigator.clipboard.writeText(referralLink).then(markCopied).catch(() => {
-            // Fallback for older browsers
-            const ta = document.createElement('textarea');
-            ta.value = referralLink;
-            ta.style.position = 'absolute';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            markCopied();
-          });
-        });
-
-        const tweetText = `I just joined the Entre waitlist. It's a new app that figures out where you and your friends should grab lunch in NYC. Join me:`;
-        document.getElementById('twitterShareBtn').href =
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(referralLink)}`;
-
-        if (navigator.share) {
-          const nativeBtn = document.getElementById('nativeShareBtn');
-          nativeBtn.style.display = '';
-          nativeBtn.addEventListener('click', () => {
-            navigator.share({ title: 'Join me on Entre', text: tweetText, url: referralLink }).catch(() => {});
-          });
-        }
-
-        document.getElementById('referralBlock').style.display = '';
-      }
-
-      successMsg.classList.add('visible');
-    });
   </script>
 </body>
 </html>
