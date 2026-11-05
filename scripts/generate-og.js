@@ -16,7 +16,8 @@ const path   = require('path');
 const sharp  = require('sharp');
 const { execFileSync } = require('child_process');
 
-const OG_NAME = 'og-beta.png';
+// og-beta.png was the "The beta is live." homepage (kept for old shares)
+const OG_NAME = 'og-home.png';
 const ROOT    = path.join(__dirname, '..');
 const outPath = path.join(ROOT, 'assets', OG_NAME);
 
@@ -31,11 +32,13 @@ const browser = BROWSERS.find(p => fs.existsSync(p));
 if (!browser) { console.error('✗  No Edge or Chrome found'); process.exit(1); }
 
 // Render at 1600×840 and scale to 1200×630 so the desktop hero layout fits.
-// The install steps, waitlist link and scroll cue are hidden: a preview only
-// needs the headline, button and map.
+// The install steps and scroll cue are hidden: a preview only needs the
+// headline, buttons and map. The hero's spare 68px under the columns (where
+// the old "New" pill's room went) is dropped so the preview sits centred.
 const OG_CSS = `
-  .install-help, .hero-alt, .scroll-cue { display: none !important; }
+  .install-help, .scroll-cue { display: none !important; }
   .hero { min-height: 840px !important; padding-top: 104px !important; padding-bottom: 40px !important; }
+  .hero-grid { padding-bottom: 0 !important; }
   .hero h1 { font-size: 5.4rem !important; }
 `;
 
@@ -45,7 +48,12 @@ const shot    = path.join(tmpDir, 'og-raw.png');
 const fileUrl = p => 'file:///' + p.replace(/\\/g, '/');
 
 let html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-html = html.replace('<head>', `<head><base href="${fileUrl(ROOT)}/">`)
+// The headline's word rolls every 1.5 s, and the render runs the page's clock
+// for 8 s: without its script, the picture always shows "your friends"
+const swapScript = /<script>\s*\/\/ ── Headline:[\s\S]*?<\/script>/;
+if (!swapScript.test(html)) { console.error('✗  The rotating headline script was not found; update generate-og.js'); process.exit(1); }
+html = html.replace(swapScript, '')
+           .replace('<head>', `<head><base href="${fileUrl(ROOT)}/">`)
            .replace('</style>', OG_CSS + '</style>');
 fs.writeFileSync(page, html);
 

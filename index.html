@@ -9,22 +9,22 @@
   <!-- Android can't install the iPhone beta, so the page leads with the web app there -->
   <script>if (/Android/i.test(navigator.userAgent)) document.documentElement.classList.add('android');</script>
   <!-- Open Graph (Facebook, iMessage, Slack, Reddit, LinkedIn…) -->
-  <meta property="og:title"       content="Entre · The beta is live." />
+  <meta property="og:title"       content="Entre · Go get lunch with your friends" />
   <meta property="og:description" content="Find restaurants halfway between you and a friend. Use it on the web, or install the iPhone beta." />
   <meta property="og:type"        content="website" />
   <meta property="og:url"         content="https://www.entre.nyc" />
-  <meta property="og:image"       content="https://www.entre.nyc/assets/og-beta.png" />
+  <meta property="og:image"       content="https://www.entre.nyc/assets/og-home.png" />
   <meta property="og:image:width"  content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt"    content="Entre homepage: The beta is live. Go get lunch." />
+  <meta property="og:image:alt"    content="Entre homepage: Go get lunch with your friends." />
   <meta property="og:site_name"   content="Entre" />
 
   <!-- Twitter / X card -->
   <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="Entre · The beta is live." />
+  <meta name="twitter:title"       content="Entre · Go get lunch with your friends" />
   <meta name="twitter:description" content="Find restaurants halfway between you and a friend. Use it on the web, or install the iPhone beta." />
-  <meta name="twitter:image"       content="https://www.entre.nyc/assets/og-beta.png" />
-  <meta name="twitter:image:alt"   content="Entre homepage: The beta is live. Go get lunch." />
+  <meta name="twitter:image"       content="https://www.entre.nyc/assets/og-home.png" />
+  <meta name="twitter:image:alt"   content="Entre homepage: Go get lunch with your friends." />
 
   <link rel="icon" type="image/svg+xml" href="assets/entre-mark.svg">
 
@@ -311,6 +311,11 @@
     }
 
     .hero h1 .line { display: block; }
+
+    /* Safari 18 (fixed in 26) breaks a balanced line whose content changes
+       width: mid-swap, the rolling word dropped onto a line of its own. This
+       line has only one place to break, so balancing never changed it. */
+    .hero h1 .swap-line { text-wrap: wrap; }
 
     .marker {
       position: relative;
@@ -1101,7 +1106,7 @@
           <h1 id="beta-title">
             <span class="sr-only">Go get lunch with your friends, family, coworkers, clients and prospects</span>
             <span class="line rise d2" aria-hidden="true">Go get lunch with</span>
-            <span class="line rise d3" aria-hidden="true">your <span class="marker swap" id="heroSwap"><span class="swap-sizer">friends</span><span class="swap-word">friends</span></span></span>
+            <span class="line swap-line rise d3" aria-hidden="true">your <span class="marker swap" id="heroSwap"><span class="swap-sizer">friends</span><span class="swap-word">friends</span></span></span>
           </h1>
 
           <p class="hero-sub rise d4">
@@ -1577,7 +1582,7 @@
 
   <script>
     // ── Headline: "your friends / family / coworkers / clients / prospects" ──
-    // Framer's Kinetic Text Swapper, its "3D roll": every 2 s (Framer's default is
+    // Framer's Kinetic Text Swapper, its "3D roll": every 1.5 s (Framer's default is
     // 2.5; Sam, 2026-11-04: quicker, so people notice before scrolling past) the next word rolls
     // up from below as the last one rolls away over the top, on the same spring
     // (stiffness 150, damping 16, mass 0.8). Its moves are px at its 72px default
@@ -1635,10 +1640,10 @@
         i = n;
       }
 
-      // Every 2 s, the first about 1 s after the band has drawn itself in (1.9 s);
-      // paused while the headline is off screen or the tab is hidden
+      // Every 1.5 s, the first 2.4 s after the fonts load, once the band has drawn
+      // itself in (1.9 s); paused while the headline is off screen or the tab is hidden
       let timer = null, seen = true;
-      const run = () => { if (!timer && seen && !document.hidden) timer = setInterval(next, 2000); };
+      const run = () => { if (!timer && seen && !document.hidden) timer = setInterval(next, 1500); };
       const stop = () => { clearInterval(timer); timer = null; };
       document.fonts.ready.then(() => {
         fit();
