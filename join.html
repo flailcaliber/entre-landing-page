@@ -164,8 +164,8 @@
     }
     .budget .sym { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
     .budget .lbl { font-size: 12px; color: var(--muted); }
-    .budget [aria-checked="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
-    .budget [aria-checked="true"] .lbl { color: rgba(255, 248, 240, .7); }
+    .budget [aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--cream-text); }
+    .budget [aria-pressed="true"] .lbl { color: rgba(255, 248, 240, .7); }
 
     .switch-row {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -895,7 +895,8 @@
         place: saved && saved.address ? { id: null, saved: true, label: saved.address } : null,
         session: newSession(),
         cuisines: new Set(saved ? saved.cuisines || [] : []),
-        budget: (saved && saved.budget) || '$$',
+        // Several picks since migration 046; none = any price (answers from before have one)
+        budgets: new Set(saved ? saved.budgets || (saved.budget ? [saved.budget] : []) : []),
         dietary: new Set(saved ? saved.dietary || [] : []),
         anyTime: true,
         slots: new Set(),
@@ -1023,16 +1024,17 @@
       }));
       app.append(course(2, 'What are you in the mood for?', true, 'Pick as many as you like, or skip it.', chipSet(CUISINES, draft.cuisines)));
 
-      // 03 Budget
-      const budget = h('div', { class: 'budget', role: 'radiogroup', 'aria-labelledby': 'q3' });
-      const drawBudget = () => {
-        budget.replaceChildren(...BUDGETS.map(([sym, label]) => h('button', {
-          type: 'button', role: 'radio', 'aria-checked': String(draft.budget === sym),
-          onclick: () => { draft.budget = sym; drawBudget(); },
-        }, h('span', { class: 'sym' }, sym), h('span', { class: 'lbl' }, label))));
-      };
-      drawBudget();
-      app.append(course(3, 'Budget', false, null, budget));
+      // 03 Budget: as many as they like, and only those prices show (Sam, 2026-11-09)
+      const budget = h('div', { class: 'budget', role: 'group', 'aria-labelledby': 'q3' }, BUDGETS.map(([sym, label]) => {
+        const b = h('button', { type: 'button', 'aria-pressed': String(draft.budgets.has(sym)) },
+          h('span', { class: 'sym' }, sym), h('span', { class: 'lbl' }, label));
+        b.addEventListener('click', () => {
+          if (draft.budgets.has(sym)) draft.budgets.delete(sym); else draft.budgets.add(sym);
+          b.setAttribute('aria-pressed', String(draft.budgets.has(sym)));
+        });
+        return b;
+      }));
+      app.append(course(3, 'Budget', true, 'Pick as many as you like, or skip it.', budget));
 
       // 04 Dietary
       app.append(course(4, 'Anything we should know?', true, 'Only used to suggest places that work for you.', chipSet(DIETARY, draft.dietary)));
@@ -1100,11 +1102,14 @@
 
       busy = true;
       cta.replaceChildren(h('span', { class: 'spin', 'aria-hidden': 'true' }), 'Sending');
+      const budgets = BUDGETS.map(([sym]) => sym).filter((sym) => draft.budgets.has(sym));
       const r = await call('submit', Object.assign({
         name: draft.name.trim(),
         session: draft.session,
         cuisines: [...draft.cuisines],
-        budget: draft.budget,
+        budgets,
+        // What the server read before migration 046: the highest pick, or no limit
+        budget: budgets[budgets.length - 1] || '$$$$',
         dietary: [...draft.dietary],
         slots: draft.anyTime ? [] : [...draft.slots].sort(),
         email: email || undefined,
