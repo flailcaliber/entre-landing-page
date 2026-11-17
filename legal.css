@@ -1,4 +1,4 @@
-/* Shared styles for /privacy and /terms, matching the landing page theme */
+/* Shared styles for /support, /privacy, /terms and /waitlist, matching the landing page theme */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -83,9 +83,11 @@ a:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; border-
 
 .wordmark-text em { font-style: italic; color: #6FB86F; }
 
-.nav-links { display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--surface-alt); border-radius: 999px; }
+.nav-links { position: relative; display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--surface-alt); border-radius: 999px; }
 
 .nav-link {
+  position: relative;
+  z-index: 1;
   padding: 8px 16px;
   font-size: 0.88rem;
   font-weight: 500;
@@ -103,6 +105,30 @@ a:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; border-
   background: var(--surface);
   box-shadow: 0 1px 2px rgba(19, 18, 32, 0.08), 0 0 0 1px var(--border-light);
 }
+
+/* Sliding highlight (nav-tabs.js on Support, Privacy, Terms): one white pill
+   glides between the tabs, same motion as the homepage bar. The script adds
+   .sliding and the pill; without it, the current tab keeps the plain
+   highlight above. */
+.nav-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(19, 18, 32, 0.08), 0 0 0 1px var(--border-light);
+  pointer-events: none;
+  transition: transform 0.45s var(--ease), width 0.45s var(--ease);
+}
+
+.nav-links.sliding .nav-link[aria-current] { background: none; box-shadow: none; }
+.nav-links.settling .nav-indicator,
+.nav-links.settling .nav-link { transition: none; }
+
+/* The content area takes focus after a tab swaps it in (for screen readers) */
+main:focus { outline: none; }
 
 .nav-cta {
   flex-shrink: 0;
@@ -323,6 +349,77 @@ a:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; border-
 
 .legal td:first-child { color: var(--ink); font-weight: 500; }
 
+/* ─── Support page (/support) ─── */
+.lead { max-width: 560px; font-size: 1.1rem; color: var(--body); }
+
+.support { max-width: 720px; padding-top: 56px; padding-bottom: 96px; }
+
+.contact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+}
+
+.contact-card .card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact-email {
+  display: inline-block;
+  margin: 6px 0 10px;
+  font-family: var(--display);
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+  overflow-wrap: anywhere;
+}
+
+.contact-card p { font-size: 1rem; color: var(--body); }
+
+.card-row {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-light);
+}
+
+/* Same section heading as Privacy and Terms */
+.support h2 {
+  font-family: var(--display);
+  font-size: clamp(1.5rem, 2.6vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 64px 0 14px;
+}
+
+.qa { padding: 22px 0; border-top: 1px solid var(--border-light); }
+.qa:last-child { border-bottom: 1px solid var(--border-light); }
+
+.qa h3 {
+  font-family: var(--sans);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.qa p { font-size: 1.02rem; color: var(--body); }
+
+@media (max-width: 720px) {
+  .support { padding-top: 40px; padding-bottom: 72px; }
+  .contact-card { padding: 22px 20px 20px; }
+  .support h2 { margin-top: 52px; }
+}
+
 /* ─── Footer (same as landing) ─── */
 footer { padding: 0 0 calc(48px + env(safe-area-inset-bottom)); }
 
@@ -364,6 +461,12 @@ footer { padding: 0 0 calc(48px + env(safe-area-inset-bottom)); }
   .nav-link { padding: 7px 10px; }
 }
 
+/* Four tabs (Home, Support, Privacy, Terms) on the smallest phones */
+@media (max-width: 359px) {
+  .nav-link { padding: 7px 7px; font-size: 0.8rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .nav-indicator, .nav-link { transition: none; } /* the pill jumps, like the homepage */
 }
